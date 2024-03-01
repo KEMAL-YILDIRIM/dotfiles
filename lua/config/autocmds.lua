@@ -1,5 +1,5 @@
 local function augroup(name)
-	return vim.api.nvim_create_augroup("moaid_" .. name, { clear = true })
+	return vim.api.nvim_create_augroup("kemal_" .. name, { clear = true })
 end
 
 -- auto format file on save

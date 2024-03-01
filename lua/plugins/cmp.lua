@@ -4,11 +4,11 @@ return {
 		event = { "BufReadPre", "BufNewFile" },
 		-- event = "VeryLazy",
 	},
-	{
-		'github/copilot.vim',
-		event = { "BufReadPre", "BufNewFile" },
-		-- event = "VeryLazy",
-	},
+	-- {
+	-- 	'github/copilot.vim',
+	-- 	event = { "BufReadPre", "BufNewFile" },
+	-- 	-- event = "VeryLazy",
+	-- },
 	{
 		'L3MON4D3/LuaSnip',
 		-- event = "VeryLazy",
