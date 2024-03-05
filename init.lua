@@ -1,8 +1,4 @@
 vim.loader.enable()
-
--- vim.g.loaded_netrw = 1
--- vim.g.loaded_netrwPlugin = 1
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not vim.loop.fs_stat(lazypath) then
@@ -18,13 +14,10 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-local ops = {
-	change_detection = {
-		notify = false
-	}
-}
-
 require("config.options")
+require("config.autocmds")
+require("config.keymap")
+
 
 require("lazy").setup({
 
@@ -54,5 +47,3 @@ require("lazy").setup({
 	}
 })
 
-require("config.autocmds")
-require("config.keymap")

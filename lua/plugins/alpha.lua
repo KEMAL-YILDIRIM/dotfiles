@@ -11,10 +11,10 @@ return {
 		local dashboard = require('alpha.themes.dashboard')
 
 		dashboard.section.buttons.val = {
-			dashboard.button('r', " Restore session", "<cmd>SessionRestore<CR>"),
-			dashboard.button('s', "ﴬ Find session", '<cmd>lua require("auto-session.session-lens").search_session() <CR>'),
+			dashboard.button('r', "󰙰 Restore session", "<cmd>SessionRestore<CR>"),
+			dashboard.button('s', "󰡦 Find session", '<cmd>lua require("auto-session.session-lens").search_session() <CR>'),
 			dashboard.button('f', " Find file", "<cmd>Telescope find_files<CR>"),
-			dashboard.button('t', " Find text", "<cmd>Telescope live_grep<CR>"),
+			dashboard.button('t', "󱎸 Find text", "<cmd>Telescope live_grep<CR>"),
 			-- dashboard.button('p', ""),
 			-- dashboard.button('p', ""),
 			dashboard.button('n', "  New file", ":ene <BAR> startinsert <CR>"),

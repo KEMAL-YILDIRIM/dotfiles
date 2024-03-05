@@ -1,9 +1,5 @@
 vim.g.mapleader = " "
 
--- save document
-vim.keymap.set("n", "<C-s>", vim.cmd.w, { desc = "Save Buffer", silent = true })
-vim.keymap.set("i", "<C-s>", vim.cmd.w, { desc = "Save Buffer", silent = true })
-vim.keymap.set("v", "<C-s>", vim.cmd.w, { desc = "Save Buffer", silent = true })
 
 -- save all documents
 -- vim.keymap.set("n", "<C-S-s>", vim.cmd.wall, { silent = true })
@@ -13,8 +9,8 @@ vim.keymap.set("v", "<C-s>", vim.cmd.w, { desc = "Save Buffer", silent = true })
 -- vim.keymap.set('n', '<leader>mq', ':wa<CR>', { desc = "Save All Buffers", })
 
 -- Delete text
-vim.keymap.set('i', '<C-Del>', "<Esc>lce")
-vim.keymap.set('n', '<C-Del>', "ce")
+-- vim.keymap.set('i', '<C-Del>', "<Esc>lce")
+-- vim.keymap.set('n', '<C-Del>', "ce")
 -- vim.keymap.set('i', '<C-BS>', "<Esc>cb")
 -- vim.keymap.set('i', '<C-Backspace>', "<Esc><C-w>")
 -- vim.keymap.set('n', '<C><BS>', "cb<Esc>")
@@ -28,15 +24,20 @@ vim.keymap.set("n", "Q", "<nop>")
 -- Split navigation and management
 vim.keymap.set('n', '<leader>bb', ':bprev<CR>', { desc = 'Goto Previous Buffer', silent = true })
 vim.keymap.set('n', '<leader>bn', ':bnext<CR>', { desc = 'Goto Next Buffer', silent = true })
-vim.keymap.set('n', '<C-left>', ':bprev<CR>', { desc = 'Goto Previous Buffer', silent = true })
-vim.keymap.set('n', '<C-right>', ':bnext<CR>', { desc = 'Goto Next Buffer', silent = true })
--- vim.keymap.set('n', '<leader>c', ':bprev<CR>:bdelete #<CR>')
+-- vim.keymap.set('n', '<C-left>', ':bprev<CR>', { desc = 'Goto Previous Buffer', silent = true })
+-- vim.keymap.set('n', '<C-right>', ':bnext<CR>', { desc = 'Goto Next Buffer', silent = true })
+
+
+-- buffer
+vim.keymap.set("n", "<leader>bs", vim.cmd.w, { desc = "Save Buffer", silent = true })
+vim.keymap.set("i", "<leader>bs", vim.cmd.w, { desc = "Save Buffer", silent = true })
+vim.keymap.set("v", "<leader>bs", vim.cmd.w, { desc = "Save Buffer", silent = true })
 vim.keymap.set('n', '<leader>bd', ':bprev<CR>:bdelete #<CR>', { desc = 'Close Current Buffer' })
 vim.keymap.set('n', '<leader>bD', "<cmd>:%bd<CR>", { desc = 'Close All Buffers' })
-vim.keymap.set('n', '<leader>bC', "<cmd>%bd|e#|bd#<CR>", { desc = 'Close All Buffers But This' })
+vim.keymap.set('n', '<leader>bc', "<cmd>%bd|e#|bd#<CR>", { desc = 'Close All Buffers But This' })
 vim.keymap.set('n', '<leader>bf', "<cmd>:BufferLinePick<CR>", { desc = 'Pick Buffer' })
-vim.keymap.set('n', '<leader>bs', "<cmd>:BufferLinePick<CR>", { desc = 'Pick Buffer' })
-vim.keymap.set('n', '<leader>bp', "<cmd>:BufferLineTogglePin<CR>", { desc = 'Pin Buffer' })
+vim.keymap.set('n', '<leader>bp', "<cmd>:BufferLinePick<CR>", { desc = 'Pick Buffer' })
+vim.keymap.set('n', '<leader>bt', "<cmd>:BufferLineTogglePin<CR>", { desc = 'Pin Buffer Toggle' })
 vim.keymap.set('n', '<leader>br', "<cmd>:e!<CR>", { desc = 'Reload Buffer' })
 
 -- Move between splits
@@ -63,8 +64,8 @@ vim.keymap.set({ 'n', 't' }, '<C-Down>', ':resize +1<CR>', { silent = true })
 vim.keymap.set({ 'n' }, '<S-l>', '10zl', { desc = "Scroll To The Right", silent = true })
 vim.keymap.set({ 'n' }, '<S-h>', '10zh', { desc = "Scroll To The Left", silent = true })
 -- Move current line / block with Alt-j/k a la vscode.
-vim.keymap.set('n', "<M-Down>", ":m .+1<CR>==", { silent = true })
-vim.keymap.set('n', "<M-Up>", ":m .-2<CR>==", { silent = true })
+vim.keymap.set('n', "<M-Down>", ":m .+1<CR>==", { desc = "move line down", silent = true })
+vim.keymap.set('n', "<M-Up>", ":m .-2<CR>==", { desc = "move line up", silent = true })
 
 -- Better line / block movement
 -- vim.keymap.set('n', "<A-j>", ":m '>+1<CR>gv-gv", { silent = true })
