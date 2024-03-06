@@ -102,17 +102,17 @@ can install to your machine using the methods above.
 
 #### Examples of adding popularly requested plugins
 
-NOTE: You'll need to uncomment the line in the init.lua that turns on loading kemal plugins.
+NOTE: You'll need to uncomment the line in the init.lua that turns on loading custom plugins.
 
 <details>
   <summary>Adding autopairs</summary>
 
 This will automatically install [windwp/nvim-autopairs](https://github.com/windwp/nvim-autopairs) and enable it on startup. For more information, see documentation for [lazy.nvim](https://github.com/folke/lazy.nvim).
 
-In the file: `lua/kemal/plugins/autopairs.lua`, add:
+In the file: `lua/custom/plugins/autopairs.lua`, add:
 
 ```lua
--- File: lua/kemal/plugins/autopairs.lua
+-- File: lua/custom/plugins/autopairs.lua
 
 return {
   "windwp/nvim-autopairs",
@@ -137,7 +137,7 @@ return {
 
 This will install the tree plugin and add the command `:Neotree` for you. You can explore the documentation at [neo-tree.nvim](https://github.com/nvim-neo-tree/neo-tree.nvim) for more information.
 
-In the file: `lua/kemal/plugins/filetree.lua`, add:
+In the file: `lua/custom/plugins/filetree.lua`, add:
 
 ```lua
 -- Unless you are still migrating, remove the deprecated commands from v1.x
