@@ -132,8 +132,13 @@ return {
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
+        omnisharp = {
+          enable_roslyn_analysers = true,
+          enable_import_completion = true,
+          organize_imports_on_format = true,
+          enable_decompilation_support = true,
+          filetypes = { 'cs', 'vb', 'csproj', 'sln', 'slnx', 'props', 'csx', 'props', 'targets' }
+        },
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -167,7 +172,7 @@ return {
                 callSnippet = 'Replace',
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
+              diagnostics = { disable = { 'missing-fields' } },
             },
           },
         },
@@ -188,7 +193,6 @@ return {
         'stylua', -- Used to format lua code
         'csharp_ls',
         'powershell_es',
-        'netcoredbg'
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 

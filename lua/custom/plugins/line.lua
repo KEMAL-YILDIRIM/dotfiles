@@ -5,7 +5,9 @@ return {
 		config = function()
 
 
-			require('lualine').setup{ options = {theme = 'palenight'}, }
+			local	lualine = require('lualine')
+			local  options = {theme = 'palenight'}
+			lualine.setup{ options, }
 			-- local lualine = require('lualine')
 
 			-- -- Color table for highlights
