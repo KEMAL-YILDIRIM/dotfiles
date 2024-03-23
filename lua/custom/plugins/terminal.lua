@@ -1,31 +1,21 @@
-return {
-	'akinsho/toggleterm.nvim',
-	
-	config = function()
-		require('toggleterm').setup({
-
-			start_in_insert = true,
-			terminal_mappings = true,
-			-- direction = 'float',
-			shell = '"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -NoLogo',
-			auto_scroll = true,
-			-- persist_mode = true,
-			persist_size = true,
-			close_on_exit = true,
-		})
-
+return { 
+	{
+		--[[
+		'aserowy/tmux.nvim', 
 		
-		vim.keymap.set({'n', 'i', 't'}, '<leader>tt', '<cmd>:1ToggleTerm direction=float<CR>', { desc = '[T]erminal [T]oggle' })
-		vim.keymap.set({ 'n', 't' }, '<leader>tv', '<cmd>:3ToggleTerm direction=vertical size=100<CR>', { desc = '[T]erminal [V]ertical toggle' })
+		config = function()
 
-		-- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
-		-- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
-		-- is not what someone will guess without a bit more experience.
-		--
-		-- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
-		-- or just use <C-\><C-n> to exit terminal mode
-		vim.keymap.set('t', '<leader>t<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })	
+			local tmux = require('tmux')
+			tmux.setup()
 
-		local Terminal = require('toggleterm.terminal').Terminal
-	end
+			vim.keymap.set('n', "<C-h>", tmux.NvimTmuxNavigateLeft)
+			vim.keymap.set('n', "<C-j>", tmux.NvimTmuxNavigateDown)
+			vim.keymap.set('n', "<C-k>", tmux.NvimTmuxNavigateUp)
+			vim.keymap.set('n', "<C-l>", tmux.NvimTmuxNavigateRight)
+			vim.keymap.set('n', "<C-\\>", tmux.NvimTmuxNavigateLastActive)
+			vim.keymap.set('n', "<C-Space>", tmux.NvimTmuxNavigateNext)
+
+		end,
+		]]
+	},
 }

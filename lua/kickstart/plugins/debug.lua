@@ -6,41 +6,42 @@ return {
     dependencies = {
       -- Creates a beautiful debugger UI
       'rcarriga/nvim-dap-ui',
+      'nvim-neotest/nvim-nio'
 
       -- Installs the debug adapters for you
       -- 'williamboman/mason.nvim',
       -- 'jay-babu/mason-nvim-dap.nvim',
 
       -- Add your own debuggers here
-          
+
     },    
     config = function()
-      local dap = require 'dap'
-      local dapui = require 'dapui'
 
       -- require('mason-nvim-dap').setup { ensure_installed = { "coreclr" }}
 
-    
+      local dap = require 'dap'
+      local dapui = require 'dapui'
+
       local netcoredbgPath = vim.fn.exepath('netcoredbg')
       dap.adapters.coreclr = {
         type = 'executable',
         command = "C:/Users/Kemal Yildirim/AppData/Local/nvim-data/mason/packages/netcoredbg/netcoredbg/netcoredbg.exe",
         args = {'--interpreter=vscode'}
       }
-      
+
       local getProjPath = function()
         local default_path = vim.fn.expand('%:p') .. '\\'
 
         if vim.g['dotnet_last_proj_path'] ~= nil then
           default_path = vim.g['dotnet_last_proj_path']
         end
-        
+
         vim.g['dotnet_last_proj_path'] = vim.fn.input('Input your *cs.proj folder path | ', default_path, 'file')
         return vim.g['dotnet_last_proj_path']
       end
 
       vim.g.dotnet_build_project = function()
-       
+
         local path = getProjPath()
         -- local cmd = 'dotnet build -c Debug ' .. path .. ' > /dev/null'
         local cmd = 'dotnet build -c Debug ' .. path
@@ -48,34 +49,34 @@ return {
         print('Cmd to execute: ' .. cmd)
         local f = os.execute(cmd)
         if f == 0 then
-            print('\nBuild: ✔️ ')
+          print('\nBuild: ✔️ ')
         else
-            print('\nBuild: ❌ (code: ' .. f .. ')')
+          print('\nBuild: ❌ (code: ' .. f .. ')')
         end
       end
-    
+
       vim.g.dotnet_get_dll_path = function()
-        
+
         if vim.g['dotnet_last_proj_path'] == nil then
           print('\nroot cs.proj path missing')
           vim.g['dotnet_last_proj_path'] = getProjPath()
         end
-        
+
         local request = function()
           return vim.fn.input('Input your project dll file path | ', vim.g['dotnet_last_proj_path'] .. 'bin\\Debug\\', 'file')
         end
-        
+
         if vim.g['dotnet_last_dll_path'] == nil then
-            vim.g['dotnet_last_dll_path'] = request()
+          vim.g['dotnet_last_dll_path'] = request()
         else
           if vim.fn.confirm('Would you like to change your dll file path?\n' .. vim.g['dotnet_last_dll_path'], '&yes\n&no', 2) == 1 then
             vim.g['dotnet_last_dll_path'] = request()
           end
         end
-    
+
         return vim.g['dotnet_last_dll_path']
       end
-    
+
       local config = {
         {
           type = "coreclr",
