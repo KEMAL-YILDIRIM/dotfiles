@@ -46,4 +46,40 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- vim: ts=2 sts=2 sw=2 et
+
+vim.keymap.set("n", "<leader>e", vim.cmd.Ex, { desc = "Netrw [e]xplorer" })
+vim.keymap.set("n", "J", "mzJ`z", { desc = "Adds up the next line to the current" })
+
+
+-- keep the cursor in the center of page while navigating page up or down 
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Page down while keeping cursor at the middle of the page" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Page down while keeping cursor at the middle of the page" })
+
+
+-- preserve paste buffer
+vim.keymap.set("x", "<leader>p", [["_dP]], { desc = "Preserve [P]aste buffer" })
+
+-- coppy to system clipboard so not loose it while navigate between files 
+vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
+vim.keymap.set("n", "<leader>Y", [["+Y]])
+
+
+vim.keymap.set("n", "Q", "<nop>")
+--vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+
+
+-- quick fix navigation
+vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
+vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
+vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
+vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
+
+
+
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+
+vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
+vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
+
+

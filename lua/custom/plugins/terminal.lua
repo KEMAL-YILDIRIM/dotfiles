@@ -14,6 +14,7 @@ return {
 			vim.keymap.set('n', "<C-l>", tmux.NvimTmuxNavigateRight)
 			vim.keymap.set('n', "<C-\\>", tmux.NvimTmuxNavigateLastActive)
 			vim.keymap.set('n', "<C-Space>", tmux.NvimTmuxNavigateNext)
+			vim.keymap.set("n", "<C-t>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 
 		end,
 		]]
