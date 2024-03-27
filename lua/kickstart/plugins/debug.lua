@@ -17,19 +17,7 @@ return {
     },    
     config = function()
 
-      -- require('mason-nvim-dap').setup { ensure_installed = { "coreclr" }}
-
-      local dap = require 'dap'
-      local dapui = require 'dapui'
-
-      local netcoredbgPath = vim.fn.exepath('netcoredbg')
-      dap.adapters.coreclr = {
-        type = 'executable',
-        command = "C:/Users/Kemal Yildirim/AppData/Local/nvim-data/mason/packages/netcoredbg/netcoredbg/netcoredbg.exe",
-        args = {'--interpreter=vscode'}
-      }
-
-      local getProjPath = function()
+      local getprojpath = function()
         local default_path = vim.fn.expand('%:p') .. '\\'
 
         if vim.g['dotnet_last_proj_path'] ~= nil then
@@ -42,16 +30,16 @@ return {
 
       vim.g.dotnet_build_project = function()
 
-        local path = getProjPath()
-        -- local cmd = 'dotnet build -c Debug ' .. path .. ' > /dev/null'
-        local cmd = 'dotnet build -c Debug ' .. path
+        local path = getprojpath()
+        -- local cmd = 'dotnet build -c debug ' .. path .. ' > /dev/null'
+        local cmd = 'dotnet build -c debug ' .. path
         print('')
-        print('Cmd to execute: ' .. cmd)
+        print('cmd to execute: ' .. cmd)
         local f = os.execute(cmd)
         if f == 0 then
-          print('\nBuild: ✔️ ')
+          print('\nbuild: ✔️ ')
         else
-          print('\nBuild: ❌ (code: ' .. f .. ')')
+          print('\nbuild: ❌ (code: ' .. f .. ')')
         end
       end
 
@@ -59,35 +47,43 @@ return {
 
         if vim.g['dotnet_last_proj_path'] == nil then
           print('\nroot cs.proj path missing')
-          vim.g['dotnet_last_proj_path'] = getProjPath()
+          vim.g['dotnet_last_proj_path'] = getprojpath()
         end
 
         local request = function()
-          return vim.fn.input('Input your project dll file path | ', vim.g['dotnet_last_proj_path'] .. 'bin\\Debug\\', 'file')
+          return vim.fn.input('input your project dll file path | ', vim.g['dotnet_last_proj_path'] .. 'bin\\debug\\', 'file')
         end
 
         if vim.g['dotnet_last_dll_path'] == nil then
           vim.g['dotnet_last_dll_path'] = request()
         else
-          if vim.fn.confirm('Would you like to change your dll file path?\n' .. vim.g['dotnet_last_dll_path'], '&yes\n&no', 2) == 1 then
+          if vim.fn.confirm('would you like to change your dll file path?\n' .. vim.g['dotnet_last_dll_path'], '&yes\n&no', 2) == 1 then
             vim.g['dotnet_last_dll_path'] = request()
           end
         end
 
         return vim.g['dotnet_last_dll_path']
       end
+      -- require('mason-nvim-dap').setup { ensure_installed = { "coreclr" }}
+
+      local dap = require 'dap'
+
+      dap.adapters.coreclr = {
+        type = 'executable',
+        command = "C:/Users/Kemal Yildirim/AppData/Local/nvim-data/mason/packages/netcoredbg/netcoredbg/netcoredbg.exe",
+        args = {'--interpreter=vscode'}
+      }
+
 
       local config = {
         {
           type = "coreclr",
-          name = "launch - netcoredbg",
+          name = "launch albert qa",
           request = "launch",
-          env = "ASPNETCORE_ENVIRONMENT=QA",
-          args = {
-            "/p:EnvironmentName=QA", -- this is a msbuild jk
-            "--urls=http://localhost:5180",
-            "--environment=QA",
-          },
+          env = {
+            ASPNETCORE_ENVIRONMENT = "Development",
+            ASPNETCORE_URLS = "http://localhost:5050",
+          }, 
           program = function()
             if vim.fn.confirm('Should I recompile first?', '&yes\n&no', 2) == 1 then
               vim.g.dotnet_build_project()
@@ -95,11 +91,23 @@ return {
             return vim.g.dotnet_get_dll_path()
           end,
         },
+        {
+          type = "coreclr",
+          name = "attach albert",
+          request = "attach",
+          processId = require('dap.utils').pick_process,
+          program = function ()
+            vim.g.dotnet_get_dll_path()
+          end,
+        },
       }
       dap.configurations.cs = config
 
+
+
       -- Dap UI setup
       -- For more information, see |:help nvim-dap-ui|
+      local dapui = require 'dapui'
       dapui.setup {
         -- Set icons to characters that are more likely to work in every terminal.
         --    Feel free to remove or use ones that you like more! :)

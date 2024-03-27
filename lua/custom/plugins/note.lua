@@ -1,4 +1,6 @@
+
 local baseWorkPath = "C:/Users/Kemal Yildirim/OneDrive/Dokumanlar/Obsidian"
+
 return {
   "epwalsh/obsidian.nvim",
   version = "*",  -- recommended, use latest release instead of latest commit
@@ -17,101 +19,101 @@ return {
 
     -- see below for full list of optional dependencies 👇
   },
-  opts = {
-    workspaces = {
-      {
-        name = "personal",
-        path = baseWorkPath .. "/personal",
-      },
-      {
-        name = "work",
-        path = baseWorkPath .. "/work",
-      },
-    },
+  config = function()
+    
+    local keymaps =    function ()
+      -- Obsidian
+      vim.keymap.set("n", "<leader>oc", "<cmd>lua require('obsidian').util.toggle_checkbox()<CR>", { desc = "Obsidian Check Checkbox" })
+      vim.keymap.set("n", "<leader>ot", "<cmd>ObsidianTemplate<CR>", { desc = "Insert Obsidian Template" })
+      vim.keymap.set("n", "<leader>oo", "<cmd>ObsidianOpen<CR>", { desc = "Open in Obsidian App" })
+      vim.keymap.set("n", "<leader>ob", "<cmd>ObsidianBacklinks<CR>", { desc = "Show ObsidianBacklinks" })
+      vim.keymap.set("n", "<leader>ol", "<cmd>ObsidianLinks<CR>", { desc = "Show ObsidianLinks" })
+      vim.keymap.set("n", "<leader>on", "<cmd>ObsidianNew<CR>", { desc = "Create New Note" })
+      vim.keymap.set("n", "<leader>os", "<cmd>ObsidianSearch<CR>", { desc = "Search Obsidian" })
+      vim.keymap.set("n", "<leader>oq", "<cmd>ObsidianQuickSwitch<CR>", { desc = "Quick Switch" })
+    end
 
-    completion = {
-      nvim_cmp = true,
-      min_chars = 2,
-    },
-
-    new_notes_location = "current_dir",
-
-    wiki_link_func = function(opts)
-      if opts.id == nil then
-        return string.format("[[%s]]", opts.label)
-      elseif opts.label ~= opts.id then
-        return string.format("[[%s|%s]]", opts.id, opts.label)
-      else
-        return string.format("[[%s]]", opts.id)
-      end
-    end,
-
-    mappings = {
-      -- "Obsidian follow"
-      ["<leader>op"] = {
-        action = function()
-          return require("obsidian").util.gf_passthrough()
-        end,
-        opts = { noremap = false, expr = true, buffer = true },
+    local options = {
+      workspaces = {
+        {
+          name = "personal",
+          path = baseWorkPath .. "/personal",
+        },
+        {
+          name = "work",
+          path = baseWorkPath .. "/work",
+        },
       },
-      -- Toggle check-boxes "obsidian done"
-      ["<leader>oc"] = {
-        action = function()
-          return require("obsidian").util.toggle_checkbox()
-        end,
-        opts = { buffer = true },
-      },
-      -- Create a new newsletter issue
-      ["<leader>on"] = {
-        action = function()
-          return require("obsidian").commands.new_note("Newsletter-Issue")
-        end,
-        opts = { buffer = true },
-      },
-      ["<leader>ot"] = {
-        action = function()
-          return require("obsidian").util.insert_template("Newsletter-Issue")
-        end,
-        opts = { buffer = true },
-      },
-    },
 
-    note_frontmatter_func = function(note)
-      -- This is equivalent to the default frontmatter function.
-      local out = { id = note.id, aliases = note.aliases, tags = note.tags, area = "", project = "" }
+      completion = {
+        nvim_cmp = true,
+        min_chars = 2,
+      },
 
-      -- `note.metadata` contains any manually added fields in the frontmatter.
-      -- So here we just make sure those fields are kept in the frontmatter.
-      if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
-        for k, v in pairs(note.metadata) do
-          out[k] = v
+      new_notes_location = "current_dir",
+
+      wiki_link_func = function(opts)
+        if opts.id == nil then
+          return string.format("[[%s]]", opts.label)
+        elseif opts.label ~= opts.id then
+          return string.format("[[%s|%s]]", opts.id, opts.label)
+        else
+          return string.format("[[%s]]", opts.id)
         end
-      end
-      return out
-    end,
+      end,
 
-    note_id_func = function(title)
-      -- Create note IDs in a Zettelkasten format with a timestamp and a suffix.
-      -- In this case a note with the title 'My new note' will be given an ID that looks
-      -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'
-      local suffix = ""
-      if title ~= nil then
-        -- If title is given, transform it into valid file name.
-        suffix = title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
-      else
-        -- If title is nil, just add 4 random uppercase letters to the suffix.
-        for _ = 1, 4 do
-          suffix = suffix .. string.char(math.random(65, 90))
+      mappings = {
+        -- "Obsidian follow"
+        ["<leader>op"] = {
+          action = function()
+            return require("obsidian").util.gf_passthrough()
+          end,
+          opts = { noremap = false, expr = true, buffer = true },
+        },
+      },
+
+      note_frontmatter_func = function(note)
+        -- This is equivalent to the default frontmatter function.
+        local out = { id = note.id, aliases = note.aliases, tags = note.tags, area = "", project = "" }
+
+        -- `note.metadata` contains any manually added fields in the frontmatter.
+        -- So here we just make sure those fields are kept in the frontmatter.
+        if note.metadata ~= nil and not vim.tbl_isempty(note.metadata) then
+          for k, v in pairs(note.metadata) do
+            out[k] = v
+          end
         end
-      end
-      return tostring(os.time()) .. "-" .. suffix
-    end,
+        return out
+      end,
 
-    templates = {
-      subdir = "Templates",
-      date_format = "%Y-%m-%d-%a",
-      time_format = "%H:%M",
-      tags = "",
-    },
-  },
+      note_id_func = function(title)
+        -- Create note IDs in a Zettelkasten format with a timestamp and a suffix.
+        -- In this case a note with the title 'My new note' will be given an ID that looks
+        -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'
+        local suffix = ""
+        if title ~= nil then
+          -- If title is given, transform it into valid file name.
+          suffix = title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
+        else
+          -- If title is nil, just add 4 random uppercase letters to the suffix.
+          for _ = 1, 4 do
+            suffix = suffix .. string.char(math.random(65, 90))
+          end
+        end
+        return tostring(os.time()) .. "-" .. suffix
+      end,
+
+      templates = {
+        subdir = "Templates",
+        date_format = "%Y-%m-%d-%a",
+        time_format = "%H:%M",
+        tags = "",
+      },
+    }
+
+    local obsidian = require("obsidian")
+    obsidian.setup(options)
+
+    keymaps()
+  end,
 }
