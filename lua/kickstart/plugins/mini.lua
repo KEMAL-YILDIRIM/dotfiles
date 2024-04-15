@@ -17,8 +17,15 @@ return {
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      --Edit buffer in the way representing file system action
+      --create new line like dir/file or dir/nested/.
+      --Press =; read confirmation dialog; confirm with y/<CR> or not confirm with n/<Esc>
+      require('mini.files').setup { mappings = { close = "<Esc>" } }
+
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
+
+      vim.keymap.set("n", "<leader>e", ":lua MiniFiles.open()<CR>", { desc = "File [E]xplorer" })
     end,
   },
 }

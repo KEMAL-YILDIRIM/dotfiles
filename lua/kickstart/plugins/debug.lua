@@ -1,91 +1,98 @@
 return {
   {
-    -- NOTE: Yes, you can install new plugins here!
+    -- note: yes, you can install new plugins here!
     'mfussenegger/nvim-dap',
-    -- NOTE: And you can specify dependencies as well
+    -- note: and you can specify dependencies as well
     dependencies = {
-      -- Creates a beautiful debugger UI
+      -- creates a beautiful debugger ui
       'rcarriga/nvim-dap-ui',
-      'nvim-neotest/nvim-nio'
+      'nvim-neotest/nvim-nio',
 
-      -- Installs the debug adapters for you
-      -- 'williamboman/mason.nvim',
-      -- 'jay-babu/mason-nvim-dap.nvim',
+      -- installs the debug adapters for you
+      'williamboman/mason.nvim',
+      --'jay-babu/mason-nvim-dap.nvim',
 
-      -- Add your own debuggers here
+      -- add your own debuggers here
 
-    },    
+    },
     config = function()
 
-      local getprojpath = function()
-        local default_path = vim.fn.expand('%:p') .. '\\'
+      local dap, daputils = require("dap"), require("dap.utils")
 
-        if vim.g['dotnet_last_proj_path'] ~= nil then
-          default_path = vim.g['dotnet_last_proj_path']
-        end
+      -- dap.set_log_level("DEBUG")
 
-        vim.g['dotnet_last_proj_path'] = vim.fn.input('Input your *cs.proj folder path | ', default_path, 'file')
-        return vim.g['dotnet_last_proj_path']
-      end
+      -- C# / .NET
+      dap.adapters.coreclr = {
+        type = "executable",
+        -- command = '/usr/local/netcoredbg',
+        command = "netcoredbg",
+        args = { "--interpreter=vscode" },
+      }
 
+      -- https://github.com/mfussenegger/nvim-dap/wiki/Cookbook#making-debugging-net-easier
       vim.g.dotnet_build_project = function()
-
-        local path = getprojpath()
-        -- local cmd = 'dotnet build -c debug ' .. path .. ' > /dev/null'
-        local cmd = 'dotnet build -c debug ' .. path
-        print('')
-        print('cmd to execute: ' .. cmd)
+        local default_path = vim.fn.getcwd() .. "/"
+        if vim.g["dotnet_last_proj_path"] ~= nil then
+          default_path = vim.g["dotnet_last_proj_path"]
+        end
+        local path = vim.fn.input("Path to your *proj file", default_path, "file")
+        vim.g["dotnet_last_proj_path"] = path
+        local cmd = "dotnet build -c Debug " .. path .. " > /dev/null"
+        print("")
+        print("Cmd to execute: " .. cmd)
         local f = os.execute(cmd)
         if f == 0 then
-          print('\nbuild: ✔️ ')
+          print("\nBuild: ✔️ ")
         else
-          print('\nbuild: ❌ (code: ' .. f .. ')')
+          print("\nBuild: ❌ (code: " .. f .. ")")
         end
       end
 
       vim.g.dotnet_get_dll_path = function()
-
-        if vim.g['dotnet_last_proj_path'] == nil then
-          print('\nroot cs.proj path missing')
-          vim.g['dotnet_last_proj_path'] = getprojpath()
-        end
-
         local request = function()
-          return vim.fn.input('input your project dll file path | ', vim.g['dotnet_last_proj_path'] .. 'bin\\debug\\', 'file')
+          return vim.fn.input("Path to dll", vim.fn.getcwd() .. "/bin/Debug/", "file")
         end
 
-        if vim.g['dotnet_last_dll_path'] == nil then
-          vim.g['dotnet_last_dll_path'] = request()
+        if vim.g["dotnet_last_dll_path"] == nil then
+          vim.g["dotnet_last_dll_path"] = request()
         else
-          if vim.fn.confirm('would you like to change your dll file path?\n' .. vim.g['dotnet_last_dll_path'], '&yes\n&no', 2) == 1 then
-            vim.g['dotnet_last_dll_path'] = request()
+          if
+              vim.fn.confirm(
+                "Do you want to change the path to dll?\n" .. vim.g["dotnet_last_dll_path"],
+                "&yes\n&no",
+                2
+              ) == 1
+          then
+            vim.g["dotnet_last_dll_path"] = request()
           end
         end
 
-        return vim.g['dotnet_last_dll_path']
+        return vim.g["dotnet_last_dll_path"]
       end
-      -- require('mason-nvim-dap').setup { ensure_installed = { "coreclr" }}
 
-      local dap = require 'dap'
 
+      require("mason").setup()
+      local mason_registry = require('mason-registry')
+      local package = mason_registry.get_package("netcoredbg")
+
+      if not package:is_installed() then
+        package:install()
+      end
+
+      local path = string.gsub(package:get_install_path(), "\\", "/") .. "/netcoredbg/netcoredbg.exe"
       dap.adapters.coreclr = {
         type = 'executable',
-        command = "C:/Users/Kemal Yildirim/AppData/Local/nvim-data/mason/packages/netcoredbg/netcoredbg/netcoredbg.exe",
-        args = {'--interpreter=vscode'}
+        command = path,
+        args = { '--interpreter=vscode' }
       }
 
-
-      local config = {
+      dap.configurations.cs = {
         {
           type = "coreclr",
-          name = "launch albert qa",
+          name = "launch .NET",
           request = "launch",
-          env = {
-            ASPNETCORE_ENVIRONMENT = "Development",
-            ASPNETCORE_URLS = "http://localhost:5050",
-          }, 
           program = function()
-            if vim.fn.confirm('Should I recompile first?', '&yes\n&no', 2) == 1 then
+            if vim.fn.confirm("Should I recompile first?", "&yes\n&no", 2) == 1 then
               vim.g.dotnet_build_project()
             end
             return vim.g.dotnet_get_dll_path()
@@ -93,25 +100,37 @@ return {
         },
         {
           type = "coreclr",
-          name = "attach albert",
+          name = "attach .NET",
           request = "attach",
-          processId = require('dap.utils').pick_process,
-          program = function ()
-            vim.g.dotnet_get_dll_path()
+          processId = daputils.pick_process,
+        },
+        {
+          type = "coreclr",
+          name = "attach to Azure Function",
+          request = "attach",
+          processId = function()
+            local pid = nil
+            while not pid do
+              pid = require("azure-functions").get_process_id()
+            end
+            return pid
           end,
         },
       }
-      dap.configurations.cs = config
 
 
 
-      -- Dap UI setup
-      -- For more information, see |:help nvim-dap-ui|
+      vim.fn.sign_define('DapBreakpoint',
+        { text = '🔴', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
+
+
+      -- dap ui setup
+      -- for more information, see |:help nvim-dap-ui|
       local dapui = require 'dapui'
       dapui.setup {
-        -- Set icons to characters that are more likely to work in every terminal.
-        --    Feel free to remove or use ones that you like more! :)
-        --    Don't feel like these are good choices.
+        -- set icons to characters that are more likely to work in every terminal.
+        --    feel free to remove or use ones that you like more! :)
+        --    don't feel like these are good choices.
         icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
         controls = {
           icons = {
@@ -128,25 +147,24 @@ return {
         },
       }
 
-      -- Basic debugging keymaps, feel free to change to your liking!
-      vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
-      vim.keymap.set('n', '<F11>', dap.step_into, { desc = 'Debug: Step Into' })
-      vim.keymap.set('n', '<F12>', dap.step_over, { desc = 'Debug: Step Over' })
-      vim.keymap.set('n', '<S-F11>', dap.step_out, { desc = 'Debug: Step Out' })
-      vim.keymap.set('n', '<F9>', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
-      vim.keymap.set('n', '<S-F9>', function()
-        dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-      end, { desc = 'Debug: Set Breakpoint' })
+      -- basic debugging keymaps, feel free to change to your liking!
+      vim.keymap.set('n', '<f5>', dap.continue, { desc = 'debug: start/continue' })
+      vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
+      vim.keymap.set('n', '<f12>', dap.step_over, { desc = 'debug: step over' })
+      vim.keymap.set('n', '<s-f11>', dap.step_out, { desc = 'debug: step out' })
+      vim.keymap.set('n', '<f9>', dap.toggle_breakpoint, { desc = 'debug: toggle breakpoint' })
+      vim.keymap.set('n', '<s-f9>', function()
+        dap.set_breakpoint(vim.fn.input 'breakpoint condition: ')
+      end, { desc = 'debug: set breakpoint' })
 
-      -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-      vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
+
+      -- toggle to see last session result. without this, you can't see session output in case of unhandled exception.
+      vim.keymap.set('n', '<f7>', dapui.toggle, { desc = 'debug: see last session result.' })
 
 
       dap.listeners.after.event_initialized['dapui_config'] = dapui.open
       dap.listeners.before.event_terminated['dapui_config'] = dapui.close
       dap.listeners.before.event_exited['dapui_config'] = dapui.close
-
-
     end,
   },
 }
