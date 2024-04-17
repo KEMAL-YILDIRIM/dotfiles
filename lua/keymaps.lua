@@ -7,10 +7,11 @@ local map = vim.keymap
 vim.opt.hlsearch = true
 map.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear highlight search in normal mode' })
 
+
 -- Diagnostic keymaps
-map.set('n', '<leader>-m', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
-map.set('n', '<leader>-m', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
-map.set('n', '<leader>--', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+map.set('n', '<leader>dp', vim.diagnostic.goto_prev, { desc = 'Go to [P]revious diagnostic message' })
+map.set('n', '<leader>dn', vim.diagnostic.goto_next, { desc = 'Go to [N]ext diagnostic message' })
+map.set('n', '<leader>dm', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 
 
 -- TIP: Disable arrow keys in normal mode
@@ -48,7 +49,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 
-map.set({ "n", "v" },"<leader>cd", ":cd %:h<CR>", { desc = "Set path to current buffer" })
+map.set({ "n", "v" }, "<leader>cd", ":cd %:h<CR>", { desc = "Set path to current buffer" })
 map.set("v", "<leader>+", "mzJ`z", { desc = "Adds up the next line to the current" })
 
 
@@ -73,8 +74,10 @@ map.set("n", "<leader>qn", "<cmd>cnext<CR>zz", { desc = "[Q]uickfix [N]ext error
 map.set("n", "<leader>qp", "<cmd>cprev<CR>zz", { desc = "[Q]uickfix [P]revious error list" })
 
 -- tabs
+map.set("n", "<leader>to", "<NOP>", { desc = "[T]ab" })        -- open new tab
 map.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "[T]ab [O]pen new" })        -- open new tab
-map.set("n", "<leader>tc", "<cmd>tabclose<CR>", { desc = "[T]ab [C]lose current" }) -- close current tab
-map.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "[T]ab go to next" })          --  go to next tab
-map.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "[T]ab go to previous" })      --  go to previous tab
+map.set("n", "<leader>tcc", "<cmd>tabc<CR>", { desc = "[T]ab [C]lose [C]urrent" }) -- close current tab
+map.set("n", "<leader>tcc", "<cmd>tabo<CR>", { desc = "[T]ab [C]lose [A]ll but this" }) -- close current tab
+map.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "[T]ab [N]ext" })          --  go to next tab
+map.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "[T]ab [P]revious" })      --  go to previous tab
 map.set("n", "<leader>tb", "<cmd>tabnew %<CR>", { desc = "[T]ab open current [B]uffer in new tab" })

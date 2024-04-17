@@ -38,15 +38,16 @@ return {
         end, { expr = true })
 
         -- Actions
-        map('n', '<leader>gss', gs.stage_buffer)
-        map('n', '<leader>gsa', gs.stage_hunk)
-        map('n', '<leader>gsu', gs.undo_stage_hunk)
-        map('n', '<leader>gsr', gs.reset_buffer)
-        map('n', '<leader>gsp', gs.preview_hunk)
-        map('n', '<leader>gsb', function() gs.blame_line { full = true } end)
-        map('n', '<leader>gsB', gs.toggle_current_line_blame)
-        map('n', '<leader>gsd', gs.diffthis)
-        map('n', '<leader>gsD', function() gs.diffthis('~') end)
+        map('n', '<leader>g', "<NOP>", { desc = '[G]it' })
+        map('n', '<leader>gs', gs.stage_buffer)
+        map('n', '<leader>ga', gs.stage_hunk)
+        map('n', '<leader>gu', gs.undo_stage_hunk)
+        map('n', '<leader>gr', gs.reset_buffer)
+        map('n', '<leader>gw', gs.preview_hunk)
+        map('n', '<leader>gB', function() gs.blame_line { full = true } end)
+        map('n', '<leader>gm', gs.toggle_current_line_blame)
+        map('n', '<leader>gt', gs.diffthis)
+        map('n', '<leader>g~', function() gs.diffthis('~') end)
 
         -- Text object
         map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
@@ -70,13 +71,13 @@ return {
         vim.keymap.set('n', keys, func, { silent = true, noremap = true, desc = '[G]it: ' .. desc, })
       end
 
-      map("<leader>gg", ":Neogit<CR>", " Neo[G]it")
-      map("<leader>gc", ":Neogit commit<CR>", "[C]ommit")
-      map("<leader>gpl", ":Neogit pull<CR>", "[P]ul[L]")
-      map("<leader>gps", ":Neogit push<CR>", "[P]u[S]h")
-      map("<leader>gbr", ":Telescope git_branches<CR>", "[BR]anch")
-      map("<leader>gbl", ":G blame<CR>", "[BL]ame")
-      map("<leader>gd", ":DiffviewOpen<CR>", "[D]iffview")
+      map('<leader>gg', ':Neogit<CR>', ' Neo[G]it')
+      map('<leader>gc', ':Neogit commit<CR>', '[C]ommit')
+      map('<leader>gp', ':Neogit pull<CR>', '[P]ull')
+      map('<leader>gh', ':Neogit push<CR>', 'Pu[S]h')
+      map('<leader>gb', ':Telescope git_branches<CR>', '[B]ranch')
+      map('<leader>gl', ':G blame<CR>', 'b[L]ame')
+      map('<leader>gd', ':DiffviewOpen<CR>', '[D]iffview')
     end,
   },
 }

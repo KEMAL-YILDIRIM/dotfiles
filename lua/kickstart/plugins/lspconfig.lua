@@ -54,6 +54,7 @@ return {
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
+          vim.keymap.set('n','<leader>l','<NOP>', { desc = '[L]SP' })
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-T>.
@@ -192,7 +193,14 @@ return {
       --    :Mason
       --
       --  You can press `g?` for help in this menu
-      require("mason").setup({
+      require("mason").setup({ 
+        ui = {
+        icons = {
+          package_installed = "✓",
+          package_pending = "➜",
+          package_uninstalled = "✗",
+        },
+      },
         PATH = "prepend", -- "skip" seems to cause the spawning error
       })
 
@@ -200,7 +208,8 @@ return {
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format lua code
+        'prettier', -- prettier formatter
+        'stylua', -- lua formatter
         'powershell_es',
         'css-lsp',
         'html-lsp',
