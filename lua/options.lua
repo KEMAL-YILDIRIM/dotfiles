@@ -10,9 +10,9 @@ opt.relativenumber = true
 
 -- tab settings
 opt.tabstop = 2
-opt.softtabstop = 2
-opt.shiftwidth = 2
-opt.expandtab = true
+opt.softtabstop = 0
+opt.shiftwidth = 0
+opt.expandtab = false
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 opt.mouse = 'a'
@@ -69,9 +69,6 @@ opt.conceallevel = 1
 opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
-
--- System clipboard as default register
-opt.clipboard = "unnamedplus"
 
 -- File list style into tree mode
 vim.cmd("let g:netrw_liststyle = 3")

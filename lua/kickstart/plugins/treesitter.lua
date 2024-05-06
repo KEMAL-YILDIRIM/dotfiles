@@ -22,10 +22,10 @@ return {
       }
 
 
-      --[[ vim.api.nvim_create_autocmd("BufWinEnter", {
+      vim.api.nvim_create_autocmd("BufWinEnter", {
         pattern = "*.{razor,cshtml}",
-        command = "set filetype=html",
-      }) ]]
+        command = "set filetype=html.cshtml.razor",
+      })
 
 
       -- There are additional nvim-treesitter modules that you can use to interact

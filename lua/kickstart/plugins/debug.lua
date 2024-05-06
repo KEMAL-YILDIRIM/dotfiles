@@ -150,7 +150,7 @@ return {
       -- basic debugging keymaps, feel free to change to your liking!
       vim.keymap.set('n', '<f5>', dap.continue, { desc = 'debug: start/continue' })
       vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
-      vim.keymap.set('n', '<f12>', dap.step_over, { desc = 'debug: step over' })
+      vim.keymap.set('n', '<f10>', dap.step_over, { desc = 'debug: step over' })
       vim.keymap.set('n', '<s-f11>', dap.step_out, { desc = 'debug: step out' })
       vim.keymap.set('n', '<f9>', dap.toggle_breakpoint, { desc = 'debug: toggle breakpoint' })
       vim.keymap.set('n', '<s-f9>', function()

@@ -18,6 +18,7 @@ return {
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
 
+        -- Mapping
         local function map(mode, l, r, opts)
           opts = opts or {}
           opts.buffer = bufnr
@@ -38,16 +39,16 @@ return {
         end, { expr = true })
 
         -- Actions
-        map('n', '<leader>g', "<NOP>", { desc = '[G]it' })
-        map('n', '<leader>gs', gs.stage_buffer)
-        map('n', '<leader>ga', gs.stage_hunk)
-        map('n', '<leader>gu', gs.undo_stage_hunk)
-        map('n', '<leader>gr', gs.reset_buffer)
-        map('n', '<leader>gw', gs.preview_hunk)
-        map('n', '<leader>gB', function() gs.blame_line { full = true } end)
-        map('n', '<leader>gm', gs.toggle_current_line_blame)
-        map('n', '<leader>gt', gs.diffthis)
-        map('n', '<leader>g~', function() gs.diffthis('~') end)
+        map('n', '<leader>g', "<NOP>", { desc = '[G]it Signs: ' })
+        map('n', '<leader>gs', gs.stage_buffer, { desc = '[G]it Signs: stage buffer' })
+        map('n', '<leader>ga', gs.stage_hunk, { desc = '[G]it Signs: stage hunk' })
+        map('n', '<leader>gu', gs.undo_stage_hunk, { desc = '[G]it Signs: undo stage hunk' })
+        map('n', '<leader>gr', gs.reset_buffer, { desc = '[G]it Signs: reset buffer' })
+        map('n', '<leader>gw', gs.preview_hunk, { desc = '[G]it Signs: preview hunk' })
+        map('n', '<leader>gB', function() gs.blame_line { full = true } end, { desc = '[G]it Signs: blame line' })
+        map('n', '<leader>gm', gs.toggle_current_line_blame, { desc = '[G]it Signs: blame current line' })
+        map('n', '<leader>gt', gs.diffthis, { desc = '[G]it Signs: diff this' })
+        map('n', '<leader>g~', function() gs.diffthis('~') end, { desc = '[G]it Signs: diff this ~' })
 
         -- Text object
         map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
@@ -68,10 +69,10 @@ return {
       require("neogit").setup {}
 
       local map = function(keys, func, desc)
-        vim.keymap.set('n', keys, func, { silent = true, noremap = true, desc = '[G]it: ' .. desc, })
+        vim.keymap.set('n', keys, func, { silent = true, noremap = true, desc = 'Neo [G]it: ' .. desc, })
       end
 
-      map('<leader>gg', ':Neogit<CR>', ' Neo[G]it')
+      map('<leader>gg', ':Neogit<CR>', '')
       map('<leader>gc', ':Neogit commit<CR>', '[C]ommit')
       map('<leader>gp', ':Neogit pull<CR>', '[P]ull')
       map('<leader>gh', ':Neogit push<CR>', 'Pu[S]h')

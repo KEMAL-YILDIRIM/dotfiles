@@ -6,6 +6,7 @@ return {
       -- Snippet Engine & its associated nvim-cmp source
       {
         'L3MON4D3/LuaSnip',
+        dependencies = {'rafamadriz/friendly-snippets'},
         build = (function()
           -- Build Step is needed for regex support in snippets
           -- This step is not supported in many windows environments
@@ -13,9 +14,11 @@ return {
           if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
             return
           end
+          require("luasnip.loaders.from_vscode").lazy_load()
           return 'make install_jsregexp'
         end)(),
       },
+
       'saadparwaiz1/cmp_luasnip',
 
       -- Adds other completion capabilities.
@@ -23,12 +26,15 @@ return {
       --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
+      -- 'hrsh7th/cmp-vsnip',
+      -- 'hrsh7th/vim-vsnip',
+      -- 'hrsh7th/vim-vsnip-integ',
 
       -- If you want to add a bunch of pre-configured snippets,
       --    you can use this plugin to help you. It even has snippets
       --    for various frameworks/libraries/etc. but you will have to
       --    set up the ones that are useful for you.
-      -- 'rafamadriz/friendly-snippets',
+      --'rafamadriz/friendly-snippets',
     },
     config = function()
       -- See `:help cmp`
@@ -39,6 +45,7 @@ return {
       cmp.setup {
         snippet = {
           expand = function(args)
+            -- vim.fn["vsnip#anonymous"](args.body)
             luasnip.lsp_expand(args.body)
           end,
         },
@@ -50,14 +57,14 @@ return {
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-j>'] = cmp.mapping.select_next_item(),
           -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-k>'] = cmp.mapping.select_prev_item(),
 
           -- Accept ([y]es) the completion.
           --  This will auto-import if your LSP supports it.
           --  This will expand snippets if the LSP sent a snippet.
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
+          ['<C-Cr>'] = cmp.mapping.confirm { select = true },
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -84,8 +91,10 @@ return {
           end, { 'i', 's' }),
         },
         sources = {
+          { name = 'nvim_lsp_signature_help' },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
+          -- { name = 'vsnip' },
           { name = 'buffer' },
           { name = 'path' },
         },

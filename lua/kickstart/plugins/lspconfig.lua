@@ -41,6 +41,8 @@ return {
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
+
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -58,35 +60,35 @@ return {
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-T>.
-          map('<leader>lgd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+          map('<leader>ld', require('telescope.builtin').lsp_definitions, 'Goto [D]efinition')
 
           -- Find references for the word under your cursor.
-          map('<leader>lgr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('<leader>lf', require('telescope.builtin').lsp_references, 'Goto Re[F]erences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('<leader>lgi', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+          map('<leader>li', require('telescope.builtin').lsp_implementations, 'Goto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>lgt', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>lt', require('telescope.builtin').lsp_type_definitions, '[T]ype Definition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>lsd', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ls', require('telescope.builtin').lsp_document_symbols, 'Document [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace
           --  Similar to document symbols, except searches over your whole project.
-          map('<leader>lsw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>lw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace Symbols')
 
           -- Rename the variable under your cursor
           --  Most Language Servers support renaming across files, etc.
-          map('<leader>lr', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>lr', vim.lsp.buf.rename, '[R]ename')
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('<leader>la', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          map('<leader>la', vim.lsp.buf.code_action, 'Code [A]ction')
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
@@ -94,7 +96,7 @@ return {
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header
-          map('<leader>lgD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+          map('<leader>lc', vim.lsp.buf.declaration, 'Goto De[C]laration')
 
           -- The following two autocommands are used to highlight references of the
           -- word under your cursor when your cursor rests there for a little while.
@@ -230,6 +232,13 @@ return {
           end,
         },
       }
+
+      
+      
+      -- Debug keymap
+      vim.keymap.set('n', '<leader>xp', vim.diagnostic.goto_prev, { desc = 'Go to [P]revious diagnostic message' })
+      vim.keymap.set('n', '<leader>xn', vim.diagnostic.goto_next, { desc = 'Go to [N]ext diagnostic message' })
+      vim.keymap.set('n', '<leader>xm', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
     end,
   },
   {
@@ -242,7 +251,7 @@ return {
       { "<leader>xq", "<cmd>TroubleToggle quickfix<CR>",              desc = "Open trouble quickfix list" },
       { "<leader>xl", "<cmd>TroubleToggle loclist<CR>",               desc = "Open trouble location list" },
       { "<leader>xt", "<cmd>TodoTrouble<CR>",                         desc = "Open todos in trouble" },
-    }
+    },
   },
   --[[ {
     "iabdelkareem/csharp.nvim",

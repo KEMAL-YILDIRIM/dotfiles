@@ -1,5 +1,5 @@
---vim.keymap.set("n", "<leader>=", vim.lsp.buf.format, { desc = "Equalize indent for current buffer" })
-vim.keymap.set("n", "<leader>=", "gg<M-v>G=<CR>", { desc = "Equalize indent for current buffer" })
+vim.keymap.set("n", "<leader>==", vim.lsp.buf.format, { desc = "Equalize indent for current buffer" })
+vim.keymap.set("n", "<leader>=-", "gg<M-v>G=<CR>:w<CR>", { desc = "Equalize indent for current buffer" })
 return {
   {
     -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).

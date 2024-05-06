@@ -47,23 +47,65 @@ return {
       -- Two important keymaps to use while in telescope are:
       --  - Insert mode: <c-/>
       --  - Normal mode: ?
-      --
-      -- This opens a window that shows you all of the keymaps for the current
-      -- telescope picker. This is really useful to discover what Telescope can
-      -- do as well as how to actually do it!
+
+      -- Limit the color of the path to two 
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "TelescopeResults",
+        callback = function(ctx)
+          vim.api.nvim_buf_call(ctx.buf, function()
+            vim.fn.matchadd("TelescopeParent", "\t\t.*$")
+            vim.api.nvim_set_hl(0, "TelescopeParent", { link = "Comment" })
+          end)
+        end,
+      })
+
+      -- Set the filename and the ext to the first part of path
+      local function filenameFirst(_, path)
+        local tail = vim.fs.basename(path)
+        local parent = vim.fs.dirname(path)
+        if parent == "." then return tail end
+        return string.format("%s\t\t%s", tail, parent)
+      end
+
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
-      require('telescope').setup {
+      local telescope = require('telescope')
+      local actions = require('telescope.actions')
+
+      telescope.setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          path_display = filenameFirst,
+          mappings = {
+            i = {
+              ['<c-enter>'] = 'to_fuzzy_refine',
+
+              ["<C-k>"] = actions.move_selection_previous,
+              ["<C-j>"] = actions.move_selection_next,
+
+              ["<M-k>"] = actions.preview_scrolling_up,
+              ["<M-j>"] = actions.preview_scrolling_down,
+              -- ["<M-h>"] = actions.preview_scrolling_left,
+              -- ["<M-l>"] = actions.preview_scrolling_right,
+
+              ["<C-p>"] = actions.results_scrolling_up,
+              ["<C-n>"] = actions.results_scrolling_down,
+              -- ["<C-h>"] = actions.results_scrolling_left,
+              -- ["<C-l>"] = actions.results_scrolling_right,
+            },
+          },
+        },
+        pickers = {
+          buffers = {
+            mappings = {
+              i = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+              n = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -110,7 +152,6 @@ return {
       vim.keymap.set('n', '<leader>sn', function()
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
-
     end,
   },
 }

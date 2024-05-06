@@ -15,7 +15,21 @@ return {
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      require('mini.surround').setup({
+        -- Module mappings. Use `''` (empty string) to disable one.
+        mappings = {
+          add = '<leader>[a', -- Add surrounding in Normal and Visual modes
+          delete = '<leader>[d', -- Delete surrounding
+          find = '<leader>[f', -- Find surrounding (to the right)
+          find_left = '<leader>[F', -- Find surrounding (to the left)
+          highlight = '<leader>[h', -- Highlight surrounding
+          replace = '<leader>[r', -- Replace surrounding
+          update_n_lines = '<leader>[u', -- Update `n_lines`
+
+          suffix_last = '<leader>[l', -- Suffix to search with "prev" method
+          suffix_next = '<leader>[n', -- Suffix to search with "next" method
+        },
+      })
 
       --Edit buffer in the way representing file system action
       --create new line like dir/file or dir/nested/.
