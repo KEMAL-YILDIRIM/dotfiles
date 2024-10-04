@@ -1,7 +1,11 @@
--- You can add your own plugins here or in other files in this directory!
---  I promise not to create any merge conflicts in this directory :)
---
--- See the kickstart.nvim README for more information
+
+function ClearUndoHistory ()
+  local old_undolevels = vim.opt_local.undolevels
+  vim.opt_local.undolevels=-1
+  vim.cmd(vim.api.nvim_replace_termcodes('normal! a <BS><Esc>',true,true,true))
+  vim.opt_local.undolevels = old_undolevels
+end
+
 return {
-	
+
 }

@@ -6,9 +6,15 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = { signs = false }
   },
-  {    
+  {
     'numToStr/Comment.nvim',
-    opts = {},
+    opts = {
+      opleader = {
+        ---Line-comment keymap
+        line = '<leader>cl',
+        ---Block-comment keymap
+        block = '<leader>cb',
+      },
+    },
   },
 }
--- vim: ts=2 sts=2 sw=2 et

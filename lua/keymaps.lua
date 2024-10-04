@@ -10,7 +10,7 @@ map.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear highlight search in
 
 
 
--- TIP: Disable arrow keys in normal mode
+-- TIP: Disable arrow tabKeys in normal mode
 -- map.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 -- map.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 -- map.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
@@ -45,7 +45,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 })
 
 
-map.set({ "n", "v" }, "<leader>cd", ":cd %:h<CR>", { desc = "Set path to current buffer" })
 map.set("v", "<leader>+", "mzJ`z", { desc = "Adds up the next line to the current" })
 
 
@@ -70,14 +69,35 @@ map.set("n", "<leader>qn", "<cmd>cnext<CR>zz", { desc = "[Q]uickfix [N]ext error
 map.set("n", "<leader>qp", "<cmd>cprev<CR>zz", { desc = "[Q]uickfix [P]revious error list" })
 
 -- tabs
-map.set("n", "<leader>t", "<NOP>", { desc = "[T]ab" })                               -- open new tab
-map.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "[T]ab [O]pen new" })         -- open new tab
-map.set("n", "<leader>tc", "<cmd>tabc<CR>", { desc = "[T]ab close [C]urrent" })      -- close current tab
-map.set("n", "<leader>ta", "<cmd>tabo<CR>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
-map.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "[T]ab [N]ext" })               --  go to next tab
-map.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "[T]ab [P]revious" })           --  go to previous tab
-map.set("n", "<leader>tt", "<cmd>tabnew %<CR>", { desc = "[T]ab open current [B]uffer in new tab" })
+local function tab_actions()
+  -- move between tab commands without unnecessary repetations 
+  local ns_id = vim.api.nvim_create_namespace("");
+  print("Entered tab mode " .. ns_id)
+  vim.on_key(function(_, key)
+    if key == "n" then vim.cmd("tabnew") end
+    if key == "c" then vim.cmd("tabc") end
+    if key == "a" then vim.cmd("tabo") end
+    if key == "l" then vim.cmd("tabn") end
+    if key == "h" then vim.cmd("tabp") end
+    if key == "d" then vim.cmd("tabnew %") end
+    if key == "\27" then
+      vim.on_key(nil, ns_id)
+      print("Exited tab mode " .. ns_id)
+    end
+  end, ns_id)
+end
+
+map.set("n", "<leader>tm", tab_actions, { desc = "[t]ab [m]ode" })
+map.set("n", "<leader>tn", "<cmd>tabnew<cr>", { desc = "[t]ab open [n]ew" })         -- open new tab
+map.set("n", "<leader>tc", "<cmd>tabc<cr>", { desc = "[t]ab close [c]urrent" })      -- close current tab
+map.set("n", "<leader>ta", "<cmd>tabo<cr>", { desc = "[t]ab close [a]ll but this" }) -- close current tab
+map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[t]ab [n]ext" })               --  go to next tab
+map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[t]ab [p]revious" })           --  go to previous tab
+map.set("n", "<leader>td", "<cmd>tabnew %<CR>", { desc = "[t]ab [d]uplicate current buffer in new tab" })
+map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[t]ab open last used [t]ab" })
+map.set("n", "<leader>t", "<nop>", { desc = "[t]ab" })
 
 -- buffers
 map.set("n", "<leader>b", "<NOP>", { desc = "[B]uffer" })
 map.set("n", "<leader>bo", ":%bd|e#", { desc = "[B]uffer close all but [O]ne" })
+map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "[B]uffer [S]et path to current " })
