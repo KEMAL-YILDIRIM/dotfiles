@@ -12,11 +12,10 @@ return {
       'williamboman/mason.nvim',
       --'jay-babu/mason-nvim-dap.nvim',
 
-      -- add your own debuggers here
-
+      -- lua debug
+      'jbyuki/one-small-step-for-vimkind'
     },
     config = function()
-
       local dap, daputils = require("dap"), require("dap.utils")
 
       -- dap.set_log_level("DEBUG")
@@ -117,6 +116,19 @@ return {
           end,
         },
       }
+
+
+      dap.configurations.lua = {
+        {
+          type = 'nlua',
+          request = 'attach',
+          name = "Attach to running Neovim instance",
+        }
+      }
+
+      dap.adapters.nlua = function(callback, config)
+        callback({ type = 'server', host = config.host or "127.0.0.1", port = config.port or 8086 })
+      end
 
 
 

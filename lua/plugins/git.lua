@@ -48,8 +48,8 @@ return {
         map('n', '<leader>gw', gs.preview_hunk, { desc = '[G]it Signs: preview hunk' })
         map('n', '<leader>gB', function() gs.blame_line { full = true } end, { desc = '[G]it Signs: blame line' })
         map('n', '<leader>gm', gs.toggle_current_line_blame, { desc = '[G]it Signs: blame current line' })
-        map('n', '<leader>g.', gs.diffthis, { desc = '[G]it Signs: diff this' })
-        map('n', '<leader>g~', function() gs.diffthis('~') end, { desc = '[G]it Signs: diff this ~' })
+        map('n', '<leader>gt', gs.diffthis, { desc = '[G]it Signs: diff this' })
+        map('n', '<leader>gT', function() gs.diffthis('~') end, { desc = '[G]it Signs: diff this ~' })
 
         map("n", "<leader>gw", "<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
           { desc = 'Telescope [G]it [W]orktrees', silent = true })

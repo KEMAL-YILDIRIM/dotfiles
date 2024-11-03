@@ -30,7 +30,8 @@ return {
       -- Useful for getting pretty icons, but requires special font.
       --  If you already have a Nerd Font, or terminal set up with fallback fonts
       --  you can enable this
-      { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
+      { 'rcarriga/nvim-notify' }
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -119,6 +120,7 @@ return {
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
+      vim.keymap.set('n', '<leader>s', '<nop>', { desc = '[S]earch Telescope' })
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -130,9 +132,16 @@ return {
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files[.]' })
       vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]earch existing [B]uffers' })
       vim.keymap.set("n", "<leader>st", ":TodoTelescope<CR>", { desc = '[S]earch [T]odo marks' })
-      vim.keymap.set("n", "<leader>sm", "<CMD>lua require('telescope').extensions.notify.notify()<CR>", 
-          { desc = '[S]earch notification [M]essages', silent = true })
 
+
+
+      vim.keymap.set("n", "<leader>so", function()
+        builtin.find_files({ cwd = 'C:/Users/Kemal Yildirim/OneDrive/Dokumanlar/Obsidian' })
+      end, { desc = "[S]earch [O]bsidian" })
+
+      vim.keymap.set('n', '<leader>sn', function()
+        builtin.find_files { cwd = vim.fn.stdpath 'config' }
+      end, { desc = '[S]earch [N]eovim files' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -151,11 +160,6 @@ return {
           prompt_title = 'Live Grep in Open Files',
         }
       end, { desc = '[S]earch [/] in Open Files' })
-
-      -- Shortcut for searching your neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch [N]eovim files' })
     end,
   },
 }

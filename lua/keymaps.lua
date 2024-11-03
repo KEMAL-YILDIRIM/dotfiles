@@ -1,20 +1,13 @@
 -- [[ Basic Keymaps ]]
 --  See `:help map.set()`
 
+vim.g.mapleader = ' '
 local map = vim.keymap
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 map.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear highlight search in normal mode' })
 
-
-
-
--- TIP: Disable arrow tabKeys in normal mode
--- map.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- map.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- map.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- map.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -29,20 +22,6 @@ map.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 map.set("v", "<M-j>", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 map.set("v", "<M-k>", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
 
-
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
-
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-})
 
 
 map.set("v", "<leader>+", "mzJ`z", { desc = "Adds up the next line to the current" })
@@ -87,15 +66,15 @@ local function tab_actions()
   end, ns_id)
 end
 
-map.set("n", "<leader>tm", tab_actions, { desc = "[t]ab [m]ode" })
-map.set("n", "<leader>tn", "<cmd>tabnew<cr>", { desc = "[t]ab open [n]ew" })         -- open new tab
-map.set("n", "<leader>tc", "<cmd>tabc<cr>", { desc = "[t]ab close [c]urrent" })      -- close current tab
-map.set("n", "<leader>ta", "<cmd>tabo<cr>", { desc = "[t]ab close [a]ll but this" }) -- close current tab
-map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[t]ab [n]ext" })               --  go to next tab
-map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[t]ab [p]revious" })           --  go to previous tab
-map.set("n", "<leader>td", "<cmd>tabnew %<CR>", { desc = "[t]ab [d]uplicate current buffer in new tab" })
-map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[t]ab open last used [t]ab" })
-map.set("n", "<leader>t", "<nop>", { desc = "[t]ab" })
+map.set("n", "<leader>tm", tab_actions, { desc = "[T]ab [M]ode" })
+map.set("n", "<leader>tn", "<cmd>tabnew<cr>", { desc = "[T]ab open [N]ew" })         -- open new tab
+map.set("n", "<leader>tc", "<cmd>tabc<cr>", { desc = "[T]ab close [C]urrent" })      -- close current tab
+map.set("n", "<leader>ta", "<cmd>tabo<cr>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
+map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[T]ab Next" })               --  go to next tab
+map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[T]ab Previous" })           --  go to previous tab
+map.set("n", "<leader>td", "<cmd>tabnew %<CR>", { desc = "[T]ab [d]uplicate current buffer in new tab" })
+map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
+map.set("n", "<leader>t", "<nop>", { desc = "[T]ab" })
 
 -- buffers
 map.set("n", "<leader>b", "<NOP>", { desc = "[B]uffer" })

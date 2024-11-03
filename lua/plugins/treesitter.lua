@@ -1,9 +1,9 @@
 return {
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    dependencies = {
+    --[[ dependencies = {
       'tree-sitter/tree-sitter-razor'
-    },
+    }, ]]
     build = ':TSUpdate',
     config = function()
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -26,10 +26,10 @@ return {
       }
 
 
-      vim.api.nvim_create_autocmd("BufWinEnter", {
+      --[[ vim.api.nvim_create_autocmd("BufWinEnter", {
         pattern = "*.{razor,cshtml}",
         command = "set filetype=html.cshtml.razor",
-      })
+      }) ]]
 
 
       -- There are additional nvim-treesitter modules that you can use to interact
@@ -40,5 +40,6 @@ return {
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  'nvim-treesitter/playground'
 }
 -- vim: ts=2 sts=2 sw=2 et
