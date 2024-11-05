@@ -8,11 +8,20 @@ local opt = vim.opt
 opt.number = true
 opt.relativenumber = true
 
+-- fold settings
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldcolumn = "0"
+vim.opt.foldtext = ""
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
+
 -- tab settings
 opt.tabstop = 2
-opt.softtabstop = 2
-opt.shiftwidth = 2
-opt.expandtab = true
+opt.softtabstop = 0
+opt.shiftwidth = 0
+opt.expandtab = false
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 opt.mouse = 'a'
@@ -69,9 +78,6 @@ opt.conceallevel = 1
 opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
-
--- System clipboard as default register
-opt.clipboard = "unnamedplus"
 
 -- File list style into tree mode
 vim.cmd("let g:netrw_liststyle = 3")

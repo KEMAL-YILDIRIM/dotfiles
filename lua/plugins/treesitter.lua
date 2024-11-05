@@ -1,9 +1,9 @@
 return {
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    dependencies = {
+    --[[ dependencies = {
       'tree-sitter/tree-sitter-razor'
-    },
+    }, ]]
     build = ':TSUpdate',
     config = function()
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -14,7 +14,11 @@ return {
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'bash', 'c', 'html', 'lua', "markdown", "markdown_inline", 'vim', 'vimdoc', 'c_sharp'  },
+        ensure_installed = {
+          'bash', 'c', 'html', 'css', 'lua', "markdown", "markdown_inline",
+          'vim', 'vimdoc', 'c_sharp', 'sql', 'json', 'regex', 'javascript',
+          'rust'
+        },
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true },
@@ -24,7 +28,7 @@ return {
 
       --[[ vim.api.nvim_create_autocmd("BufWinEnter", {
         pattern = "*.{razor,cshtml}",
-        command = "set filetype=html",
+        command = "set filetype=html.cshtml.razor",
       }) ]]
 
 
@@ -36,5 +40,6 @@ return {
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  'nvim-treesitter/playground'
 }
 -- vim: ts=2 sts=2 sw=2 et

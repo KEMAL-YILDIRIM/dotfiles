@@ -12,11 +12,10 @@ return {
       'williamboman/mason.nvim',
       --'jay-babu/mason-nvim-dap.nvim',
 
-      -- add your own debuggers here
-
+      -- lua debug
+      'jbyuki/one-small-step-for-vimkind'
     },
     config = function()
-
       local dap, daputils = require("dap"), require("dap.utils")
 
       -- dap.set_log_level("DEBUG")
@@ -119,6 +118,19 @@ return {
       }
 
 
+      dap.configurations.lua = {
+        {
+          type = 'nlua',
+          request = 'attach',
+          name = "Attach to running Neovim instance",
+        }
+      }
+
+      dap.adapters.nlua = function(callback, config)
+        callback({ type = 'server', host = config.host or "127.0.0.1", port = config.port or 8086 })
+      end
+
+
 
       vim.fn.sign_define('DapBreakpoint',
         { text = '🔴', texthl = 'DapBreakpoint', linehl = 'DapBreakpoint', numhl = 'DapBreakpoint' })
@@ -150,7 +162,7 @@ return {
       -- basic debugging keymaps, feel free to change to your liking!
       vim.keymap.set('n', '<f5>', dap.continue, { desc = 'debug: start/continue' })
       vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
-      vim.keymap.set('n', '<f12>', dap.step_over, { desc = 'debug: step over' })
+      vim.keymap.set('n', '<f10>', dap.step_over, { desc = 'debug: step over' })
       vim.keymap.set('n', '<s-f11>', dap.step_out, { desc = 'debug: step out' })
       vim.keymap.set('n', '<f9>', dap.toggle_breakpoint, { desc = 'debug: toggle breakpoint' })
       vim.keymap.set('n', '<s-f9>', function()

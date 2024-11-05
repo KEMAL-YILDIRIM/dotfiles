@@ -30,7 +30,8 @@ return {
       -- Useful for getting pretty icons, but requires special font.
       --  If you already have a Nerd Font, or terminal set up with fallback fonts
       --  you can enable this
-      { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
+      { 'rcarriga/nvim-notify' }
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -47,23 +48,65 @@ return {
       -- Two important keymaps to use while in telescope are:
       --  - Insert mode: <c-/>
       --  - Normal mode: ?
-      --
-      -- This opens a window that shows you all of the keymaps for the current
-      -- telescope picker. This is really useful to discover what Telescope can
-      -- do as well as how to actually do it!
+
+      -- Limit the color of the path to two
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "TelescopeResults",
+        callback = function(ctx)
+          vim.api.nvim_buf_call(ctx.buf, function()
+            vim.fn.matchadd("TelescopeParent", "\t\t.*$")
+            vim.api.nvim_set_hl(0, "TelescopeParent", { link = "Comment" })
+          end)
+        end,
+      })
+
+      -- Set the filename and the ext to the first part of path
+      local function filenameFirst(_, path)
+        local tail = vim.fs.basename(path)
+        local parent = vim.fs.dirname(path)
+        if parent == "." then return tail end
+        return string.format("%s\t\t%s", tail, parent)
+      end
+
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
-      require('telescope').setup {
+      local telescope = require('telescope')
+      local actions = require('telescope.actions')
+
+      telescope.setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          path_display = filenameFirst,
+          mappings = {
+            i = {
+              ['<c-enter>'] = 'to_fuzzy_refine',
+
+              ["<C-k>"] = actions.move_selection_previous,
+              ["<C-j>"] = actions.move_selection_next,
+
+              ["<M-k>"] = actions.preview_scrolling_up,
+              ["<M-j>"] = actions.preview_scrolling_down,
+              -- ["<M-h>"] = actions.preview_scrolling_left,
+              -- ["<M-l>"] = actions.preview_scrolling_right,
+
+              ["<C-p>"] = actions.results_scrolling_up,
+              ["<C-n>"] = actions.results_scrolling_down,
+              -- ["<C-h>"] = actions.results_scrolling_left,
+              -- ["<C-l>"] = actions.results_scrolling_right,
+            },
+          },
+        },
+        pickers = {
+          buffers = {
+            mappings = {
+              i = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+              n = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -77,6 +120,7 @@ return {
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
+      vim.keymap.set('n', '<leader>s', '<nop>', { desc = '[S]earch Telescope' })
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -85,8 +129,19 @@ return {
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files[.]' })
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, { desc = '[S]earch existing [B]uffers' })
+      vim.keymap.set("n", "<leader>st", ":TodoTelescope<CR>", { desc = '[S]earch [T]odo marks' })
+
+
+
+      vim.keymap.set("n", "<leader>so", function()
+        builtin.find_files({ cwd = 'C:/Users/Kemal Yildirim/OneDrive/Dokumanlar/Obsidian' })
+      end, { desc = "[S]earch [O]bsidian" })
+
+      vim.keymap.set('n', '<leader>sn', function()
+        builtin.find_files { cwd = vim.fn.stdpath 'config' }
+      end, { desc = '[S]earch [N]eovim files' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -105,12 +160,6 @@ return {
           prompt_title = 'Live Grep in Open Files',
         }
       end, { desc = '[S]earch [/] in Open Files' })
-
-      -- Shortcut for searching your neovim configuration files
-      vim.keymap.set('n', '<leader>sn', function()
-        builtin.find_files { cwd = vim.fn.stdpath 'config' }
-      end, { desc = '[S]earch [N]eovim files' })
-
     end,
   },
 }
