@@ -3,9 +3,10 @@ return {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
-      -- Snippet Engine & its associated nvim-cmp source
+
       {
         'L3MON4D3/LuaSnip',
+        version = "v2.3.0",
         dependencies = { 'molleweide/LuaSnip-snippets.nvim' },
         build = 'make install_jsregexp',
         config = function()
@@ -40,9 +41,6 @@ return {
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-cmdline',
-      -- 'hrsh7th/cmp-vsnip',
-      -- 'hrsh7th/vim-vsnip',
-      -- 'hrsh7th/vim-vsnip-integ',
 
     },
     config = function()

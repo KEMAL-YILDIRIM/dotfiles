@@ -42,11 +42,6 @@ map.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard t
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
 
--- quick fix navigation
-map.set('n', '<leader>qq', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-map.set("n", "<leader>qn", "<cmd>cnext<CR>zz", { desc = "[Q]uickfix [N]ext error list" })
-map.set("n", "<leader>qp", "<cmd>cprev<CR>zz", { desc = "[Q]uickfix [P]revious error list" })
-
 -- tabs
 local function tab_actions()
   -- move between tab commands without unnecessary repetations 

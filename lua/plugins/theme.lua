@@ -1,6 +1,6 @@
 return {
   --[[ {
-    
+
     -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is
@@ -23,6 +23,12 @@ return {
 
   }, ]]
   {
+    'norcalli/nvim-colorizer.lua',
+    config = function()
+      require 'colorizer'.setup();
+    end
+  },
+  {
     'catppuccin/nvim',
     lazy = false,
     priority = 1000,
@@ -42,7 +48,7 @@ return {
             red = "#ea7183",
             maroon = "#ea838c",
             peach = "#f39967",
-            green = "#96d382",
+            green = "#8d7c7c",
             teal = "#78cec1",
             sky = "#91d7e3",
             sapphire = "#68bae0",

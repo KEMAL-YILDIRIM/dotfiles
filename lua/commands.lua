@@ -25,3 +25,14 @@ vim.api.nvim_create_user_command("Test", function()
   package.loaded.razorls = nil
   require("razorls").test()
 end, { desc = "Lsp test" })
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  pattern = "*.txt",
+  desc = 'Create a new tab and display help inside that',
+  group = vim.api.nvim_create_augroup('help-display', { clear = true }),
+  callback = function()
+    if vim.bo.buftype == "help" then
+      vim.cmd("wincmd T")
+    end
+  end,
+})
