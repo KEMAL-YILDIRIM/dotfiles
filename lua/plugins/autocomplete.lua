@@ -1,69 +1,98 @@
 return {
+  {
+    'L3MON4D3/LuaSnip',
+    version = "v2.3.0",
+    dependencies = { 'molleweide/LuaSnip-snippets.nvim' },
+    build = 'make install_jsregexp',
+    config = function()
+      local ls = require("luasnip")
+      vim.snippet.expand = ls.lsp_expand
+
+      ---@diagnostic disable-next-line: duplicate-set-field
+      vim.snippet.active = function(filter)
+        filter = filter or {}
+        filter.direction = filter.direction or 1
+
+        if filter.direction == 1 then
+          return ls.expand_or_jumpable()
+        else
+          return ls.jumpable(filter.direction)
+        end
+      end
+
+      ---@diagnostic disable-next-line: duplicate-set-field
+      vim.snippet.jump = function(direction)
+        if direction == 1 then
+          if ls.expandable() then
+            return ls.expand_or_jump()
+          else
+            return ls.jumpable(1) and ls.jump(1)
+          end
+        else
+          return ls.jumpable(-1) and ls.jump(-1)
+        end
+      end
+
+      vim.snippet.stop = ls.unlink_current
+
+
+      ls.config.set_config {
+        history = true,
+        updateevents = "TextChanged,TextChangedI",
+        override_builtin = true,
+      }
+
+      for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/custom/*.lua", true)) do
+        loadfile(ft_path)()
+      end
+
+      vim.keymap.set({ "i", "s" }, "<c-l>", function()
+        return vim.snippet.active { direction = 1 } and vim.snippet.jump(1)
+      end, { silent = true })
+
+      vim.keymap.set({ "i", "s" }, "<c-h>", function()
+        return vim.snippet.active { direction = -1 } and vim.snippet.jump(-1)
+      end, { silent = true })
+
+      ls.setup({
+        snip_env = {
+          s = function(...)
+            local snip = ls.s(...)
+            -- we can't just access the global `ls_file_snippets`, since it will be
+            -- resolved in the environment of the scope in which it was defined.
+            table.insert(getfenv(2).ls_file_snippets, snip)
+          end,
+          parse = function(...)
+            local snip = ls.parser.parse_snippet(...)
+            table.insert(getfenv(2).ls_file_snippets, snip)
+          end,
+          -- remaining definitions.
+        },
+      })
+
+      require("luasnip.loaders.from_vscode").lazy_load()
+    end
+  },
+
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
 
-      {
-        'L3MON4D3/LuaSnip',
-        version = "v2.3.0",
-        dependencies = { 'molleweide/LuaSnip-snippets.nvim' },
-        build = 'make install_jsregexp',
-        config = function()
-          local ls = require("luasnip")
-          ls.setup({
-            snip_env = {
-              s = function(...)
-                local snip = ls.s(...)
-                -- we can't just access the global `ls_file_snippets`, since it will be
-                -- resolved in the environment of the scope in which it was defined.
-                table.insert(getfenv(2).ls_file_snippets, snip)
-              end,
-              parse = function(...)
-                local snip = ls.parser.parse_snippet(...)
-                table.insert(getfenv(2).ls_file_snippets, snip)
-              end,
-              -- remaining definitions.
-            },
-          })
-          require("luasnip.loaders.from_vscode").lazy_load()
-        end
-      },
-
-      'saadparwaiz1/cmp_luasnip',
-
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
-      'neovim/nvim-lspconfig',
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-buffer',
       'hrsh7th/cmp-path',
       'hrsh7th/cmp-cmdline',
 
+      'neovim/nvim-lspconfig',
+      'saadparwaiz1/cmp_luasnip',
+
     },
     config = function()
       -- See `:help cmp`
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
-      local keymaps = cmp.mapping.preset.insert {
-        ['<C-j>'] = cmp.mapping.select_next_item(),
-        ['<C-k>'] = cmp.mapping.select_prev_item(),
-        ['<CR>'] = cmp.mapping.confirm { select = true },
-        ['<C-Space>'] = cmp.mapping.complete {},
-
-        ['<C-l>'] = cmp.mapping(function()
-          if luasnip.expand_or_locally_jumpable() then
-            luasnip.expand_or_jump()
-          end
-        end, { 'i', 's' }),
-        ['<C-h>'] = cmp.mapping(function()
-          if luasnip.locally_jumpable(-1) then
-            luasnip.jump(-1)
-          end
-        end, { 'i', 's' }),
-      }
 
       cmp.setup {
         snippet = {
@@ -73,26 +102,58 @@ return {
           end,
         },
         completion = { completeopt = 'menu,menuone,noinsert' },
-
+        formatting = {
+          format = require('lspkind').cmp_format({
+            mode = "symbol",
+            maxwidth = 50,
+            ellipsis_char = '...',
+            symbol_map = { Codeium = "", }
+          })
+        },
         -- For an understanding of why these keymaps were
         -- chosen, you will need to read `:help ins-completion`
-        mapping = keymaps,
+        mapping = {
+          ['<c-space>'] = cmp.mapping.open_docs(),
+          ['<c-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<c-f>'] = cmp.mapping.scroll_docs(4),
+          ['<c-j>'] = cmp.mapping.select_next_item(),
+          ['<c-k>'] = cmp.mapping.select_prev_item(),
+          ['<c-x>'] = cmp.mapping.close(),
+          ['<Tab>'] = cmp.mapping.confirm { select = true },
+          --[[ ['<c-l>'] = cmp.mapping(function()
+            if luasnip.expand_or_locally_jumpable() then
+              luasnip.expand_or_jump()
+            end
+          end, { 'i', 's' }),
+          ['<c-h>'] = cmp.mapping(function()
+            if luasnip.locally_jumpable(-1) then
+              luasnip.jump(-1)
+            end
+          end, { 'i', 's' }) ]]
+        },
         sources = {
-          { name = 'nvim_lsp_signature_help' },
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
-          { name = 'buffer' },
-          { name = 'path' },
+          {  name = 'codeium' },
+          {  name = 'nvim_lsp_signature_help' },
+          {  name = 'nvim_lsp' },
+          {  name = 'luasnip' },
+          {  name = 'buffer' },
+          {  name = 'path' },
         },
       }
 
+
       -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
       cmp.setup.cmdline(':', {
-        mapping = cmp.mapping.preset.cmdline(),
+        mapping = {
+          ['<c-j>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'c' }),
+          ['<c-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'c' }),
+          ['<Tab>'] = cmp.mapping(cmp.mapping.confirm { select = true, behavior = cmp.ConfirmBehavior.Replace }, { 'c' }),
+        },
         sources = cmp.config.sources(
           { { name = 'path' } },
           { { name = 'cmdline' } }),
       })
+
 
 
       -- Setup up vim-dadbod

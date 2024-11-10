@@ -36,8 +36,20 @@ return {
       --Press =; read confirmation dialog; confirm with y/<CR> or not confirm with n/<Esc>
       require('mini.files').setup {
         mappings = {
-          close = "<Esc>",
-        }
+          close       = '<ESC>',
+          go_in       = 'l',
+          go_in_plus  = 'L',
+          go_out      = 'h',
+          go_out_plus = 'H',
+          mark_goto   = "'",
+          mark_set    = 'm',
+          reset       = '<BS>',
+          reveal_cwd  = '@',
+          show_help   = 'g?',
+          synchronize = '=',
+          trim_left   = '<',
+          trim_right  = '>',
+        },
       }
 
       -- ... and there is more!

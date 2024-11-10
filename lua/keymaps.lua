@@ -13,23 +13,24 @@ map.set('n', '<Esc>', '<cmd>nohlsearch<CR>', { desc = 'Clear highlight search in
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-map.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-map.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-map.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-map.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+map.set('n', '<c-h>', '<c-w><c-h>', { desc = 'Move focus to the left window' })
+map.set('n', '<c-l>', '<c-w><c-l>', { desc = 'Move focus to the right window' })
+map.set('n', '<c-j>', '<c-w><c-j>', { desc = 'Move focus to the lower window' })
+map.set('n', '<c-k>', '<c-w><c-k>', { desc = 'Move focus to the upper window' })
+
+-- indentation while stay in indent mode
+vim.keymap.set('v', '<', '<gv', { desc = 'Decrease the indent' })
+vim.keymap.set('v', '>', '>gv', { desc = 'Increase the indent' })
+
 
 -- visual mode > move selected lines
 map.set("v", "<M-j>", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
 map.set("v", "<M-k>", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
 
 
-
-map.set("v", "<leader>+", "mzJ`z", { desc = "Adds up the next line to the current" })
-
-
 -- keep the cursor in the center of page while navigating page up or down
-map.set("n", "<C-d>", "<C-d>zz", { desc = "Page down while keeping cursor at the middle of the page" })
-map.set("n", "<C-u>", "<C-u>zz", { desc = "Page down while keeping cursor at the middle of the page" })
+map.set("n", "<c-d>", "<c-d>zz", { desc = "Page down while keeping cursor at the middle of the page" })
+map.set("n", "<c-u>", "<c-u>zz", { desc = "Page down while keeping cursor at the middle of the page" })
 
 
 -- preserve paste buffer
@@ -39,12 +40,19 @@ map.set("x", "<leader>p", [["_dP]], { desc = "Preserve [P]aste buffer" })
 map.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Copy to system clipboard text" })
 
 
+-- save and quit
+map.set("n", "<c-s>", "<nop>", { desc = "[S]ave" })
+map.set("n", "<c-s>f", "<cmd>:w<cr>", { noremap = true, desc = "[S]ave [F]ile" })
+map.set("n", "<c-s>o", "<cmd>:w<cr><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
+map.set("n", "<c-s>q", "<cmd>:wq<cr>", { noremap = true, desc = "[S]ave and [Q]uit" })
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
+-- planary test
+map.set("n", "<leader>u", "<Plug>PlenaryTestFile", { noremap = false, silent = false, desc = "[U]nit Test" })
 
 -- tabs
 local function tab_actions()
-  -- move between tab commands without unnecessary repetations 
+  -- move between tab commands without unnecessary repetations
   local ns_id = vim.api.nvim_create_namespace("");
   print("Entered tab mode " .. ns_id)
   vim.on_key(function(_, key)
@@ -65,8 +73,8 @@ map.set("n", "<leader>tm", tab_actions, { desc = "[T]ab [M]ode" })
 map.set("n", "<leader>tn", "<cmd>tabnew<cr>", { desc = "[T]ab open [N]ew" })         -- open new tab
 map.set("n", "<leader>tc", "<cmd>tabc<cr>", { desc = "[T]ab close [C]urrent" })      -- close current tab
 map.set("n", "<leader>ta", "<cmd>tabo<cr>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
-map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[T]ab Next" })               --  go to next tab
-map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[T]ab Previous" })           --  go to previous tab
+map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[T]ab Next" })                 --  go to next tab
+map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[T]ab Previous" })             --  go to previous tab
 map.set("n", "<leader>td", "<cmd>tabnew %<CR>", { desc = "[T]ab [d]uplicate current buffer in new tab" })
 map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
 map.set("n", "<leader>t", "<nop>", { desc = "[T]ab" })

@@ -1,6 +1,7 @@
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 local servers = {
   lemminx = {},
+  stylua = {},
   ts_ls = {},
   pyright = {},
   rust_analyzer = {},
@@ -32,6 +33,43 @@ local servers = {
 
 
 return {
+
+  {
+    "seblj/roslyn.nvim",
+    event = { "bufreadpre", "bufnewfile" },
+    ft = "cs",
+    opts = {
+      filewatching = false,
+      broad_search = true,
+      settings = {
+        ["csharp|inlay_hints"] = {
+          csharp_enable_inlay_hints_for_implicit_object_creation = true,
+          csharp_enable_inlay_hints_for_implicit_variable_types = true,
+          csharp_enable_inlay_hints_for_lambda_parameter_types = true,
+          csharp_enable_inlay_hints_for_types = true,
+          dotnet_enable_inlay_hints_for_indexer_parameters = true,
+          dotnet_enable_inlay_hints_for_literal_parameters = true,
+          dotnet_enable_inlay_hints_for_object_creation_parameters = true,
+          dotnet_enable_inlay_hints_for_other_parameters = true,
+          dotnet_enable_inlay_hints_for_parameters = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
+        },
+        ["csharp|code_lens"] = {
+          dotnet_enable_references_code_lens = true,
+        },
+        choose_sln = function(sln)
+          return vim.iter(sln):find(function(item)
+            if string.match(item, "*.sln") then
+              return item
+            end
+          end)
+        end
+      },
+    }
+  },
+
   {
     'williamboman/mason.nvim',
     dependencies = {
@@ -80,34 +118,7 @@ return {
       }
     end
   },
-  {
-    "seblj/roslyn.nvim",
-    event = { "bufreadpre", "bufnewfile" },
-    ft = "cs",
-    opts = {
-      filewatching = false,
-      broad_search = true,
-      settings = {
-        ["csharp|inlay_hints"] = {
-          csharp_enable_inlay_hints_for_implicit_object_creation = true,
-          csharp_enable_inlay_hints_for_implicit_variable_types = true,
-          csharp_enable_inlay_hints_for_lambda_parameter_types = true,
-          csharp_enable_inlay_hints_for_types = true,
-          dotnet_enable_inlay_hints_for_indexer_parameters = true,
-          dotnet_enable_inlay_hints_for_literal_parameters = true,
-          dotnet_enable_inlay_hints_for_object_creation_parameters = true,
-          dotnet_enable_inlay_hints_for_other_parameters = true,
-          dotnet_enable_inlay_hints_for_parameters = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
-        },
-        ["csharp|code_lens"] = {
-          dotnet_enable_references_code_lens = true,
-        },
-      }
-    },
-  },
+
   {
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -134,6 +145,9 @@ return {
           map('<leader>lw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace Symbols')
           map('<leader>lr', lsp.buf.rename, '[R]ename')
           map('<leader>la', lsp.buf.code_action, 'Code [A]ction')
+          map( "<space>li", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = 0 }, { bufnr = 0 })
+          end, 'Enable [I]nlay hints')
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
@@ -164,8 +178,7 @@ return {
       })
 
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
-      -- lsp.inlay_hint.enable(true)
+      lsp.inlay_hint.enable(true)
     end,
   },
 }
--- vim: ts=2 sts=2 sw=2 et

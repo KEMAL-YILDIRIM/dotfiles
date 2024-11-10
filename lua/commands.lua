@@ -36,3 +36,13 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end,
 })
+
+P = function (v)
+  print(vim.inspect(v))
+  return v 
+end
+
+R = function (v)
+  require("plenary.reload").reload_module(v)
+  return require(v)
+end

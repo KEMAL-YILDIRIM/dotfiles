@@ -1,28 +1,38 @@
 return {
   --[[ {
-
-    -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-
-    'folke/tokyonight.nvim',
-    lazy = false,    -- make sure we load this during startup if it is your main colorscheme
-    priority = 1000, -- make sure to load this before all the other start plugins
-    config = function()
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-
-
-      vim.cmd.colorscheme 'tokyonight-night'
-      vim.cmd.hi 'Comment gui=none'
-    end,
-
+    "folke/zen-mode.nvim",
+    dependencies = {
+      "folke/twilight.nvim",
+    },
+    opts = {
+      window = {
+        width = 1,
+      },
+      wezterm = {
+        enabled = true,
+      }
+    }
   }, ]]
   {
+    'onsails/lspkind.nvim', -- adds vscode-like pictograms
+    config = function()
+      local lspkind = require('lspkind')
+      lspkind.init()
+    end,
+  },
+  {
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      local lualine = require('lualine')
+      -- local  options = {theme = 'palenight'}
+      -- local  options = {theme = 'ayu_mirage'}
+      local options = { theme = 'nightfly' }
+      lualine.setup { options = options }
+    end,
+  },
+  {
+    -- show colors in badges
     'norcalli/nvim-colorizer.lua',
     config = function()
       require 'colorizer'.setup();
@@ -48,7 +58,7 @@ return {
             red = "#ea7183",
             maroon = "#ea838c",
             peach = "#f39967",
-            green = "#8d7c7c",
+            green = "#9d775e",
             teal = "#78cec1",
             sky = "#91d7e3",
             sapphire = "#68bae0",

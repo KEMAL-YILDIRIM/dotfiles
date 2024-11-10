@@ -80,30 +80,39 @@ return {
         --
         defaults = {
           path_display = filenameFirst,
+          layout_strategy = "horizontal",
+          layout_config = {
+            horizontal = {
+              height = 0.9,
+              preview_width = 0.7,
+              prompt_position = "bottom",
+              width = 0.9
+            },
+          },
           mappings = {
             i = {
               ['<c-enter>'] = 'to_fuzzy_refine',
 
-              ["<C-k>"] = actions.move_selection_previous,
-              ["<C-j>"] = actions.move_selection_next,
+              ["<c-k>"] = actions.move_selection_previous,
+              ["<c-j>"] = actions.move_selection_next,
 
               ["<M-k>"] = actions.preview_scrolling_up,
               ["<M-j>"] = actions.preview_scrolling_down,
               -- ["<M-h>"] = actions.preview_scrolling_left,
               -- ["<M-l>"] = actions.preview_scrolling_right,
 
-              ["<C-p>"] = actions.results_scrolling_up,
-              ["<C-n>"] = actions.results_scrolling_down,
-              -- ["<C-h>"] = actions.results_scrolling_left,
-              -- ["<C-l>"] = actions.results_scrolling_right,
+              ["<c-p>"] = actions.results_scrolling_up,
+              ["<c-n>"] = actions.results_scrolling_down,
+              -- ["<c-h>"] = actions.results_scrolling_left,
+              -- ["<c-l>"] = actions.results_scrolling_right,
             },
           },
         },
         pickers = {
           buffers = {
             mappings = {
-              i = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
-              n = { ["<C-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+              i = { ["<c-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+              n = { ["<c-d>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
             },
           },
         },
