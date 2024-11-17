@@ -104,10 +104,17 @@ return {
         completion = { completeopt = 'menu,menuone,noinsert' },
         formatting = {
           format = require('lspkind').cmp_format({
-            mode = "symbol",
-            maxwidth = 50,
-            ellipsis_char = '...',
-            symbol_map = { Codeium = "", }
+            symbol_map = { Codeium = "", },
+            mode = "symbol_text",
+            menu = {
+              nvim_lsp = "[LSP]",
+              buffer = "[Buffer]",
+              luasnip = "[Luasnip]",
+              path = "[Path]",
+              crates = "[Crates]",
+            },
+            maxwidth = 90,
+            ellipsis_char = "...",
           })
         },
         -- For an understanding of why these keymaps were
@@ -132,12 +139,12 @@ return {
           end, { 'i', 's' }) ]]
         },
         sources = {
-          {  name = 'codeium' },
-          {  name = 'nvim_lsp_signature_help' },
-          {  name = 'nvim_lsp' },
-          {  name = 'luasnip' },
-          {  name = 'buffer' },
-          {  name = 'path' },
+          { name = 'codeium' },
+          { name = 'nvim_lsp_signature_help' },
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' },
+          { name = 'buffer' },
+          { name = 'path' },
         },
       }
 

@@ -1,3 +1,4 @@
+local nvim_data_path = vim.fn.stdpath "data"
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 local servers = {
   lemminx = {},
@@ -5,6 +6,8 @@ local servers = {
   ts_ls = {},
   pyright = {},
   rust_analyzer = {},
+  -- roslyn = {},
+  -- rzls = {},
 
 
 
@@ -31,44 +34,7 @@ local servers = {
   },
 }
 
-
 return {
-
-  {
-    "seblj/roslyn.nvim",
-    event = { "bufreadpre", "bufnewfile" },
-    ft = "cs",
-    opts = {
-      filewatching = false,
-      broad_search = true,
-      settings = {
-        ["csharp|inlay_hints"] = {
-          csharp_enable_inlay_hints_for_implicit_object_creation = true,
-          csharp_enable_inlay_hints_for_implicit_variable_types = true,
-          csharp_enable_inlay_hints_for_lambda_parameter_types = true,
-          csharp_enable_inlay_hints_for_types = true,
-          dotnet_enable_inlay_hints_for_indexer_parameters = true,
-          dotnet_enable_inlay_hints_for_literal_parameters = true,
-          dotnet_enable_inlay_hints_for_object_creation_parameters = true,
-          dotnet_enable_inlay_hints_for_other_parameters = true,
-          dotnet_enable_inlay_hints_for_parameters = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-          dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
-        },
-        ["csharp|code_lens"] = {
-          dotnet_enable_references_code_lens = true,
-        },
-        choose_sln = function(sln)
-          return vim.iter(sln):find(function(item)
-            if string.match(item, "*.sln") then
-              return item
-            end
-          end)
-        end
-      },
-    }
-  },
 
   {
     'williamboman/mason.nvim',
@@ -85,6 +51,10 @@ return {
             package_uninstalled = "✗",
           },
         },
+        registries = {
+          'github:mason-org/mason-registry',
+          'github:crashdummyy/mason-registry',
+        },
         PATH = "prepend", -- "skip" seems to cause the spawning error
       })
 
@@ -99,6 +69,8 @@ return {
         'css-lsp',
         'html-lsp',
         "pyright",
+        "rzls",
+        "roslyn",
         "typescript-language-server",
         "tailwindcss-language-server",
       })
@@ -116,8 +88,11 @@ return {
           end,
         },
       }
-    end
+
+      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+    end,
   },
+
 
   {
     'neovim/nvim-lspconfig',
@@ -129,7 +104,7 @@ return {
       local api = vim.api
 
       api.nvim_create_autocmd('LspAttach', {
-        group = api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
+        group = api.nvim_create_augroup('aug-lsp-attach', { clear = true }),
         callback = function(event)
           local map = function(keys, func, desc)
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
@@ -145,7 +120,7 @@ return {
           map('<leader>lw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace Symbols')
           map('<leader>lr', lsp.buf.rename, '[R]ename')
           map('<leader>la', lsp.buf.code_action, 'Code [A]ction')
-          map( "<space>li", function()
+          map("<space>li", function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = 0 }, { bufnr = 0 })
           end, 'Enable [I]nlay hints')
 
@@ -176,9 +151,64 @@ return {
           end
         end,
       })
-
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
-      lsp.inlay_hint.enable(true)
     end,
   },
+
+
+  {
+    'jlcrochet/vim-razor',
+    ft = { 'cshtml', 'razor' },
+  },
+
+  {
+    -- "seblj/roslyn.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    dir = "D:/Razor/roslyn.nvim",
+    dev = true,
+    name = "roslyn",
+    ft = "cs",
+    opts = {
+      exe = {
+        "dotnet",
+        nvim_data_path .. "/mason/packages/roslyn/libexec/Microsoft.CodeAnalysis.LanguageServer.dll",
+      },
+      filewatching = false,
+      broad_search = true,
+      settings = {
+        ["csharp|inlay_hints"] = {
+          csharp_enable_inlay_hints_for_implicit_object_creation = true,
+          csharp_enable_inlay_hints_for_implicit_variable_types = true,
+          csharp_enable_inlay_hints_for_lambda_parameter_types = true,
+          csharp_enable_inlay_hints_for_types = true,
+          dotnet_enable_inlay_hints_for_indexer_parameters = true,
+          dotnet_enable_inlay_hints_for_literal_parameters = true,
+          dotnet_enable_inlay_hints_for_object_creation_parameters = true,
+          dotnet_enable_inlay_hints_for_other_parameters = true,
+          dotnet_enable_inlay_hints_for_parameters = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
+          dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
+        },
+        ["csharp|code_lens"] = {
+          dotnet_enable_references_code_lens = true,
+        },
+        choose_sln = function(sln)
+          return vim.iter(sln):find(function(item)
+            if string.match(item, "*.sln") then
+              return item
+            end
+          end)
+        end
+      },
+    },
+  },
+
+  {
+    -- event = "VeryLazy",
+    dir = "D:/Razor/rzls.nvim",
+    name = 'rzls',
+    dev = true,
+  }
+
+
 }
