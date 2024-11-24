@@ -12,6 +12,18 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+vim.api.nvim_create_user_command('FileInfo', function()
+  local current_file = vim.fn.expand('%:p')
+  local stat = vim.loop.fs_stat(current_file)
+  if stat then
+    -- print(vim.inspect(stat))
+    local creation_time = os.date('%Y-%m-%d %H:%M:%S', stat.birthtime.sec)
+    print(stat.type .. " / " .. creation_time .. " / " .. stat.size)
+  else
+    print("Could not get file information")
+  end
+end, { desc = "Get file info" })
+
 vim.api.nvim_create_user_command('ResetHistory',
   function()
     local old_undolevels = vim.opt_local.undolevels
@@ -19,6 +31,15 @@ vim.api.nvim_create_user_command('ResetHistory',
     vim.cmd(vim.api.nvim_replace_termcodes('normal! a <BS><Esc>', true, true, true))
     vim.opt_local.undolevels = old_undolevels
   end, { desc = "Set history level to -1" })
+
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+  pattern = "*.cs",
+  callback = function()
+    if vim.lsp.codelens then
+      vim.lsp.codelens.refresh({ bufnr = 0 })
+    end
+  end
+})
 
 vim.opt.rtp:append("D:/Razor/nvim.razorls")
 vim.api.nvim_create_user_command("Test", function()
@@ -37,12 +58,12 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
-P = function (v)
+P = function(v)
   print(vim.inspect(v))
-  return v 
+  return v
 end
 
-R = function (v)
+R = function(v)
   require("plenary.reload").reload_module(v)
   return require(v)
 end

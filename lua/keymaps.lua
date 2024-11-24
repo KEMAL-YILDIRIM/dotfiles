@@ -47,8 +47,6 @@ map.set("n", "<c-s>o", "<cmd>:w<cr><cmd>:so<cr>", { noremap = true, desc = "[S]a
 map.set("n", "<c-s>q", "<cmd>:wq<cr>", { noremap = true, desc = "[S]ave and [Q]uit" })
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
--- planary test
-map.set("n", "<leader>u", "<Plug>PlenaryTestFile", { noremap = false, silent = false, desc = "[U]nit Test" })
 
 -- tabs
 local function tab_actions()
@@ -80,6 +78,6 @@ map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[T]ab open last used
 map.set("n", "<leader>t", "<nop>", { desc = "[T]ab" })
 
 -- buffers
-map.set("n", "<leader>b", "<NOP>", { desc = "[B]uffer" })
+map.set("n", "<leader>b", "<NOP>", { desc = "Buffer" })
 map.set("n", "<leader>bo", ":%bd|e#", { desc = "[B]uffer close all but [O]ne" })
 map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "[B]uffer [S]et path to current " })

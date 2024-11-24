@@ -55,7 +55,7 @@ return {
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
 
-      vim.keymap.set("n", "<leader>e", ":lua MiniFiles.open()<CR>", { desc = "File [E]xplorer" })
+      vim.keymap.set("n", "<leader>e", ":lua MiniFiles.open()<CR>", { desc = "Files" })
     end,
   },
 }

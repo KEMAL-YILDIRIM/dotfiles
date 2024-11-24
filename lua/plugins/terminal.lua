@@ -24,7 +24,7 @@ return {
 		-- event = "VeryLazy",
 		cmd = "ToggleTerm",
 		keys = {
-			{ '<C-\\>', '<cmd>:3ToggleTerm direction=vertical size=100<CR>', mode = { 'n', 't' } },
+			{ '<C-\\>', '<cmd>:3ToggleTerm direction=vertical size=60<CR>', mode = { 'n', 't' } },
 		},
 		version = "*",
 		config = function()
