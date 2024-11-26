@@ -32,15 +32,6 @@ vim.api.nvim_create_user_command('ResetHistory',
     vim.opt_local.undolevels = old_undolevels
   end, { desc = "Set history level to -1" })
 
-vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-  pattern = "*.cs",
-  callback = function()
-    if vim.lsp.codelens then
-      vim.lsp.codelens.refresh({ bufnr = 0 })
-    end
-  end
-})
-
 vim.opt.rtp:append("D:/Razor/nvim.razorls")
 vim.api.nvim_create_user_command("Test", function()
   package.loaded.razorls = nil
@@ -57,6 +48,16 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end,
 })
+
+-- vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+--   pattern = "*.cs",
+--   desc = 'Refresh codelens hints',
+--   callback = function()
+--     if vim.lsp and vim.lsp.codelens then
+--       vim.lsp.codelens.refresh({ bufnr = 0 })
+--     end
+--   end
+-- })
 
 P = function(v)
   print(vim.inspect(v))

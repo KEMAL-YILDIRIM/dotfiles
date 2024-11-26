@@ -14,9 +14,9 @@ local function lsp_attach(event)
   map('<leader>lw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace Symbols')
   map('<leader>lr', lsp.buf.rename, '[R]ename')
   map('<leader>la', lsp.buf.code_action, 'Code [A]ction')
-  map("<space>li", function()
+  map("<space>lh", function()
     vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = 0 }, { bufnr = 0 })
-  end, 'Enable [I]nlay hints')
+  end, 'Enable Inlay [H]ints')
 
   -- Opens a popup that displays documentation about the word under your cursor
   --  See `:help K` for why this keymap

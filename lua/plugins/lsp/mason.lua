@@ -1,33 +1,3 @@
-local servers = {
-  lemminx = {},
-  stylua = {},
-  ts_ls = {},
-  pyright = {},
-  rust_analyzer = {},
-
-  lua_ls = {
-    settings = {
-      Lua = {
-        runtime = { version = 'LuaJIT' },
-        workspace = {
-          checkThirdParty = false,
-          library = {
-            '${3rd}/luv/library',
-            unpack(vim.api.nvim_get_runtime_file('', true)),
-          },
-        },
-        completion = {
-          callSnippet = 'Replace',
-        },
-        diagnostics = {
-          globals = { "vim" },
-          disable = { 'missing-fields' }
-        },
-      },
-    },
-  },
-}
-
 return
 {
   'williamboman/mason.nvim',
@@ -53,7 +23,8 @@ return
 
     -- You can add other tools here that you want Mason to install
     -- for you, so that they are available from within Neovim.
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    local servers = require "plugins.lsp.servers"
+    local capabilities = require "plugins.lsp.capabilities"
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'jsonls',
@@ -80,6 +51,6 @@ return
       },
     }
 
-    capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+
   end,
 }
