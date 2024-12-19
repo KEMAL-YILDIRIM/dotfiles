@@ -1,6 +1,12 @@
+-- Color scheme
+vim.opt.termguicolors = true
+vim.opt.background = "dark"
+vim.opt.signcolumn = "yes"
+
 return {
-  --[[ {
+  {
     "folke/zen-mode.nvim",
+    enabled = false,
     dependencies = {
       "folke/twilight.nvim",
     },
@@ -12,7 +18,40 @@ return {
         enabled = true,
       }
     }
-  }, ]]
+  },
+  {
+    "HiPhish/rainbow-delimiters.nvim",
+    config = function()
+      -- This module contains a number of default definitions
+      local rainbow_delimiters = require 'rainbow-delimiters'
+
+      ---@type rainbow_delimiters.config
+      vim.g.rainbow_delimiters = {
+        strategy = {
+          [''] = rainbow_delimiters.strategy['global'],
+          commonlisp = rainbow_delimiters.strategy['local'],
+        },
+        query = {
+          [''] = 'rainbow-delimiters',
+          lua = 'rainbow-blocks',
+        },
+        priority = {
+          [''] = 110,
+          lua = 210,
+        },
+        highlight = {
+          'RainbowDelimiterRed',
+          'RainbowDelimiterYellow',
+          'RainbowDelimiterBlue',
+          'RainbowDelimiterOrange',
+          'RainbowDelimiterGreen',
+          'RainbowDelimiterViolet',
+          'RainbowDelimiterCyan',
+        },
+        blacklist = { 'c', 'cpp' },
+      }
+    end
+  },
   {
     'onsails/lspkind.nvim', -- adds vscode-like pictograms
     config = function()
@@ -33,9 +72,17 @@ return {
   },
   {
     -- show colors in badges
-    'norcalli/nvim-colorizer.lua',
+    "catgoose/nvim-colorizer.lua",
+    event = "BufReadPre",
     config = function()
-      require 'colorizer'.setup();
+      require('colorizer').setup({
+        filetypes = {
+          "*",
+          css = { names = true },
+          html = { names = true }
+        },
+        user_default_options = { css = true, css_fn = true, mode = 'foreground', names = false }
+      })
     end
   },
   {

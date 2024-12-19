@@ -16,12 +16,6 @@ vim.opt.foldlevel = 99
 vim.opt.foldlevelstart = 99
 vim.opt.foldenable = true
 
--- tab settings
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 0
-vim.opt.shiftwidth = 0
-vim.opt.expandtab = false
-
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -36,6 +30,7 @@ vim.opt.clipboard = 'unnamedplus'
 -- Enable break indent
 vim.opt.breakindent = true
 vim.opt.autoindent = true
+vim.opt.wrap = true
 
 -- Save undo history
 vim.opt.undofile = true
@@ -77,11 +72,6 @@ vim.opt.scrolloff = 10
 
 -- Debug render requirement
 vim.opt.conceallevel = 1
-
--- Color scheme
-vim.opt.termguicolors = true
-vim.opt.background = "dark"
-vim.opt.signcolumn = "yes"
 
 -- File list style into tree mode
 vim.cmd("let g:netrw_liststyle = 3")

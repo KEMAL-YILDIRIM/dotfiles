@@ -3,7 +3,7 @@ return {
     'L3MON4D3/LuaSnip',
     version = "v2.3.0",
     dependencies = { 'molleweide/LuaSnip-snippets.nvim' },
-    build = 'make install_jsregexp',
+    build = 'make install_jsregexp CC=gcc.exe SHELL=C:/path/to/sh.exe .SHELLFLAGS=-c',
     config = function()
       local ls = require("luasnip")
       vim.snippet.expand = ls.lsp_expand

@@ -7,7 +7,7 @@ local function lsp_attach(event)
   vim.keymap.set('n', '<leader>l', '<NOP>', { desc = 'LSP' })
   --  To jump back, press <C-T>.
   map('<leader>ld', require('telescope.builtin').lsp_definitions, 'Goto [D]efinition')
-  map('<leader>lf', require('telescope.builtin').lsp_references, 'Goto Re[F]erences')
+  map('<leader>lf', require('telescope.builtin').lsp_references, 'Goto re[F]erences')
   map('<leader>li', require('telescope.builtin').lsp_implementations, 'Goto [I]mplementation')
   map('<leader>lt', require('telescope.builtin').lsp_type_definitions, '[T]ype Definition')
   map('<leader>ls', require('telescope.builtin').lsp_document_symbols, 'Document [S]ymbols')
@@ -17,6 +17,9 @@ local function lsp_attach(event)
   map("<space>lh", function()
     vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = 0 }, { bufnr = 0 })
   end, 'Enable Inlay [H]ints')
+  map("<space>ll", function()
+    vim.lsp.codelens.refresh({ bufnr = 0 })
+  end, 'Refresh Code [L]ens')
 
   -- Opens a popup that displays documentation about the word under your cursor
   --  See `:help K` for why this keymap

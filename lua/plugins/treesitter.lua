@@ -1,17 +1,12 @@
 return {
-  { -- Highlight, edit, and navigate code
+  {
+    -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     --[[ dependencies = {
       'tree-sitter/tree-sitter-razor'
     }, ]]
     build = ':TSUpdate',
     config = function()
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-
-
-
-
-
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
         ensure_installed = {
@@ -21,16 +16,18 @@ return {
         },
         -- Autoinstall languages that are not installed
         auto_install = true,
-        highlight = { enable = true },
+        highlight = {
+          enable = true,
+          disable = function(lang, buf)
+            local max_filesize = 200 * 1024 -- 200 KB
+            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            if ok and stats and stats.size > max_filesize then
+              return true
+            end
+          end,
+        },
         indent = { enable = true },
       }
-
-
-      --[[ vim.api.nvim_create_autocmd("BufWinEnter", {
-        pattern = "*.{razor,cshtml}",
-        command = "set filetype=html.cshtml.razor",
-      }) ]]
-
 
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:

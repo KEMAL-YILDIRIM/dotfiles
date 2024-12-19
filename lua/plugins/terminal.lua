@@ -1,31 +1,85 @@
+local state = {
+	terminal = {
+		buf = -1,
+		win = -1,
+		job_id = -1
+	}
+}
+
+
+
+local function create_terminal(opts)
+	opts = opts or {}
+	local buf = nil
+	if vim.api.nvim_buf_is_valid(opts.buf) then
+		buf = opts.buf
+	else
+		buf = vim.api.nvim_create_buf(false, true) -- No file, scratch buffer
+	end
+
+	local win_config = {
+		height = 20,
+		split = "below"
+	}
+
+	state.terminal.job_id = vim.bo.channel;
+	local win = vim.api.nvim_open_win(buf, true, win_config)
+	return { buf = buf, win = win }
+end
+
+local toggle_terminal = function()
+	if not vim.api.nvim_win_is_valid(state.terminal.win) then
+		state.terminal = create_terminal({ buf = state.terminal.buf })
+		if vim.bo[state.terminal.buf].buftype ~= "terminal" then
+			vim.cmd.terminal()
+		end
+	else
+		vim.api.nvim_win_hide(state.terminal.win)
+	end
+end
+
+vim.api.nvim_create_autocmd('TermOpen', {
+	group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
+	callback = function()
+		vim.opt.number = false
+		vim.opt.relativenumber = false
+	end,
+})
+
+vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = "[T]erminal [T]oggle" })
+vim.keymap.set('t', '<leader>t/', '<c-\\><c-n><>')
+
+vim.keymap.set('n', '<leader>ts', function()
+	-- make
+	-- dotnet run cwd
+	vim.fn.chansend(job_id, { '\r\n' })
+end, { desc = "[T]erminal [S]end command" })
+
+
 return {
 	{
-		--[[
+
 		'aserowy/tmux.nvim',
-
+		enabled = false,
 		config = function()
-
 			local tmux = require('tmux')
 			tmux.setup()
 
-			vim.keymap.set('n', "<leader-th>", tmux.NvimTmuxNavigateLeft)
-			vim.keymap.set('n', "<leader-tj>", tmux.NvimTmuxNavigateDown)
-			vim.keymap.set('n', "<leader-tk>", tmux.NvimTmuxNavigateUp)
-			vim.keymap.set('n', "<leader-tl>", tmux.NvimTmuxNavigateRight)
-			vim.keymap.set('n', "<leader-t.>", tmux.NvimTmuxNavigateLastActive)
-			vim.keymap.set('n', "<leader-tn>", tmux.NvimTmuxNavigateNext)
-			vim.keymap.set("n", "<leader-tt>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
+			vim.keymap.set('n', "<leader>th", tmux.NvimTmuxNavigateLeft)
+			vim.keymap.set('n', "<leader>tj", tmux.NvimTmuxNavigateDown)
+			vim.keymap.set('n', "<leader>tk", tmux.NvimTmuxNavigateUp)
+			vim.keymap.set('n', "<leader>tl", tmux.NvimTmuxNavigateRight)
+			vim.keymap.set('n', "<leader>tp", tmux.NvimTmuxNavigateLastActive)
+			vim.keymap.set('n', "<leader>tn", tmux.NvimTmuxNavigateNext)
+			vim.keymap.set("n", "<leader>to", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
+		end,
 
-		 end,
-		]]
 	},
 	{
 		'akinsho/toggleterm.nvim',
-		-- event = "VeryLazy",
+		enabled = false,
+		event = "VeryLazy",
 		cmd = "ToggleTerm",
-		keys = {
-			{ '<C-\\>', '<cmd>:3ToggleTerm direction=vertical size=80<CR>', mode = { 'n', 't' } },
-		},
 		version = "*",
 		config = function()
 			require('toggleterm').setup({
@@ -41,8 +95,8 @@ return {
 				close_on_exit = true,
 			})
 
-			-- vim.keymap.set({ 'n', 't' }, '<c-z>', '<cmd>:3ToggleTerm direction=vertical size=100<CR>',
-			-- 	{ desc = "Open terminal in split" })
+			vim.keymap.set({ 'n', 't' }, '<c-\\>', '<cmd>:3ToggleTerm direction=vertical size=100<CR>',
+				{ desc = "[T]erminal [T]oggle" })
 		end
 	}
 }

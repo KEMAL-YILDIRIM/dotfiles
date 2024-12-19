@@ -20,8 +20,8 @@ return {
 
                     vim.keymap.set('n', '<leader>dx', "<cmd>Trouble diagnostics toggle<cr>",
                         { desc = "Open/close trouble list" })
-                    vim.keymap.set('n', '<leader>dw', "<cmd>Trouble symbols toggle focus=false<cr>",
-                        { desc = "Open trouble [W]orkspace diagnostics" })
+                    vim.keymap.set('n', '<leader>ds', "<cmd>Trouble symbols toggle focus=false<cr>",
+                        { desc = "Open trouble Document [S]ymbols" })
                     vim.keymap.set('n', '<leader>dd', "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
                         { desc = "Open trouble [D]ocument diagnostics" })
                     vim.keymap.set('n', '<leader>dq', "<cmd>Trouble qflist toggle<cr>",

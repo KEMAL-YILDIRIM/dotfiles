@@ -47,6 +47,25 @@ map.set("n", "<c-s>o", "<cmd>:w<cr><cmd>:so<cr>", { noremap = true, desc = "[S]a
 map.set("n", "<c-s>q", "<cmd>:wq<cr>", { noremap = true, desc = "[S]ave and [Q]uit" })
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
+-- quickfix
+map.set("n", "<leader>qn", "<cmd>:cn<cr>", { noremap = true, desc = "[Q]uickfix [N]ext" })
+map.set("n", "<leader>qp", "<cmd>:cp<cr>", { noremap = true, desc = "[Q]uickfix [P]revious" })
+map.set("n", "<leader>qt", function()
+  local qf_exists = false
+  for _, win in pairs(vim.fn.getwininfo()) do
+    if win["quickfix"] == 1 then
+      qf_exists = true
+    end
+  end
+  if qf_exists == true then
+    vim.cmd "cclose"
+    return
+  end
+  if not vim.tbl_isempty(vim.fn.getqflist()) then
+    vim.cmd "copen"
+  end
+end, { noremap = true, desc = "[Q]uickfix [T]oggle" })
+
 
 -- tabs
 local function tab_actions()
@@ -55,7 +74,7 @@ local function tab_actions()
   print("Entered tab mode " .. ns_id)
   vim.on_key(function(_, key)
     if key == "n" then vim.cmd("tabnew") end
-    if key == "c" then vim.cmd("tabc") end
+    if key == "q" then vim.cmd("tabc") end
     if key == "a" then vim.cmd("tabo") end
     if key == "l" then vim.cmd("tabn") end
     if key == "h" then vim.cmd("tabp") end
@@ -67,15 +86,15 @@ local function tab_actions()
   end, ns_id)
 end
 
-map.set("n", "<leader>tm", tab_actions, { desc = "[T]ab [M]ode" })
-map.set("n", "<leader>tn", "<cmd>tabnew<cr>", { desc = "[T]ab open [N]ew" })         -- open new tab
-map.set("n", "<leader>tc", "<cmd>tabc<cr>", { desc = "[T]ab close [C]urrent" })      -- close current tab
-map.set("n", "<leader>ta", "<cmd>tabo<cr>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
-map.set("n", "<leader>tl", "<cmd>tabn<cr>", { desc = "[T]ab Next" })                 --  go to next tab
-map.set("n", "<leader>th", "<cmd>tabp<cr>", { desc = "[T]ab Previous" })             --  go to previous tab
-map.set("n", "<leader>td", "<cmd>tabnew %<CR>", { desc = "[T]ab [d]uplicate current buffer in new tab" })
-map.set("n", "<leader>tt", "<cmd>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
-map.set("n", "<leader>t", "<nop>", { desc = "[T]ab" })
+map.set("n", "tm", tab_actions, { desc = "[T]ab [M]ode" })
+map.set("n", "tn", "<cmd>tabnew<cr>", { desc = "[T]ab open [N]ew" })         -- open new tab
+map.set("n", "tc", "<cmd>tabc<cr>", { desc = "[T]ab close [C]urrent" })      -- close current tab
+map.set("n", "ta", "<cmd>tabo<cr>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
+map.set("n", "tl", "<cmd>tabn<cr>", { desc = "[T]ab Next" })                 --  go to next tab
+map.set("n", "th", "<cmd>tabp<cr>", { desc = "[T]ab Previous" })             --  go to previous tab
+map.set("n", "td", "<cmd>tabnew %<CR>", { desc = "[T]ab [d]uplicate current buffer in new tab" })
+map.set("n", "tt", "<cmd>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
+map.set("n", "t", "<nop>", { desc = "[T]ab" })
 
 -- buffers
 map.set("n", "<leader>b", "<NOP>", { desc = "Buffer" })
