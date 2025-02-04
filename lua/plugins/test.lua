@@ -1,18 +1,24 @@
 return {
 	{
+		'nvim-lua/plenary.nvim',
+		config = function()
+			-- planary test
+			vim.keymap.set("n", "<leader>up", "<Plug>PlenaryTestFile", { desc = "[P]lenary Test" })
+		end
+	},
+	{
 		"nvim-neotest/neotest",
-		lazy = true,
 		dependencies = {
 			"nvim-neotest/nvim-nio",
+			"nvim-lua/plenary.nvim",
 			"antoinemadec/FixCursorHold.nvim",
-			"nvim-neotest/neotest-plenary",
+			"nvim-treesitter/nvim-treesitter",
 			"Issafalcon/neotest-dotnet",
 		},
+		lazy = true,
 		config = function()
-			local ntest = require("neotest")
-			ntest.setup({
+			require("neotest").setup({
 				adapters = {
-					require("neotest-plenary"),
 					require("neotest-dotnet")({
 						dap = {
 							-- Extra arguments for nvim-dap configuration
@@ -37,11 +43,10 @@ return {
 						--       to locate all test projects in the solution more reliably (if a .sln file is present) then 'solution' is better.
 						discovery_root = "project" -- Default
 					})
-				},
+				}
 			})
 
 			-- planary test
-			vim.keymap.set("n", "<leader>up", "<Plug>PlenaryTestFile", { desc = "[P]lenary Test" })
 			vim.keymap.set("n", "<leader>ur", function() ntest.run.run() end, { desc = "[R]un Test" })
 			vim.keymap.set("n", "<leader>uf", function() ntest.run.run(vim.fn.exp("%")) end,
 				{ desc = "[R]un all tests on the [F]ile" })

@@ -1,16 +1,16 @@
 return {
-	{
+	{ -- code companion
 		"olimorris/codecompanion.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-treesitter/nvim-treesitter",
 		},
+		enabled = false,
 		config = function()
-
 			return true
 		end
 	},
-	{
+	{ -- codeium
 		"Exafunction/codeium.nvim",
 		enabled = false,
 		lazy = true,
@@ -21,16 +21,35 @@ return {
 		config = function()
 			require("codeium").setup({
 				enable_cmp_source = true,
+				virtual_text = {
+					manual = true,
+					key_bindings = {
+            -- Accept the current completion.
+            accept = "<C-y>",
+            -- Accept the next word.
+            accept_word = "<TAB>",
+            -- Accept the next line.
+            accept_line = false,
+            -- Clear the virtual text.
+            clear = "<C-c>",
+            -- Cycle to the next completion.
+            next = "<C-n>",
+            -- Cycle to the previous completion.
+            prev = "<C-p>",
+        }
+				}
 			})
-			vim.g.codeium_disable_bindings = 1
-			vim.keymap.set('i', '<c-y>', function() return vim.fn['codeium#Accept']() end, { expr = true, silent = true })
-			vim.keymap.set('i', '<c-n>', function() return vim.fn['codeium#Clear']() end, { expr = true, silent = true })
+			-- Codeium Chat
+			vim.api.nvim_create_user_command('Chat', function(opts)
+					vim.api.nvim_call_function("codeium#Chat", {})
+				end,
+				{})
 			require('codeium.virtual_text').set_statusbar_refresh(function()
 				require('lualine').refresh()
 			end)
 		end
 	},
-	{
+	{ -- gen.nvim
 		"David-Kunz/gen.nvim",
 		enabled = false,
 		opts = {
@@ -57,7 +76,7 @@ return {
 			debug = false        -- Prints errors and the command which is run.
 		}
 	},
-	{
+	{ -- cmp-ai
 		'tzachar/cmp-ai',
 		enabled = false,
 		dependencies = 'nvim-lua/plenary.nvim',

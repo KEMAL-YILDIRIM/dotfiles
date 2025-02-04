@@ -1,12 +1,12 @@
 -- Highlight todo, notes, etc in comments
 return {
-    {
+    { -- folke/todo-comments.nvim   TODO: comments see if it's working
         'folke/todo-comments.nvim',
         event = 'VimEnter',
         dependencies = { 'nvim-lua/plenary.nvim' },
         opts = { signs = false }
     },
-    {
+    { -- numToStr/Comment
         'numToStr/Comment.nvim',
         opts = {},
         config = function()

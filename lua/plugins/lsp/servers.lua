@@ -7,7 +7,7 @@ local servers = {
   rust_analyzer = {},
 
   lua_ls = {
-    settings = {
+    --[[ settings = {
       Lua = {
         runtime = { version = 'LuaJIT' },
         workspace = {
@@ -25,7 +25,7 @@ local servers = {
           disable = { 'missing-fields' }
         },
       },
-    },
+    }, ]]
   },
 }
 return servers

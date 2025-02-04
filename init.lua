@@ -2,6 +2,9 @@
 require 'options'
 
 -- [[ Basic Keymaps ]]
+require 'utils'
+
+-- [[ Basic Keymaps ]]
 require 'keymaps'
 
 -- [[ Configure and install plugins ]]

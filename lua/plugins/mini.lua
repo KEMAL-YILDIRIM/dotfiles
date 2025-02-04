@@ -1,14 +1,17 @@
+vim.keymap.set("n", "<leader>e", ":lua MiniFiles.open()<CR>", { desc = "Files" })
 return {
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
+    version = '*',
     config = function()
-      -- Better Around/Inside textobjects
-      --
+
+
       -- Examples:
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
+      require('mini.pairs').setup() -- use default config
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
       --
@@ -16,46 +19,44 @@ return {
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup({
-        -- Module mappings. Use `''` (empty string) to disable one.
         mappings = {
-          add = '<leader>[a',            -- Add surrounding in Normal and Visual modes
-          delete = '<leader>[d',         -- Delete surrounding
-          find = '<leader>[f',           -- Find surrounding (to the right)
-          find_left = '<leader>[F',      -- Find surrounding (to the left)
-          highlight = '<leader>[h',      -- Highlight surrounding
-          replace = '<leader>[r',        -- Replace surrounding
-          update_n_lines = '<leader>[u', -- Update `n_lines`
+          add = 'sa', -- Add surrounding in Normal and Visual modes
+          delete = 'sd', -- Delete surrounding
+          find = 'sf', -- Find surrounding (to the right)
+          find_left = 'sF', -- Find surrounding (to the left)
+          highlight = 'sh', -- Highlight surrounding
+          replace = 'sr', -- Replace surrounding
+          update_n_lines = 'sn', -- Update `n_lines`
 
-          suffix_last = '<leader>[l',    -- Suffix to search with "prev" method
-          suffix_next = '<leader>[n',    -- Suffix to search with "next" method
+          suffix_last = 'p', -- Suffix to search with "prev" method
+          suffix_next = 'n', -- Suffix to search with "next" method
         },
       })
 
-      --Edit buffer in the way representing file system action
-      --create new line like dir/file or dir/nested/.
-      --Press =; read confirmation dialog; confirm with y/<CR> or not confirm with n/<Esc>
+      -- Edit file system like editing a buffer
       require('mini.files').setup {
+        options = {
+          permanent_delete = false,
+        },
         mappings = {
-          close       = '<ESC>',
-          go_in       = 'l',
-          go_in_plus  = 'L',
-          go_out      = 'h',
-          go_out_plus = 'H',
-          mark_goto   = "'",
-          mark_set    = 'm',
-          reset       = '<BS>',
-          reveal_cwd  = '@',
+          close       = '<C-c>',
+          go_in       = '<C-l>',
+          go_in_plus  = '<C-l>',
+          go_out      = '<C-h>',
+          go_out_plus = '<C-h>',
+          mark_goto   = '<C-g>',
+          mark_set    = '<C-m>',
+          reset       = '<C-r>',
+          reveal_cwd  = '<C-p>',
           show_help   = 'g?',
-          synchronize = '=',
-          trim_left   = '<',
-          trim_right  = '>',
+          synchronize = '<C-y>',
+          trim_left   = '<C-b>',
+          trim_right  = '<C-n>',
         },
       }
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
-
-      vim.keymap.set("n", "<leader>e", ":lua MiniFiles.open()<CR>", { desc = "Files" })
     end,
   },
 }

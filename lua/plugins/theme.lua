@@ -1,10 +1,36 @@
--- Color scheme
+-- color scheme
 vim.opt.termguicolors = true
 vim.opt.background = "dark"
 vim.opt.signcolumn = "yes"
 
+-- tailwind colors can be found at https://tailscan.com/_nuxt/colors.*.js
+---Read the colors.json and gets the color palette
+---@param theme string
+---@return table
+local function get_colors(theme)
+  local cur_path = "~/AppData/Local/nvim/lua/colors.json"
+  local content = ReadFile(cur_path)
+  if content == nil then
+    return {}
+  end
+  local colors = vim.json.decode(content)
+  local formattedColors = {}
+  for key, color in pairs(colors[theme]) do
+    local item = {}
+    for _, subColor in pairs(color) do
+      if subColor ~= nil and subColor.value ~= nil and subColor.hex ~= nil then
+        table.insert(item, subColor.value, subColor.hex)
+      end
+    end
+    if key ~= nil then
+      formattedColors[key] = item
+    end
+  end
+  return formattedColors
+end
+
 return {
-  {
+  { -- zen mode
     "folke/zen-mode.nvim",
     enabled = false,
     dependencies = {
@@ -19,13 +45,13 @@ return {
       }
     }
   },
-  {
+  { -- rainbow delimiter
     "HiPhish/rainbow-delimiters.nvim",
+    enabled = false,
     config = function()
       -- This module contains a number of default definitions
       local rainbow_delimiters = require 'rainbow-delimiters'
 
-      ---@type rainbow_delimiters.config
       vim.g.rainbow_delimiters = {
         strategy = {
           [''] = rainbow_delimiters.strategy['global'],
@@ -52,14 +78,14 @@ return {
       }
     end
   },
-  {
-    'onsails/lspkind.nvim', -- adds vscode-like pictograms
+  { -- lspkind adds vscode-like pictograms
+    'onsails/lspkind.nvim',
     config = function()
       local lspkind = require('lspkind')
       lspkind.init()
     end,
   },
-  {
+  { -- lualine
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
@@ -70,8 +96,7 @@ return {
       lualine.setup { options = options }
     end,
   },
-  {
-    -- show colors in badges
+  { -- nvim-colorizer show colors in badges
     "catgoose/nvim-colorizer.lua",
     event = "BufReadPre",
     config = function()
@@ -85,41 +110,46 @@ return {
       })
     end
   },
-  {
+  { -- catppuccin
     'catppuccin/nvim',
     lazy = false,
     priority = 1000,
     config = function()
+      local colors = get_colors("custom")
       require('catppuccin').setup({
+        highlight = {
+          enable = true,
+          additional_vim_regex_highlighting = false
+        },
         color_overrides = {
           macchiato = {
-            mauve = "#229cc3",
-            blue = "#dcdcaa",
-            yellow = "#94ddcf",
-            overlay0 = "#646432",
-            text = "#9bdbfd",
+            mauve = colors.green[600],
+            blue = colors.yellow[500],
+            yellow = colors.green[500],
+            overlay0 = colors.green[900],
+            text = colors.blue[200],
 
-            rosewater = "#efc9c2",
-            flamingo = "#ebb2b2",
-            pink = "#c295b6",
-            red = "#ea7183",
-            maroon = "#ea838c",
-            peach = "#f39967",
-            green = "#9d775e",
-            teal = "#78cec1",
-            sky = "#91d7e3",
-            sapphire = "#68bae0",
-            lavender = "#a0a8f6",
-            subtext1 = "#a6b0d8",
-            subtext0 = "#959ec2",
-            overlay2 = "#848cad",
-            overlay1 = "#717997",
-            surface2 = "#505469",
-            surface1 = "#3e4255",
-            surface0 = "#2c2f40",
-            base = "#1a1c2a",
-            mantle = "#141620",
-            crust = "#0e0f16",
+            rosewater = colors.red[300],
+            flamingo = colors.pink[700],
+            pink = colors.pink[500],
+            red = colors.red[500],
+            maroon = colors.purple[500],
+            peach = colors.red[700],
+            green = colors.brown[500],
+            teal = colors.green[400],
+            sky = colors.blue[600],
+            sapphire = colors.blue[700],
+            lavender = colors.blue[500],
+            subtext1 = colors.grey[500],
+            subtext0 = colors.grey[550],
+            overlay2 = colors.grey[600],
+            overlay1 = colors.grey[700],
+            surface2 = colors.grey[800],
+            surface1 = colors.grey[900],
+            surface0 = colors.black[300],
+            base = colors.black[350],
+            mantle = colors.black[400],
+            crust = colors.black[500],
           }
         }
       })

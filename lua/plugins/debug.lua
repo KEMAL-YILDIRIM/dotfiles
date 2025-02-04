@@ -72,7 +72,7 @@ return {
 				package:install()
 			end
 
-			local path = string.gsub(package:get_install_path() .. "/netcoredbg/netcoredbg.exe","\\", "/")
+			local path = vim.fs.normalize(package:get_install_path() .. "/netcoredbg/netcoredbg.exe")
 
 			-- C# / .NET
 			dap.adapters.coreclr = {

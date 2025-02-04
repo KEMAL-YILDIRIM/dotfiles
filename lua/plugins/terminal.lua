@@ -7,7 +7,6 @@ local state = {
 }
 
 
-
 local function create_terminal(opts)
 	opts = opts or {}
 	local buf = nil
@@ -31,7 +30,7 @@ local toggle_terminal = function()
 	if not vim.api.nvim_win_is_valid(state.terminal.win) then
 		state.terminal = create_terminal({ buf = state.terminal.buf })
 		if vim.bo[state.terminal.buf].buftype ~= "terminal" then
-			vim.cmd.terminal()
+			vim.cmd(":terminal pwsh.exe --NoLogo")
 		end
 	else
 		vim.api.nvim_win_hide(state.terminal.win)
@@ -41,8 +40,10 @@ end
 vim.api.nvim_create_autocmd('TermOpen', {
 	group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
 	callback = function()
+		-- Shell settings
 		vim.opt.number = false
 		vim.opt.relativenumber = false
+		vim.cmd("startinsert")
 	end,
 })
 
@@ -57,7 +58,7 @@ end, { desc = "[T]erminal [S]end command" })
 
 
 return {
-	{
+	{ -- Tmux
 
 		'aserowy/tmux.nvim',
 		enabled = false,

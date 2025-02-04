@@ -143,7 +143,7 @@ end
 
 ls.add_snippets("cs", {
 
-    s("iface", fmt([[
+    s("interface_snip", fmt([[
 using System;
 
 namespace {}
@@ -159,7 +159,7 @@ namespace {}
         i(0)
     })),
 
-    s("class", fmt([[
+    s("class_snip", fmt([[
 using System;
 
 namespace {}

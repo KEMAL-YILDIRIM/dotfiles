@@ -11,7 +11,6 @@ return {
         { '<leader>s', 'nop', group = 'Search' },
         { '<leader>o', 'nop', group = 'Obsidian' },
         { '<leader>t', 'nop', group = 'Terminal' },
-        { '<leader>[', 'nop', group = 'Surround' },
         { '<leader>q', 'nop', group = 'Quickfix' },
         { '<leader>u', 'nop', group = 'Unit Test' },
         { '<leader>d', 'nop', group = 'Diagnostics' },

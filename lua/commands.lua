@@ -35,6 +35,12 @@ vim.api.nvim_create_user_command('ResetHistory',
 	end,
 	{ desc = "Set history level to -1" })
 
+vim.api.nvim_create_user_command('ReloadPlugin',
+	function()
+		package.loaded["roslyn"] = nil
+		require("roslyn")
+	end,
+	{ desc = "Reload the roslyn plugin we are testing, need to update this command if you testing another plugin" })
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*.txt",
@@ -62,12 +68,4 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	command = "set filetype=html.cshtml.razor",
 }) ]]
 
-P = function(v)
-	print(vim.inspect(v))
-	return v
-end
 
-R = function(v)
-	require("plenary.reload").reload_module(v)
-	return require(v)
-end

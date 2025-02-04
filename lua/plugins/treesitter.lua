@@ -1,18 +1,16 @@
 return {
-  {
-    -- Highlight, edit, and navigate code
+  { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    --[[ dependencies = {
-      'tree-sitter/tree-sitter-razor'
-    }, ]]
     build = ':TSUpdate',
     config = function()
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
         ensure_installed = {
-          'bash', 'c', 'html', 'css', 'lua', "markdown", "markdown_inline",
-          'vim', 'vimdoc', 'c_sharp', 'sql', 'json', 'regex', 'javascript',
-          'rust'
+          'bash', 'c', 'rust',
+          'html', 'css', "markdown", "markdown_inline",
+          'lua', 'vim', 'latex', 'vimdoc',
+          'sql',
+          'json', 'regex', 'javascript'
         },
         -- Autoinstall languages that are not installed
         auto_install = true,
@@ -29,6 +27,26 @@ return {
         indent = { enable = true },
       }
 
+      --[[ ---@class parser_config
+      local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+      parser_config.cshtml = {
+        install_info = {
+          url = "D:/Nvim/tree-sitter-cshtml",          -- local path or git repo
+          files = { "src/parser.c", "src/scanner.c" }, -- note that some parsers also require src/scanner.c or src/scanner.cc
+          -- optional entries:
+          -- branch = "main",                           -- default branch in case of git repo if different from master
+          generate_requires_npm = false,         -- if stand-alone parser without npm dependencies
+          requires_generate_from_grammar = true, -- if folder contains pre-generated src/parser.c
+        },
+        filetype = "cshtml",                     -- if filetype does not match the parser name
+        used_by = { "razor", "aspnetcorerazor" },
+
+        -- Experimental: Use multiple parsers
+        used_parsers = { "html", "c_sharp" },
+      }
+
+      vim.filetype.add({ extension = { cshtml = "cshtml" } })
+      vim.treesitter.language.register('cshtml', { 'cshtml', 'razor' }) ]]
       -- There are additional nvim-treesitter modules that you can use to interact
       -- with nvim-treesitter. You should go explore a few and see what interests you:
       --
