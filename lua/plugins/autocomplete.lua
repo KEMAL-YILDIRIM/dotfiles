@@ -34,8 +34,10 @@ return {
     'L3MON4D3/LuaSnip',
     version = "v2.*",
     enabled = true,
+    lazy = true,
     dependencies = { 'molleweide/LuaSnip-snippets.nvim' },
-    build = 'make install_jsregexp CC=gcc.exe SHELL=C:/path/to/sh.exe .SHELLFLAGS=-c',
+    -- build = 'make install_jsregexp CC=gcc.exe SHELL=C:/path/to/sh.exe .SHELLFLAGS=-c',
+    build = 'make install_jsregexp CC=gcc',
     config = function()
       local ls = require("luasnip")
       vim.snippet.expand = ls.lsp_expand
@@ -160,6 +162,7 @@ return {
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     enabled = true,
+    lazy = true,
     dependencies = {
 
       'hrsh7th/cmp-nvim-lsp',
@@ -187,7 +190,7 @@ return {
         preselect = cmp.PreselectMode.None,
         completion = {
           completeopt = 'menu,menuone,preview',
-          keyword_length = 3
+          keyword_length = 2
         },
         formatting = {
           fields = { "kind", "abbr", "menu" },

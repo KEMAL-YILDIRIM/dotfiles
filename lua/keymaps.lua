@@ -1,29 +1,36 @@
 -- [[ Basic Keymaps ]]
 --  See `:help map.set()`
 
-vim.g.mapleader = ' '
+vim.g.mapleader = " "
 local map = vim.keymap
 
 -- Set highlight on search, but clear on pressing CTRL + x in normal mode
 vim.opt.hlsearch = true
-map.set('n', '<C-c>', '<CMD>nohlsearch<CR>', { desc = 'Clear highlight search in normal mode' })
+map.set("n", "<C-c>", "<CMD>nohlsearch<CR>", { desc = "Clear highlight search in normal mode" })
 
 -- return to normal mode
-map.set('i', '<C-c>', '<esc><esc><esc>', { desc = 'Press ESC' })
+map.set("i", "<C-c>", "<esc><esc><esc>", { desc = "Press ESC" })
 
+-- jump to lsp document window
+map.set("i", "<C-l>", function()
+    vim.cmd.stopinsert()
+    vim.lsp.buf.signature_help()
+    vim.defer_fn(function() vim.cmd.wincmd("w") end, 100)
+    vim.keymap.set("n", "q", ":close<CR>", { buffer = true })
+end)
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-map.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-map.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-map.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-map.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+map.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
+map.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })
+map.set("n", "<C-j>", "<C-w><C-j>", { desc = "Move focus to the lower window" })
+map.set("n", "<C-k>", "<C-w><C-k>", { desc = "Move focus to the upper window" })
 
 -- indentation while stay in indent mode
-vim.keymap.set('v', '<', '<gv', { desc = 'Decrease the indent' })
-vim.keymap.set('v', '>', '>gv', { desc = 'Increase the indent' })
+vim.keymap.set("v", "<", "<gv", { desc = "Decrease the indent" })
+vim.keymap.set("v", ">", ">gv", { desc = "Increase the indent" })
 
 
 -- visual mode > move selected lines
@@ -42,23 +49,23 @@ map.set("x", "<leader>p", [["_dP]], { desc = "Preserve [P]aste buffer" })
 -- coppy to system clipboard so not loose it while navigate between files
 map.set({ "n", "v" }, "<leader>y", "<nop>", { desc = "Copy" })
 map.set({ "n", "v" }, "<leader>yy", [["+y]], { desc = "Copy text to system clipboard" })
-map.set({ "n", "v" }, "<leader>ya", 'ggVGy', { desc = "Copy all on page" })
+map.set({ "n", "v" }, "<leader>ya", "ggVGy", { desc = "Copy all on page" })
 map.set({ "n", "v" }, "<leader>yp", function()
 	local results = {
-		vim.fn.expand('%:p'),
-		vim.fn.expand('%:h'),
-		vim.fn.expand('%:t'),
-		vim.fn.expand('%:t:r'),
-		vim.fn.expand('%:e'),
+		vim.fn.expand("%:p"),
+		vim.fn.expand("%:h"),
+		vim.fn.expand("%:t"),
+		vim.fn.expand("%:t:r"),
+		vim.fn.expand("%:e"),
 	}
 
 	vim.ui.select({
-		'1. Absolute: ' .. results[1],
-		'2. Directory: ' .. results[2],
-		'3. Filename: ' .. results[3],
-		'4. Filename only: ' .. results[4],
-		'5. Extension: ' .. results[5],
-	}, { prompt = 'Choose to copy to clipboard:' }, function(choice)
+		"1. Absolute: " .. results[1],
+		"2. Directory: " .. results[2],
+		"3. Filename: " .. results[3],
+		"4. Filename only: " .. results[4],
+		"5. Extension: " .. results[5],
+	}, { prompt = "Choose to copy to clipboard:" }, function(choice)
 		local i = tonumber(string.sub(choice, 1, 1)) or 1
 		local result = results[i]
 		vim.fn.setreg('"', result)

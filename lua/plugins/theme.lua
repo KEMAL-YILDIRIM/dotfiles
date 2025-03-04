@@ -9,7 +9,7 @@ vim.opt.signcolumn = "yes"
 ---@return table
 local function get_colors(theme)
   local cur_path = "~/AppData/Local/nvim/lua/colors.json"
-  local content = ReadFile(cur_path)
+  local content = F.read_file(cur_path)
   if content == nil then
     return {}
   end
@@ -83,17 +83,6 @@ return {
     config = function()
       local lspkind = require('lspkind')
       lspkind.init()
-    end,
-  },
-  { -- lualine
-    'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-      local lualine = require('lualine')
-      -- local  options = {theme = 'palenight'}
-      -- local  options = {theme = 'ayu_mirage'}
-      local options = { theme = 'nightfly' }
-      lualine.setup { options = options }
     end,
   },
   { -- nvim-colorizer show colors in badges

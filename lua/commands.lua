@@ -35,12 +35,20 @@ vim.api.nvim_create_user_command('ResetHistory',
 	end,
 	{ desc = "Set history level to -1" })
 
-vim.api.nvim_create_user_command('ReloadPlugin',
+
+vim.api.nvim_create_user_command('ReloadRoslyn',
 	function()
 		package.loaded["roslyn"] = nil
 		require("roslyn")
 	end,
 	{ desc = "Reload the roslyn plugin we are testing, need to update this command if you testing another plugin" })
+
+
+vim.api.nvim_create_user_command("TestRazorls", function()
+	package.loaded.razorls = nil
+	require("razorls").test()
+end, { desc = "Lsp test" })
+
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*.txt",
@@ -54,18 +62,16 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 --[[ vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-  pattern = "*.cs",
-  desc = 'Refresh codelens hints',
-  callback = function()
-    if vim.lsp and vim.lsp.codelens then
-      vim.lsp.codelens.refresh({ bufnr = 0 })
-    end
-  end
+	pattern = "*.cs",
+	desc = 'Refresh codelens hints',
+	callback = function()
+		if vim.lsp and vim.lsp.codelens then
+			vim.lsp.codelens.refresh({ bufnr = 0 })
+		end
+	end
 }) ]]
 
 --[[ vim.api.nvim_create_autocmd("BufWinEnter", {
 	pattern = "*.{razor,cshtml}",
 	command = "set filetype=html.cshtml.razor",
 }) ]]
-
-

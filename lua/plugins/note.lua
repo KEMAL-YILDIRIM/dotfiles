@@ -31,6 +31,7 @@ return {
 				vim.keymap.set("n", "<leader>oq", "<cmd>ObsidianQuickSwitch<CR>", { desc = "Quick Switch" })
 			end
 
+			vim.o.conceallevel = 1
 			local options = {
 				workspaces = {
 					{
@@ -117,8 +118,8 @@ return {
 	},
 	{
 		"OXY2DEV/markview.nvim",
-		lazy = false, -- Recommended
-		-- ft = "markdown" -- If you decide to lazy-load anyway
+		lazy = true,   -- Recommended
+		ft = "markdown", -- If you decide to lazy-load anyway
 
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
