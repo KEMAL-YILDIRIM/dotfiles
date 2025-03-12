@@ -5,8 +5,7 @@ local servers = {
   ts_ls = {},
   pyright = {},
   rust_analyzer = {},
-
-  -- lua_ls = {
+  lua_ls = {
   --   settings = {
   --     Lua = {
   --       runtime = { version = 'LuaJIT' },
@@ -26,6 +25,6 @@ local servers = {
   --       },
   --     },
   --   },
-  -- },
+  },
 }
 return servers
