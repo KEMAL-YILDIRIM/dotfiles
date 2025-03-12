@@ -4,7 +4,7 @@ vim.keymap.set("n", "<leader>=-", "gg=G", { desc = "Format buffer with indentati
 -- tab settings
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 0
-vim.opt.shiftwidth = 2
+vim.opt.shiftwidth = 1
 vim.opt.expandtab = false
 
 -- Sets how neovim will display certain whitespace in the editor.
