@@ -53,7 +53,7 @@ vim.keymap.set('t', '<leader>t/', '<c-\\><c-n><>')
 vim.keymap.set('n', '<leader>ts', function()
 	-- make
 	-- dotnet run cwd
-	vim.fn.chansend(job_id, { '\r\n' })
+	vim.fn.chansend(state.terminal.job_id, { '\r\n' })
 end, { desc = "[T]erminal [S]end command" })
 
 
