@@ -92,7 +92,7 @@ return {
     -- setting the keybinding for LazyGit with 'keys' is recommended in
     -- order to load the plugin when the command is run for the first time
     keys = {
-      { "<leader>gg", "<cmd>LazyGit<cr>", desc = "[G]it Lazy[G]it" }
+      { "<leader>gg", "<CMD>LazyGit<CR>", desc = "[G]it Lazy[G]it" },
     }
   },
   { -- Neo git
