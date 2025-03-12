@@ -23,46 +23,50 @@ return {
 
 
 			-- https://github.com/mfussenegger/nvim-dap/wiki/Cookbook#making-debugging-net-easier
-			vim.g.dotnet_build_project = function()
-				local default_path = vim.fn.getcwd() .. "/"
-				if vim.g["dotnet_last_proj_path"] ~= nil then
-					default_path = vim.g["dotnet_last_proj_path"]
+			local build_project = function(csproj_path)
+				local cmd = "dotnet build -c Debug " .. csproj_path
+				local result = "Build: ❌"
+
+				local output = F.cmd(cmd)
+				if output ~= nil then
+					result = "Build: ✔️ "
 				end
-				local path = vim.fn.input("Path to your *proj file", default_path, "file")
-				vim.g["dotnet_last_proj_path"] = path
-				local cmd = "dotnet build -c Debug " .. path .. " > /dev/null"
-				print("")
-				print("Cmd to execute: " .. cmd)
-				local f = os.execute(cmd)
-				if f == 0 then
-					print("\nBuild: ✔️ ")
-				else
-					print("\nBuild: ❌ (code: " .. f .. ")")
-				end
+
+				vim.api.nvim_echo({
+					{ "\n" .. result,        "WarningMsg" },
+					{ "\nexecuted: " .. cmd, "MoreMsg" },
+				}, true, {})
 			end
 
-			vim.g.dotnet_get_dll_path = function()
-				local request = function()
-					return vim.fn.input("Path to dll", vim.fn.getcwd() .. "/bin/Debug/", "file")
-				end
+			local excluded_dirs = {
+				node_modules = "node_modules",
+				git = ".git",
+				dist = "dist",
+				wwwroot = "wwwroot",
+				properties = "properties",
+				build = "build",
+				bin = "bin",
+				debug = "debug",
+				obj = "obj",
+			}
 
-				if vim.g["dotnet_last_dll_path"] == nil then
-					vim.g["dotnet_last_dll_path"] = request()
-				else
-					if
-							vim.fn.confirm(
-								"Do you want to change the path to dll?\n" .. vim.g["dotnet_last_dll_path"],
-								"&yes\n&no",
-								2
-							) == 1
-					then
-						vim.g["dotnet_last_dll_path"] = request()
+			local is_excluded = function(name)
+				for _, pattern in pairs(excluded_dirs) do
+					if string.match(name:lower(), pattern) then
+						return true
 					end
 				end
-
-				return vim.g["dotnet_last_dll_path"]
+				return false
 			end
 
+			local function find_proj_file()
+				local proj_path = vim.fs.root(0, function(name, path)
+					return name:match('%.csproj$') ~= nil and not is_excluded(path)
+				end)
+
+				vim.api.nvim_echo({ { "Project file found: " .. proj_path, "WarningMsg" } }, true, {})
+				return proj_path
+			end
 
 			require("mason").setup()
 			local mason_registry = require('mason-registry')
@@ -72,14 +76,13 @@ return {
 				package:install()
 			end
 
-			local path = vim.fs.normalize(package:get_install_path() .. "/netcoredbg/netcoredbg.exe")
 
 			-- C# / .NET
 			dap.adapters.coreclr = {
 				type = "executable",
 				-- command = '/usr/local/netcoredbg',
 				-- command = "netcoredbg",
-				command = path,
+				command = vim.fs.normalize(package:get_install_path() .. "/netcoredbg/netcoredbg.exe"),
 				args = { "--interpreter=vscode" },
 			}
 
@@ -89,18 +92,31 @@ return {
 					name = "launch .NET",
 					request = "launch",
 					program = function()
-						local project_path = vim.fs.root(0, function(name)
-							return name:match("%.csproj$") ~= nil
-						end)
-
+						local project_path = find_proj_file()
 						if not project_path then
 							return vim.notify("Couldn't find the csproj path")
 						end
 
-						return daputils.pick_file({
-							filter = string.format("Debug/.*/%s", vim.fn.fnamemodify(project_path, ":t:r")),
-							path = string.format("%s/bin", project_path),
+						build_project(project_path)
+						local filter = string.format("Debug/.*/%s", vim.fn.fnamemodify(project_path, ":t"))
+						local bin_path = string.format("%s/bin", project_path)
+						local selected = require("dap.utils").pick_file({
+							filter      = filter,
+							executables = false,
+							path        = bin_path,
 						})
+
+						local info = {
+							{ "\nfilter: " .. filter, "MoreMsg" },
+							{ "\npath: " .. bin_path, "MoreMsg" }
+						}
+						if selected ~= nil then
+							table.insert(info, 1, { "\nselected: " .. selected, "WarningMsg" })
+							vim.fn.chdir(vim.fn.fnamemodify(selected, ":h")) -- important for setting debug path
+						end
+						vim.api.nvim_echo(info, true, {})
+
+						return selected
 					end,
 				},
 				{
@@ -134,15 +150,15 @@ return {
 
 						local res = vim.system({ "dotnet", "sln", vim.g.roslyn_nvim_selected_solution, "list" }):wait()
 						local csproj_files = vim.iter(vim.split(res.stdout, "\n"))
-								:map(function(it)
-									local fullpath = vim.fs.normalize(vim.fs.joinpath(solution_dir, it))
-									if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
-										return fullpath
-									else
-										return nil
-									end
-								end)
-								:totable()
+										:map(function(it)
+											local fullpath = vim.fs.normalize(vim.fs.joinpath(solution_dir, it))
+											if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
+												return fullpath
+											else
+												return nil
+											end
+										end)
+										:totable()
 
 						return dap_utils.pick_process({
 							filter = function(proc)
@@ -178,17 +194,18 @@ return {
 			require('nvim-dap-virtual-text').setup()
 			-- dap ui setup for more information, see |:help nvim-dap-ui|
 			local dapui = require 'dapui'
-			dapui.setup {}
-			-- dap.set_log_level("DEBUG")
+			dapui.setup()
+			dap.set_log_level("DEBUG")
 
-			-- basic debugging keymaps, feel free to change to your liking!
 			vim.keymap.set('n', '<s-f5>', function()
-				-- if (vim.filetype.match({ filename = '*.lua' }))
-				-- then
-				require 'osv'.launch({ port = 8086 })
-				-- end
+				dap.terminate()
+			end, { desc = 'debug: terminate' })
+			vim.keymap.set('n', '<f5>', function()
+				if (vim.filetype.match({ buf = 0, filename = '%.lua' })) then
+					require 'osv'.launch({ port = 8086 })
+				end
+				dap.continue()
 			end, { desc = 'debug: start/continue' })
-			vim.keymap.set('n', '<f5>', dap.continue, { desc = 'debug: start/continue' })
 			vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
 			vim.keymap.set('n', '<f10>', dap.step_over, { desc = 'debug: step over' })
 			vim.keymap.set('n', '<s-f10>', dap.step_back, { desc = 'debug: step over' })

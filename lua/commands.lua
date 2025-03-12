@@ -36,12 +36,16 @@ vim.api.nvim_create_user_command('ResetHistory',
 	{ desc = "Set history level to -1" })
 
 
-vim.api.nvim_create_user_command('ReloadRoslyn',
-	function()
-		package.loaded["roslyn"] = nil
-		require("roslyn")
+vim.api.nvim_create_user_command('ReloadPackage',
+	function(opts)
+		local packageName = opts.args
+		package.loaded[packageName] = nil
+		require(packageName)
 	end,
-	{ desc = "Reload the roslyn plugin we are testing, need to update this command if you testing another plugin" })
+	{
+		nargs = "?",
+		desc = "Reload the plugin we are testing, need to update this command if you testing another plugin"
+	})
 
 
 vim.api.nvim_create_user_command("TestRazorls", function()
