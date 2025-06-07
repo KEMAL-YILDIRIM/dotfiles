@@ -1,6 +1,6 @@
 F = {}
 F.log = function(v)
-	print(vim.inspect(v))
+	vim.api.nvim_echo({ { vim.inspect(v), "WarningMsg" } }, true, {})
 	return v
 end
 
@@ -106,4 +106,54 @@ F.read_file = function(path)
 	end
 
 	return content
+end
+
+
+
+-- csharp helper section
+local excluded_dirs = {
+	node_modules = "node_modules",
+	git = ".git",
+	dist = "dist",
+	wwwroot = "wwwroot",
+	properties = "properties",
+	build = "build",
+	bin = "bin",
+	debug = "debug",
+	obj = "obj",
+}
+
+local is_excluded = function(name)
+	for _, pattern in pairs(excluded_dirs) do
+		if string.match(name:lower(), pattern) then
+			return true
+		end
+	end
+	return false
+end
+
+F.find_csproj_file = function(path)
+	local dirs = { path }
+
+	while #dirs > 0 do
+		local dir = table.remove(dirs, 1)
+		for other, fs_obj_type in vim.fs.dir(dir) do
+			local name = vim.fs.joinpath(dir, other)
+
+			if fs_obj_type == "file" then
+				if name:match("%.csproj$") then
+					F.log("Project file found: " .. name)
+					return name
+				end
+			elseif fs_obj_type == "directory" and not is_excluded(name) then
+				dirs[#dirs + 1] = name
+			end
+		end
+		if #dirs == 0 then
+			local parent = vim.fn.fnamemodify(dir, ':h')
+			if parent ~= '/' then
+				dirs[1] = parent
+			end
+		end
+	end
 end

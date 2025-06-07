@@ -1,6 +1,7 @@
 return {
 	{
 		'nvim-lua/plenary.nvim',
+		ft = 'lua',
 		config = function()
 			-- planary test
 			vim.keymap.set("n", "<leader>up", "<Plug>PlenaryTestFile", { desc = "[P]lenary Test" })
@@ -16,8 +17,10 @@ return {
 			"Issafalcon/neotest-dotnet",
 		},
 		lazy = true,
+		ft = "cs",
 		config = function()
-			require("neotest").setup({
+			local ntest = require("neotest")
+			ntest.setup({
 				adapters = {
 					require("neotest-dotnet")({
 						dap = {
@@ -45,10 +48,8 @@ return {
 					})
 				}
 			})
-
-			-- planary test
 			vim.keymap.set("n", "<leader>ur", function() ntest.run.run() end, { desc = "[R]un Test" })
-			vim.keymap.set("n", "<leader>uf", function() ntest.run.run(vim.fn.exp("%")) end,
+			vim.keymap.set("n", "<leader>uf", function() ntest.run.run(vim.fn.expand("%")) end,
 				{ desc = "[R]un all tests on the [F]ile" })
 			vim.keymap.set("n", "<leader>ud", function() ntest.run.run({ strategy = "dap" }) end,
 				{ desc = "[D]ebug Test" })

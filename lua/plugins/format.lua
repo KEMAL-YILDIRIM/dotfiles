@@ -2,16 +2,39 @@ vim.keymap.set("n", "<leader>==", vim.lsp.buf.format, { desc = "Format buffer wi
 vim.keymap.set("n", "<leader>=-", "gg=G", { desc = "Format buffer with indentation" })
 
 -- tab settings
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 0
-vim.opt.shiftwidth = 1
-vim.opt.expandtab = false
+vim.o.tabstop = 2
+vim.o.softtabstop = 0
+vim.o.shiftwidth = 2
+vim.o.expandtab = true
 
 -- Sets how neovim will display certain whitespace in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
-vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.o.list = true
+vim.o.listchars = "tab:» ,trail:·,nbsp:␣,extends:#"
+
+-- Enable break indent
+vim.o.breakindent = false
+vim.o.linebreak = true
+vim.o.autoindent = true
+vim.o.wrap = true
+-- vim.o.sidescroll=5
+-- vim.o.listchars = vim.o.listchars + "precedes:<,extends:>"
+
+
+vim.o.conceallevel = 0
+vim.api.nvim_create_autocmd("BufEnter", {
+	desc = "Rectify the conceal level when the md files displayed",
+	group = vim.api.nvim_create_augroup('conceal-setting', { clear = true }),
+	callback = function()
+		if
+			vim.bo.filetype == "markdown"
+			or package.loaded["nvim-dap"] ~= nil
+		then
+			vim.o.conceallevel = 1
+		end
+	end
+})
 
 return {
 	{

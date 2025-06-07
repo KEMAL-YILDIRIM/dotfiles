@@ -44,8 +44,7 @@ return {
 
       ---@diagnostic disable-next-line: duplicate-set-field
       vim.snippet.active = function(filter)
-        filter = filter or {}
-        filter.direction = filter.direction or 1
+        filter = filter or { direction = 1 }
 
         if filter.direction == 1 then
           return ls.expand_or_jumpable()
@@ -76,7 +75,7 @@ return {
         override_builtin = true,
       }
 
-      for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/custom/*.lua", true)) do
+      for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/snippets/*.lua", true)) do
         loadfile(ft_path)()
       end
 

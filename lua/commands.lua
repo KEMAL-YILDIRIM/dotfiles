@@ -3,15 +3,14 @@
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
+--  See `:help vim.hl.on_yank()`
 vim.api.nvim_create_autocmd('TextYankPost', {
 	desc = 'Highlight when yanking (copying) text',
 	group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
 	callback = function()
-		vim.highlight.on_yank()
+		vim.hl.on_yank()
 	end,
 })
-
 
 vim.api.nvim_create_user_command('FileInfo', function()
 	local current_file = vim.fn.expand('%:p')
@@ -25,7 +24,6 @@ vim.api.nvim_create_user_command('FileInfo', function()
 	end
 end, { desc = "Get file info" })
 
-
 vim.api.nvim_create_user_command('ResetHistory',
 	function()
 		local old_undolevels = vim.opt_local.undolevels
@@ -34,7 +32,6 @@ vim.api.nvim_create_user_command('ResetHistory',
 		vim.opt_local.undolevels = old_undolevels
 	end,
 	{ desc = "Set history level to -1" })
-
 
 vim.api.nvim_create_user_command('ReloadPackage',
 	function(opts)
@@ -47,12 +44,10 @@ vim.api.nvim_create_user_command('ReloadPackage',
 		desc = "Reload the plugin we are testing, need to update this command if you testing another plugin"
 	})
 
-
 vim.api.nvim_create_user_command("TestRazorls", function()
 	package.loaded.razorls = nil
 	require("razorls").test()
 end, { desc = "Lsp test" })
-
 
 vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*.txt",
@@ -64,18 +59,3 @@ vim.api.nvim_create_autocmd("BufEnter", {
 		end
 	end,
 })
-
---[[ vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-	pattern = "*.cs",
-	desc = 'Refresh codelens hints',
-	callback = function()
-		if vim.lsp and vim.lsp.codelens then
-			vim.lsp.codelens.refresh({ bufnr = 0 })
-		end
-	end
-}) ]]
-
---[[ vim.api.nvim_create_autocmd("BufWinEnter", {
-	pattern = "*.{razor,cshtml}",
-	command = "set filetype=html.cshtml.razor",
-}) ]]

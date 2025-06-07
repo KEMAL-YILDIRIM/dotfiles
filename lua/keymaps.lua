@@ -76,15 +76,16 @@ end, { desc = "Copy current buffer path to system clipboard" })
 
 -- save and quit
 map.set("n", "<C-s>", "<nop>", { desc = "[S]ave" })
-map.set("n", "<C-s>f", "<CMD>:w<CR>", { noremap = true, desc = "[S]ave [F]ile" })
-map.set("n", "<C-s>o", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
-map.set("n", "<C-s>q", "<CMD>:wq<CR>", { noremap = true, desc = "[S]ave and [Q]uit" })
+map.set("n", "<C-s>f", "<CMD>:w!<CR>", { noremap = true, desc = "[S]ave [F]ile" })
+map.set("n", "<C-s>a", "<CMD>:wa!<CR>", { noremap = true, desc = "[S]ave [A]ll buffers" })
+map.set("n", "<C-s>o", "<CMD>:w!<CR><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
+map.set("n", "<C-s>q", "<CMD>:wq!<CR>", { noremap = true, desc = "[S]ave and [Q]uit" })
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
 -- quickfix
 map.set("n", "<leader>qn", "<CMD>:cn<CR>", { noremap = true, desc = "[Q]uickfix [N]ext" })
 map.set("n", "<leader>qp", "<CMD>:cp<CR>", { noremap = true, desc = "[Q]uickfix [P]revious" })
-map.set("n", "<leader>qt", function()
+map.set("n", "<leader>qq", function()
 	local qf_exists = false
 	for _, win in pairs(vim.fn.getwininfo()) do
 		if win["quickfix"] == 1 then
@@ -98,7 +99,7 @@ map.set("n", "<leader>qt", function()
 	if not vim.tbl_isempty(vim.fn.getqflist()) then
 		vim.cmd "copen"
 	end
-end, { noremap = true, desc = "[Q]uickfix [T]oggle" })
+end, { noremap = true, desc = "[Q]uickfix Toggle" })
 
 
 -- tabs
@@ -126,7 +127,7 @@ map.set("n", "tc", "<CMD>tabc<CR>", { desc = "[T]ab close [C]urrent" })      -- 
 map.set("n", "ta", "<CMD>tabo<CR>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
 map.set("n", "tl", "<CMD>tabn<CR>", { desc = "[T]ab Next" })                 --  go to next tab
 map.set("n", "th", "<CMD>tabp<CR>", { desc = "[T]ab Previous" })             --  go to previous tab
-map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "[T]ab [d]uplicate current buffer in new tab" })
+map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "[T]ab [D]uplicate current buffer in new tab" })
 map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
 map.set("n", "t", "<nop>", { desc = "[T]ab" })
 

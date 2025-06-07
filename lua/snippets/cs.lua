@@ -1,31 +1,23 @@
 local ls = require("luasnip")
-local s = ls.snippet     -- creator
-local i = ls.insert_node --nodes
-local t = ls.text_node
-local f = ls.function_node
-local fmt = require("luasnip.extras.fmt").fmt
+local _snippet = ls.snippet   -- creator
+local _input = ls.insert_node --nodes
+local _text = ls.text_node
+local _func = ls.function_node
+local _format = require("luasnip.extras.fmt").fmt
+
+
 
 local function get_namespace()
-    -- Get the current buffer's file path
-    local file_path = vim.fn.expand("%:p")
-    -- Get the project root (assuming it contains .sln or .csproj file)
-    local project_root = vim.fn.fnamemodify(vim.fn.findfile(".sln", ".;"), ":h")
-    if project_root == "" then
-        project_root = vim.fn.fnamemodify(vim.fn.findfile(".csproj", ".;"), ":h")
-    end
+    local file_path    = vim.fn.expand("%:p:h")
+    local project_path = F.find_csproj_file(file_path)
 
-    -- Get relative path from project root to current file
-    local rel_path = file_path:sub(#project_root + 2)
-    -- Remove the filename
-    local dir_path = vim.fn.fnamemodify(rel_path, ":h")
-    -- Convert directory separators to dots and remove any special characters
-    local namespace = dir_path:gsub("[/\\]", "."):gsub("[^%w.]", "")
+    local project_root = vim.uv.fs_realpath(project_path .. "/../..") or "/"
+    local rel_path     = vim.fs.relpath(project_root, file_path) or "/"
+    local namespace    = string.gsub(vim.fs.normalize(rel_path), '/', '.')
 
     -- If we're in the root, use the project name
     if namespace == "" then
         namespace = vim.fn.fnamemodify(project_root, ":t")
-    else
-        namespace = vim.fn.fnamemodify(project_root, ":t") .. "." .. namespace
     end
 
     return namespace
@@ -36,10 +28,9 @@ end
 local function get_class_info()
     local params = {
         textDocument = vim.lsp.util.make_text_document_params(),
-        position = vim.lsp.util.make_position_params().position
+        position = vim.lsp.util.make_position_params(0, 'utf-8').position
     }
 
-    local result = vim.lsp.buf_request_sync(0, 'textDocument/semanticTokens/full', params, 1000)
     local symbols = vim.lsp.buf_request_sync(0, 'textDocument/documentSymbol', params, 1000)
 
     if not symbols then return nil end
@@ -64,7 +55,7 @@ end
 local function get_class_fields()
     local params = {
         textDocument = vim.lsp.util.make_text_document_params(),
-        position = vim.lsp.util.make_position_params().position
+        position = vim.lsp.util.make_position_params(0, 'utf-8').position
     }
 
     local result = vim.lsp.buf_request_sync(0, 'textDocument/documentSymbol', params, 1000)
@@ -111,7 +102,7 @@ local function parse_field_detail(detail)
     return nil
 end
 
-local function generate_constructor_params(args)
+local function generate_constructor_params()
     local fields = get_class_fields()
     local params = {}
 
@@ -125,7 +116,7 @@ local function generate_constructor_params(args)
     return table.concat(params, ", ")
 end
 
-local function generate_assignments(args)
+local function generate_assignments()
     local fields = get_class_fields()
     local assignments = {}
 
@@ -143,7 +134,7 @@ end
 
 ls.add_snippets("cs", {
 
-    s("interface_snip", fmt([[
+    _snippet("interface_snip", _format([[
 using System;
 
 namespace {}
@@ -154,12 +145,12 @@ namespace {}
     }}
 }}
     ]], {
-        f(get_namespace),
-        i(1, "InterfaceName"),
-        i(0)
+        _func(get_namespace),
+        _func(function() return "I" .. vim.fn.expand("%:t:r") end),
+        _input(0)
     })),
 
-    s("class_snip", fmt([[
+    _snippet("class_snip", _format([[
 using System;
 
 namespace {}
@@ -170,20 +161,20 @@ namespace {}
     }}
 }}
     ]], {
-        f(get_namespace),
-        i(1, "ClassName"),
-        i(0)
+        _func(get_namespace),
+        _func(function() return vim.fn.expand("%:t:r") end),
+        _input(0)
     })),
 
-    s("ctor", {
-        t({ "    /// <summary>", "    /// Initializes a new instance of the " }),
-        f(function()
+    _snippet("ctor", {
+        _text({ "    /// <summary>", "    /// Initializes a new instance of the " }),
+        _func(function()
             local class_info = get_class_info()
-            return class_info and class_info.name or "ClassName"
+            return class_info and class_info.name or vim.fn.expand("%:t:r")
         end, {}),
-        t({ " class.", "    /// </summary>" }),
+        _text({ " class.", "    /// </summary>" }),
         -- Generate parameter documentation
-        f(function()
+        _func(function()
             local fields = get_class_fields()
             local docs = {}
             for _, field in ipairs(fields) do
@@ -195,19 +186,19 @@ namespace {}
             end
             return #docs > 0 and "\n" .. table.concat(docs, "\n") or ""
         end, {}),
-        t({ "", "    public " }),
+        _text({ "", "    public " }),
         -- Class name
-        f(function()
+        _func(function()
             local class_info = get_class_info()
-            return class_info and class_info.name or "ClassName"
+            return class_info and class_info.name or vim.fn.expand("%:t:r")
         end, {}),
-        t("("),
+        _text("("),
         -- Constructor parameters
-        f(generate_constructor_params, {}),
-        t({ ") {", "" }),
+        _func(generate_constructor_params, {}),
+        _text({ ") {", "" }),
         -- Field assignments
-        f(generate_assignments, {}),
-        t({ "", "    }" })
+        _func(generate_assignments, {}),
+        _text({ "", "    }" })
     })
 
 })

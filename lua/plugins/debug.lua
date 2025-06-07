@@ -38,36 +38,6 @@ return {
 				}, true, {})
 			end
 
-			local excluded_dirs = {
-				node_modules = "node_modules",
-				git = ".git",
-				dist = "dist",
-				wwwroot = "wwwroot",
-				properties = "properties",
-				build = "build",
-				bin = "bin",
-				debug = "debug",
-				obj = "obj",
-			}
-
-			local is_excluded = function(name)
-				for _, pattern in pairs(excluded_dirs) do
-					if string.match(name:lower(), pattern) then
-						return true
-					end
-				end
-				return false
-			end
-
-			local function find_proj_file()
-				local proj_path = vim.fs.root(0, function(name, path)
-					return name:match('%.csproj$') ~= nil and not is_excluded(path)
-				end)
-
-				vim.api.nvim_echo({ { "Project file found: " .. proj_path, "WarningMsg" } }, true, {})
-				return proj_path
-			end
-
 			require("mason").setup()
 			local mason_registry = require('mason-registry')
 			local package = mason_registry.get_package("netcoredbg")
@@ -82,7 +52,7 @@ return {
 				type = "executable",
 				-- command = '/usr/local/netcoredbg',
 				-- command = "netcoredbg",
-				command = vim.fs.normalize(package:get_install_path() .. "/netcoredbg/netcoredbg.exe"),
+				command = vim.fs.normalize(vim.fn.exepath("netcoredbg")),
 				args = { "--interpreter=vscode" },
 			}
 
@@ -92,7 +62,8 @@ return {
 					name = "launch .NET",
 					request = "launch",
 					program = function()
-						local project_path = find_proj_file()
+            local current_dir = vim.fn.expand("%:h") -- Get the current buffer's directory
+						local project_path = F.find_csproj_file(current_dir)
 						if not project_path then
 							return vim.notify("Couldn't find the csproj path")
 						end
@@ -195,7 +166,7 @@ return {
 			-- dap ui setup for more information, see |:help nvim-dap-ui|
 			local dapui = require 'dapui'
 			dapui.setup()
-			dap.set_log_level("DEBUG")
+			dap.set_log_level("TRACE")
 
 			vim.keymap.set('n', '<s-f5>', function()
 				dap.terminate()

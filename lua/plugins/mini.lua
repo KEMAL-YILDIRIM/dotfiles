@@ -4,7 +4,24 @@ return {
     'echasnovski/mini.nvim',
     version = '*',
     config = function()
-			require('mini.ai').setup ({ n_lines = 500 })
+      require('mini.ai').setup({
+        n_lines = 500,
+        mappings = {
+          -- Main textobject prefixes
+          around = 'a',
+          inside = 'i',
+
+          -- Next/last textobjects
+          around_next = 'an',
+          inside_next = 'in',
+          around_last = 'ap',
+          inside_last = 'ip',
+
+          -- Move cursor to corresponding edge of `a` textobject
+          goto_left = 'g[',
+          goto_right = 'g]',
+        },
+      })
       require('mini.pairs').setup() -- use default config
       require('mini.surround').setup()
 
@@ -21,7 +38,7 @@ return {
           go_out_plus = '<C-h>',
           mark_goto   = '<C-g>',
           mark_set    = '<C-m>',
-          reset       = '<C-r>',
+          reset       = '<C-s>',
           reveal_cwd  = '<C-p>',
           show_help   = 'g?',
           synchronize = '<C-y>',
