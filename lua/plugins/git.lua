@@ -40,15 +40,15 @@ return {
 
         -- Actions
         vim.keymap.set('n', '<leader>g', "<NOP>", { desc = '[G]it' })
-        vim.keymap.set('n', '<leader>gsb', gs.stage_buffer, { desc = '[G]it Signs: stage buffer' })
-        vim.keymap.set('n', '<leader>gss', gs.stage_hunk, { desc = '[G]it Signs: stage hunk toggle' })
-        vim.keymap.set('n', '<leader>gsR', gs.reset_buffer, { desc = '[G]it Signs: reset buffer' })
-        vim.keymap.set('n', '<leader>gsp', gs.preview_hunk, { desc = '[G]it Signs: preview hunk' })
-        vim.keymap.set('n', '<leader>gst', gs.toggle_current_line_blame, { desc = '[G]it Signs: blame current line' })
-        vim.keymap.set('n', '<leader>gsB', function() gs.blame_line { full = true } end,
+        vim.keymap.set('n', '<leader>gss', gs.stage_buffer, { desc = '[G]it Signs: stage buffer' })
+        vim.keymap.set('n', '<leader>gst', gs.stage_hunk, { desc = '[G]it Signs: stage hunk toggle' })
+        vim.keymap.set('n', '<leader>gsa', gs.reset_buffer, { desc = '[G]it Signs: reset buffer' })
+        vim.keymap.set('n', '<leader>gp', gs.preview_hunk, { desc = '[G]it Signs: preview hunk' })
+        vim.keymap.set('n', '<leader>gsb', gs.toggle_current_line_blame, { desc = '[G]it Signs: blame current line' })
+        vim.keymap.set('n', '<leader>gsl', function() gs.blame_line { full = true } end,
           { desc = '[G]it Signs: blame line' })
-        vim.keymap.set('n', '<leader>gsd', function() gs.diffthis('~') end, { desc = '[G]it Signs: diff this ~' })
-        vim.keymap.set('v', '<leader>ghr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end)
+        vim.keymap.set('n', '<leader>gd', function() gs.diffthis('~') end, { desc = '[G]it Signs: diff this ~' })
+        vim.keymap.set('v', '<leader>gr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { desc = '[G]it Signs: [R]eset hunk' })
 
 
         -- Text object
@@ -57,9 +57,9 @@ return {
 
         -- Setup key mappings for git operations
         vim.keymap.set('n', '<leader>gts', ':Telescope git_status<CR>', { noremap = true })
-        vim.keymap.set('n', '<leader>gta', ':Telescope git_commits<CR>', { noremap = true })
-        vim.keymap.set('n', '<leader>gtc', ':Telescope git_bcommits<CR>', { noremap = true })
-        vim.keymap.set('n', '<leader>gtb', ':Telescope git_branches<CR>', { noremap = true })
+        vim.keymap.set('n', '<leader>gh', ':Telescope git_commits<CR>', { noremap = true })
+        vim.keymap.set('n', '<leader>gc', ':Telescope git_bcommits<CR>', { noremap = true })
+        vim.keymap.set('n', '<leader>gb', ':Telescope git_branches<CR>', { noremap = true })
         vim.keymap.set("n", "<leader>gtw", "<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
           { desc = 'Telescope [G]it [W]orktrees', silent = true })
         vim.keymap.set("n", "<leader>gtW",

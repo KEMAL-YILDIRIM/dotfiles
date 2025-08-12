@@ -66,36 +66,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
-vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
-local attach = require 'plugins.lsp.attach'
-local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath "data", "mason", "packages"))
-local roslyn_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "roslyn", "libexec"))
-local roslyn_cmd = {
-	"dotnet",
-	vim.fs.normalize(vim.fs.joinpath(roslyn_mason_path, "Microsoft.CodeAnalysis.LanguageServer.dll")),
-	"--stdio",
-	"--logLevel=Information",
-	"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
-}
-
--- vim.opt.rtp:append("D:/Nvim/rzls.nvim")
--- local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
--- vim.list_extend(roslyn_cmd, {
--- 	'--razorSourceGenerator=' ..
--- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll')),
--- 	'--razorDesignTimePath=' ..
--- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets')),
--- 	'--extension=' ..
--- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'RazorExtension', 'Microsoft.VisualStudioCode.RazorExtension.dll')),
--- })
 
 return {
 	{
 		-- "seblyng/roslyn.nvim",
 		dir = "D:/Nvim/roslyn.nvim",
-		name = "roslyn",
 		dev = true,
-		ft = { "cs", "razor", "cshtml" },
+		opts = {
+			broad_search = true,
+			lock_target = false,
+			debug = true,
+		},
 		-- dependencies = {
 		-- 	{
 		-- 		-- "tris203/rzls.nvim",
@@ -109,42 +90,32 @@ return {
 		-- },
 		---@module 'roslyn.config'
 		---@type RoslynNvimConfig
-		opts = {
-			broad_search = true,
-			lock_target = true,
-			debug_enabled = false,
-		},
 		config = function()
+			require("roslyn").setup({})
 			vim.lsp.config("roslyn", {
-				cmd = roslyn_cmd,
-				-- handlers = require("rzls.roslyn_handlers"),
-				on_attach = attach,
-				settings = {
-					["csharp|inlay_hints"] = {
-						csharp_enable_inlay_hints_for_implicit_object_creation = true,
-						csharp_enable_inlay_hints_for_implicit_variable_types = true,
-
-						csharp_enable_inlay_hints_for_lambda_parameter_types = true,
-						csharp_enable_inlay_hints_for_types = true,
-						dotnet_enable_inlay_hints_for_indexer_parameters = true,
-						dotnet_enable_inlay_hints_for_literal_parameters = true,
-						dotnet_enable_inlay_hints_for_object_creation_parameters = true,
-						dotnet_enable_inlay_hints_for_other_parameters = true,
-						dotnet_enable_inlay_hints_for_parameters = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-						dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
+				cmd = F.roslyn_cmd(),
+				on_attach = require('plugins.lsp.attach'),
+					settings = {
+						["csharp|inlay_hints"] = {
+							csharp_enable_inlay_hints_for_implicit_object_creation = true,
+							csharp_enable_inlay_hints_for_implicit_variable_types = true,
+							csharp_enable_inlay_hints_for_lambda_parameter_types = true,
+							csharp_enable_inlay_hints_for_types = true,
+							dotnet_enable_inlay_hints_for_indexer_parameters = true,
+							dotnet_enable_inlay_hints_for_literal_parameters = true,
+							dotnet_enable_inlay_hints_for_object_creation_parameters = true,
+							dotnet_enable_inlay_hints_for_other_parameters = true,
+							dotnet_enable_inlay_hints_for_parameters = true,
+							dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
+							dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
+							dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
+						},
+						["csharp|code_lens"] = {
+							dotnet_enable_references_code_lens = true,
+						},
 					},
-					["csharp|completion"] = {
-						dotnet_show_completion_items_from_unimported_namespaces = true,
-					},
-					["csharp|code_lens"] = {
-						dotnet_enable_references_code_lens = true,
-					},
-				},
 			})
-			vim.lsp.enable("roslyn")
-		end,
+		end
 		-- init = function()
 		-- 	-- We add the Razor file types before the plugin loads.
 		-- 	vim.filetype.add({

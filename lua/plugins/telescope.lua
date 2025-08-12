@@ -103,8 +103,16 @@ return {
         --
         defaults = {
           path_display = filenameFirst,
-          layout_strategy = "horizontal",
+          layout_strategy = "vertical",
           layout_config = {
+            vertical = {
+              height = 0.9,
+              preview_height = 0.7,
+              resolve_height = 0.3,
+              prompt_position = "top",
+              preview_cutoff = 0,
+              width = 0.9
+            },
             horizontal = {
               height = 0.9,
               preview_width = 0.7,
