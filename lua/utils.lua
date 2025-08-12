@@ -132,6 +132,33 @@ local is_excluded = function(name)
 	return false
 end
 
+F.roslyn_cmd = function()
+	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
+	local attach = require 'plugins.lsp.attach'
+	local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath "data", "mason", "packages"))
+	local roslyn_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "roslyn", "libexec"))
+	local roslyn_cmd = {
+		"dotnet",
+		vim.fs.normalize(vim.fs.joinpath(roslyn_mason_path, "Microsoft.CodeAnalysis.LanguageServer.dll")),
+		"--stdio",
+		"--logLevel=Information",
+		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
+	}
+
+	-- vim.opt.rtp:append("D:/Nvim/rzls.nvim")
+	-- local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
+	-- vim.list_extend(roslyn_cmd, {
+	-- 	'--razorSourceGenerator=' ..
+	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll')),
+	-- 	'--razorDesignTimePath=' ..
+	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets')),
+	-- 	'--extension=' ..
+	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'RazorExtension', 'Microsoft.VisualStudioCode.RazorExtension.dll')),
+	-- })
+
+	return roslyn_cmd;
+end
+
 F.find_csproj_file = function(path)
 	local dirs = { path }
 
