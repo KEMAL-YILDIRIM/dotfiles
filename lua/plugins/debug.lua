@@ -1,9 +1,8 @@
 vim.keymap.set('n', '<f9>', function()
   -- Load nvim-dap plugin if not already loaded
-  local ok, dap_module = pcall(require, 'dap')
+  local ok, _ = pcall(require, 'dap')
   if not ok then
     require('lazy').load({ plugins = { 'nvim-dap' } })
-    dap_module = require('dap')
   end
 end, { desc = "Load dap module" })
 
