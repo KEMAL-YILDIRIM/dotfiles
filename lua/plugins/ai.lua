@@ -2,7 +2,27 @@ return {
   {
     "olimorris/codecompanion.nvim",
     event = "BufEnter",
-    opts = {},
+    opts = {
+      -- adapters = {
+      --   anthropic = function()
+      --     return require("codecompanion.adapters").extend("anthropic", {
+      --       env = {
+      --         api_key = vim.env.ANTHROPIC_API_KEY
+      --       },
+      --     })
+      --   end,
+      -- },
+      strategies = {
+        chat = {
+          keymaps = {
+            close = {
+              modes = { n = "<C-x>", i = "<C-x>" },
+              opts = {},
+            },
+          }
+        }
+      }
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",

@@ -13,16 +13,10 @@ return {
     dependencies = {
       -- creates a beautiful debugger ui
       'rcarriga/nvim-dap-ui',
-
       -- display text as you step throughout the code
       'theHamsta/nvim-dap-virtual-text',
-
-      -- you can install the debug adapters with 'williamboman/mason.nvim',
-      -- to auto include some debug predefined configs 'jay-babu/mason-nvim-dap.nvim',
-
       -- lua debug
       'jbyuki/one-small-step-for-vimkind',
-
       -- async io operations
       'nvim-neotest/nvim-nio',
     },
@@ -131,8 +125,7 @@ return {
 
             local solution_dir = vim.fs.dirname(vim.g.roslyn_nvim_selected_solution)
 
-            local res = vim.system({ "dotnet", "sln", vim.g
-                .roslyn_nvim_selected_solution, "list" }):wait()
+            local res = vim.system({ "dotnet", "sln", vim.g.roslyn_nvim_selected_solution, "list" }):wait()
             local csproj_files = vim.iter(vim.split(res.stdout, "\n"))
                 :map(function(it)
                   local fullpath = vim.fs.normalize(vim.fs.joinpath(
