@@ -67,7 +67,7 @@ return {
       dap.configurations.cs = {
         {
           type = "coreclr",
-          name = "launch .NET",
+          name = "Run .NET",
           request = "launch",
           program = function()
             local current_dir = vim.fn.expand("%:h") -- Get the current buffer's directory
@@ -90,11 +90,13 @@ return {
               { "\nfilter: " .. filter, "MoreMsg" },
               { "\npath: " .. bin_path, "MoreMsg" }
             }
-            if selected ~= nil then
-              table.insert(info, 1,
-                { "\nselected: " .. selected, "WarningMsg" })
-              vim.fn.chdir(vim.fn.fnamemodify(selected, ":h")) -- important for setting debug path
+            if type(selected) ~= type("v:t_string") then
+              return vim.notify("Incorrect proj name!")
             end
+
+            table.insert(info, 1,
+              { "\nselected: " .. selected, "WarningMsg" })
+            vim.fn.chdir(vim.fn.fnamemodify(selected, ":h")) -- important for setting debug path
             vim.api.nvim_echo(info, true, {})
 
             return selected

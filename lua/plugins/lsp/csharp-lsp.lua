@@ -91,7 +91,7 @@ return {
 		---@module 'roslyn.config'
 		---@type RoslynNvimConfig
 		config = function()
-			require("roslyn").setup({})
+			require("roslyn").setup()
 			vim.lsp.config("roslyn", {
 				cmd = F.roslyn_cmd(),
 				on_attach = require('plugins.lsp.attach'),

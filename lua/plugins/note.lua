@@ -118,12 +118,12 @@ return {
   },
   {
     "OXY2DEV/markview.nvim",
-    lazy = true,     -- Recommended
-    ft = "markdown", -- If you decide to lazy-load anyway
-
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-tree/nvim-web-devicons"
+    ft = { "markdown", "codecompanion" }, -- If you decide to lazy-load anyway
+    opts = {
+      preview = {
+        filetypes = { "markdown", "codecompanion" },
+        ignore_buftypes = {},
+      },
     },
     config = function()
       vim.keymap.set('n', '<leader>om', '<CMD>Markview splitToggle<CR>', { desc = "[M]arkdown Split and Toggle" })
