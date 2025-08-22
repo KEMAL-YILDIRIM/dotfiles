@@ -32,9 +32,11 @@ return {
         }
       }
 
-      -- vim.opt.rtp:append("D:/Nvim/tree-sitter-razor")
       ---@class parser_config
-      --[[ local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+      local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+      --[[
+
+      -- vim.opt.rtp:append("D:/Nvim/tree-sitter-razor")
       parser_config.razor = {
         install_info = {
           url = "D:/Nvim/tree-sitter-razor",
@@ -45,11 +47,11 @@ return {
       }
       -- vim.filetype.add({ extension = { razor = "razor" } })
 
-      -- vim.opt.rtp:append("D:/Nvim/tree-sitter-cshtml")
+      vim.opt.rtp:append("D:/Nvim/tree-sitter-cshtml")
       parser_config.cshtml = {
         install_info = {
           url = "D:/Nvim/tree-sitter-cshtml", -- local path or git repo
-          files = { "src/scanner.c" },        -- note that some parsers also require src/scanner.c or src/scanner.cc
+          files = { "src/scanner.c", "src/parser.c" },        -- note that some parsers also require src/scanner.c or src/scanner.cc
           -- optional entries:
           -- branch = "main",                         -- default branch in case of git repo if different from master
           -- generate_requires_npm = false,           -- if stand-alone parser without npm dependencies
@@ -58,10 +60,12 @@ return {
         filetype = { "cshtml" }, -- if filetype does not match the parser name
 
         -- Experimental: Use multiple parsers
-        used_parsers = { "html", "c_sharp" },
-      } ]]
-      -- vim.filetype.add({ extension = { cshtml = "cshtml" } })
-      -- vim.treesitter.language.register('cshtml', { 'cshtml' })
+        used_by = { "html", "c_sharp" },
+      }
+      vim.filetype.add({ extension = { cshtml = "cshtml" } })
+      vim.treesitter.language.register('cshtml', { 'cshtml' })
+
+      ]]
     end,
   },
   { -- playground

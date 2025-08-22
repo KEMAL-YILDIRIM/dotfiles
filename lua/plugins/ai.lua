@@ -1,7 +1,8 @@
+vim.keymap.set("n","<leader>ac","<CMD>CodeCompanionChat Toggle<CR>",{desc = "[A]I Code Companion Chat [T]oggle"})
 return {
   {
     "olimorris/codecompanion.nvim",
-    event = "BufEnter",
+    event = "InsertEnter",
     opts = {
       -- adapters = {
       --   anthropic = function()

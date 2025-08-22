@@ -48,7 +48,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 					vim.defer_fn(function()
 						client:request(
 						---@diagnostic disable-next-line: param-type-mismatch
-							M.method_name,
+							"textDocument/_vs_onAutoInsert",
 							params,
 							function(err, result, _)
 								if err or not result then
@@ -77,54 +77,55 @@ return {
 			lock_target = false,
 			debug = true,
 		},
-		-- dependencies = {
-		-- 	{
-		-- 		-- "tris203/rzls.nvim",
-		-- 		dir = "D:/Nvim/rzls.nvim",
-		-- 		dev = true,
-		-- 		ft = "razor",
-		-- 		-- event = "VeryLazy",
-		-- 		-- name = "rzls",
-		-- 		config = true,
-		-- 	},
-		-- },
-		---@module 'roslyn.config'
-		---@type RoslynNvimConfig
+		dependencies = {
+			{
+				-- "tris203/rzls.nvim",
+				dir = "D:/Nvim/rzls.nvim",
+				dev = true,
+				ft = "razor",
+				-- event = "VeryLazy",
+				-- name = "rzls",
+				config = true,
+			},
+		},
 		config = function()
 			require("roslyn").setup()
 			vim.lsp.config("roslyn", {
 				cmd = F.roslyn_cmd(),
 				on_attach = require('plugins.lsp.attach'),
-					settings = {
-						["csharp|inlay_hints"] = {
-							csharp_enable_inlay_hints_for_implicit_object_creation = true,
-							csharp_enable_inlay_hints_for_implicit_variable_types = true,
-							csharp_enable_inlay_hints_for_lambda_parameter_types = true,
-							csharp_enable_inlay_hints_for_types = true,
-							dotnet_enable_inlay_hints_for_indexer_parameters = true,
-							dotnet_enable_inlay_hints_for_literal_parameters = true,
-							dotnet_enable_inlay_hints_for_object_creation_parameters = true,
-							dotnet_enable_inlay_hints_for_other_parameters = true,
-							dotnet_enable_inlay_hints_for_parameters = true,
-							dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
-							dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
-							dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
-						},
-						["csharp|code_lens"] = {
-							dotnet_enable_references_code_lens = true,
-						},
+				settings = {
+					["csharp|inlay_hints"] = {
+						csharp_enable_inlay_hints_for_implicit_object_creation = true,
+						csharp_enable_inlay_hints_for_implicit_variable_types = true,
+						csharp_enable_inlay_hints_for_lambda_parameter_types = true,
+						csharp_enable_inlay_hints_for_types = true,
+						dotnet_enable_inlay_hints_for_indexer_parameters = true,
+						dotnet_enable_inlay_hints_for_literal_parameters = true,
+						dotnet_enable_inlay_hints_for_object_creation_parameters = true,
+						dotnet_enable_inlay_hints_for_other_parameters = true,
+						dotnet_enable_inlay_hints_for_parameters = true,
+						dotnet_suppress_inlay_hints_for_parameters_that_differ_only_by_suffix = true,
+						dotnet_suppress_inlay_hints_for_parameters_that_match_argument_name = true,
+						dotnet_suppress_inlay_hints_for_parameters_that_match_method_intent = true,
 					},
+					["csharp|code_lens"] = {
+						dotnet_enable_references_code_lens = true,
+					},
+					["csharp|symbol_search"] = {
+						dotnet_search_reference_assemblies = true,
+					}
+				},
 			})
-		end
-		-- init = function()
-		-- 	-- We add the Razor file types before the plugin loads.
-		-- 	vim.filetype.add({
-		-- 		extension = {
-		-- 			razor = "razor",
-		-- 			cshtml = "razor",
-		-- 		},
-		-- 	})
-		-- end,
+		end,
+		init = function()
+			-- We add the Razor file types before the plugin loads.
+			vim.filetype.add({
+				extension = {
+					razor = "razor",
+					cshtml = "razor",
+				},
+			})
+		end,
 	},
 	{
 		"GustavEikaas/easy-dotnet.nvim",

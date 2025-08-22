@@ -17,6 +17,7 @@ return {
         { '<leader>c', 'nop', group = 'Comment' },
         { '<leader>=', 'nop', group = 'Format' },
         { '<leader>g', 'nop', group = 'Git' },
+        { '<leader>a', 'nop', group = 'AI' },
       })
     end,
   }

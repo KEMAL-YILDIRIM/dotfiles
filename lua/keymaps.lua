@@ -68,7 +68,7 @@ map.set({ "n", "v" }, "<leader>yp", function()
 	}, { prompt = "Choose to copy to clipboard:" }, function(choice)
 		local i = tonumber(string.sub(choice, 1, 1)) or 1
 		local result = results[i]
-		vim.fn.setreg('"', result)
+		vim.fn.setreg('+y', result)
 		vim.notify('Copied: ' .. result)
 	end)
 end, { desc = "Copy current buffer path to system clipboard" })

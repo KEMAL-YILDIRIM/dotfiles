@@ -51,6 +51,7 @@ return {
 	{
 		-- Converts the linters and formatters into built in lsp
 		"nvimtools/none-ls.nvim",
+    event = "BufEnter",
 		config = function()
 			local null_ls = require("null-ls")
 

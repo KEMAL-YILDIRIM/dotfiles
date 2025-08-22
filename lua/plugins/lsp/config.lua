@@ -1,7 +1,11 @@
 return {
   'neovim/nvim-lspconfig',
+  event = "BufEnter",
   dependencies = {
-    { "j-hui/fidget.nvim", opts = {} },
+    {
+      "j-hui/fidget.nvim",
+      opts = {}
+    },
   },
   config = function()
     local api = vim.api
