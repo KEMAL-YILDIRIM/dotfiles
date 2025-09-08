@@ -4,6 +4,9 @@ return {
     event = "VeryLazy",
     opts = {
       preset = "modern",
+      spec = {
+        ["<C-c>"] = { "<Esc>", "Exit which-key" },
+      },
     },
     config = function()
       local wk = require("which-key")

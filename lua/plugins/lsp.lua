@@ -1,6 +1,6 @@
-local lsp_modules = {}
-table.insert(lsp_modules, require 'plugins.lsp.mason')
-table.insert(lsp_modules, require 'plugins.lsp.csharp-lsp')
-table.insert(lsp_modules, require 'plugins.lsp.config')
-table.insert(lsp_modules, require 'plugins.lsp.lua-lsp')
-return  lsp_modules
+local M = {}
+table.insert(M, require 'plugins.lsp.mason')
+table.insert(M, require 'plugins.lsp.csharp-lsp')
+table.insert(M, require 'plugins.lsp.config')
+table.insert(M, require 'plugins.lsp.lua-lsp')
+return  M

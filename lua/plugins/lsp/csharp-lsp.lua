@@ -72,11 +72,6 @@ return {
 		-- "seblyng/roslyn.nvim",
 		dir = "D:/Nvim/roslyn.nvim",
 		dev = true,
-		opts = {
-			broad_search = true,
-			lock_target = false,
-			debug = true,
-		},
 		dependencies = {
 			{
 				-- "tris203/rzls.nvim",
@@ -89,11 +84,14 @@ return {
 			},
 		},
 		config = function()
-			require("roslyn").setup()
+			require("roslyn").setup({ broad_search = true, lock_target = false, debug = false })
 			vim.lsp.config("roslyn", {
 				cmd = F.roslyn_cmd(),
 				on_attach = require('plugins.lsp.attach'),
 				settings = {
+					["csharp|background_analysis"] = {
+						dotnet_compiler_diagnostics_scope = "fullSolution"
+					},
 					["csharp|inlay_hints"] = {
 						csharp_enable_inlay_hints_for_implicit_object_creation = true,
 						csharp_enable_inlay_hints_for_implicit_variable_types = true,
@@ -116,8 +114,6 @@ return {
 					}
 				},
 			})
-		end,
-		init = function()
 			-- We add the Razor file types before the plugin loads.
 			vim.filetype.add({
 				extension = {

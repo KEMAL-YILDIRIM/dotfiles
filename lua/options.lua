@@ -28,6 +28,9 @@ vim.o.showmode = false
 --  See `:help 'clipboard'`
 vim.o.clipboard = 'unnamedplus'
 
+-- Autosave
+vim.o.autowriteall = true
+
 -- Save undo history
 vim.o.undofile = true
 
