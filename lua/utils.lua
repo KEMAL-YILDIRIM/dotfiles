@@ -113,7 +113,7 @@ end
 -- csharp helper section
 local excluded_dirs = {
 	node_modules = "node_modules",
-	git = ".git",
+	git = "%.git",
 	dist = "dist",
 	wwwroot = "wwwroot",
 	properties = "properties",
@@ -145,41 +145,43 @@ F.roslyn_cmd = function()
 		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
 	}
 
-	-- vim.opt.rtp:append("D:/Nvim/rzls.nvim")
-	-- local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
-	-- vim.list_extend(roslyn_cmd, {
-	-- 	'--razorSourceGenerator=' ..
-	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll')),
-	-- 	'--razorDesignTimePath=' ..
-	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets')),
-	-- 	'--extension=' ..
-	-- 	vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'RazorExtension', 'Microsoft.VisualStudioCode.RazorExtension.dll')),
-	-- })
+	if (pcall(require, 'rzls')) then
+		vim.opt.rtp:append("D:/Nvim/rzls.nvim")
+		local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
+		vim.list_extend(roslyn_cmd, {
+			'--razorSourceGenerator=' ..
+			vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll')),
+			'--razorDesignTimePath=' ..
+			vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets')),
+			'--extension=' ..
+			vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'RazorExtension', 'Microsoft.VisualStudioCode.RazorExtension.dll')),
+		})
+	end
 
 	return roslyn_cmd;
 end
 
 F.find_csproj_file = function(path)
-	local dirs = { path }
+	local dirs = { vim.fs.normalize(path) }
+	local inspected = {}
 
 	while #dirs > 0 do
 		local dir = table.remove(dirs, 1)
-		for other, fs_obj_type in vim.fs.dir(dir) do
-			local name = vim.fs.joinpath(dir, other)
+
+		for fs_obj_name, fs_obj_type in vim.fs.dir(dir) do
+			local name = vim.fs.normalize(vim.fs.joinpath(dir, fs_obj_name))
+			inspected[name] = true
 
 			if fs_obj_type == "file" then
 				if name:match("%.csproj$") then
 					F.log("Project file found: " .. name)
 					return name
 				end
-			elseif fs_obj_type == "directory" and not is_excluded(name) then
+			elseif fs_obj_type == "directory"
+					and not is_excluded(name)
+					and not inspected[name]
+			then
 				dirs[#dirs + 1] = name
-			end
-		end
-		if #dirs == 0 then
-			local parent = vim.fn.fnamemodify(dir, ':h')
-			if parent ~= '/' then
-				dirs[1] = parent
 			end
 		end
 	end
