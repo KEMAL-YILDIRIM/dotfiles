@@ -11,7 +11,7 @@ local function get_namespace()
     local file_path    = vim.fn.expand("%:p:h")
     local project_path = F.find_csproj_file(file_path)
 
-    local project_root = vim.uv.fs_realpath(project_path .. "/../..") or "/"
+    local project_root = vim.fn.fnamemodify(project_path,":h") or "/"
     local rel_path     = vim.fs.relpath(project_root, file_path) or "/"
     local namespace    = string.gsub(vim.fs.normalize(rel_path), '/', '.')
 
