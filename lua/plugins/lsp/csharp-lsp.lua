@@ -69,15 +69,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 return {
 	{
-		-- "seblyng/roslyn.nvim",
-		dir = "D:/Nvim/roslyn.nvim",
-		dev = true,
+		"https://github.com/KEMAL-YILDIRIM/roslyn.nvim",
+    branch = "windows",
 		dependencies = {
 			{
-				-- "tris203/rzls.nvim",
-				dir = "D:/Nvim/rzls.nvim",
-				dev = true,
+				"https://github.com/KEMAL-YILDIRIM/rzls.nvim",
 				ft = "razor",
+        branch = "windows",
 				-- event = "VeryLazy",
 				-- name = "rzls",
 				config = true,

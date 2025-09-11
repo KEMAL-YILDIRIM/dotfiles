@@ -4,6 +4,7 @@ return {
     dir = "D:/Nvim/repos.nvim",
     name = "repos",
     dev = true,
+    enabled = false,
     config = function()
       vim.opt.rtp:append("D:/Nvim/repos.nvim")
       local options = { debug_enabled = true }
