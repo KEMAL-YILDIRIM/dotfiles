@@ -1,4 +1,16 @@
-local M = {
+local dap = require("dap")
+
+local netcoredbg_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath("data"),
+  "mason/packages/netcoredbg/netcoredbg/netcoredbg.exe"))
+local netcoredbg_adapter = {
+  type = "executable",
+  command = netcoredbg_path,
+  args = { "--interpreter=vscode" },
+}
+dap.adapters.coreclr = netcoredbg_adapter
+dap.adapters.netcoredbg = netcoredbg_adapter
+
+dap.configurations.cs = {
   -- Debug specific test (will be configured dynamically)
   {
     type = "coreclr",
@@ -74,7 +86,14 @@ local M = {
     type = "coreclr",
     name = "attach .NET",
     request = "attach",
-    processId = require("dap.utils").pick_process,
+    processId = function()
+      return require("dap.utils").pick_process({
+        filter = function(proc)
+          ---@diagnostic disable-next-line: return-type-mismatch
+          return proc.name:match(".*/Debug/.*") and not proc.name:find("vstest.console.dll")
+        end,
+      })
+    end,
   },
   {
     type = "coreclr",
@@ -101,16 +120,16 @@ local M = {
 
       local res = vim.system({ "dotnet", "sln", vim.g.roslyn_nvim_selected_solution, "list" }):wait()
       local csproj_files = vim.iter(vim.split(res.stdout, "\n"))
-          :map(function(it)
-            local fullpath = vim.fs.normalize(vim.fs.joinpath(
-              solution_dir, it))
-            if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
-              return fullpath
-            else
-              return nil
-            end
-          end)
-          :totable()
+        :map(function(it)
+          local fullpath = vim.fs.normalize(vim.fs.joinpath(
+            solution_dir, it))
+          if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
+            return fullpath
+          else
+            return nil
+          end
+        end)
+        :totable()
 
       return require("dap.utils").pick_process({
         filter = function(proc)
@@ -124,4 +143,4 @@ local M = {
     end,
   },
 }
-return M
+return {}

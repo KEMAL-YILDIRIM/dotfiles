@@ -18,7 +18,7 @@ vim.api.nvim_create_user_command('FileInfo', function()
 	if stat then
 		-- print(vim.inspect(stat))
 		local creation_time = os.date('%Y-%m-%d %H:%M:%S', stat.birthtime.sec)
-		print(stat.type .. " / " .. creation_time .. " / " .. stat.size)
+		print(stat.type .. " / created_at: " .. creation_time .. " / size: " .. stat.size)
 	else
 		print("Could not get file information")
 	end

@@ -109,7 +109,7 @@ local function tab_actions()
 	print("Entered tab mode " .. ns_id)
 	vim.on_key(function(_, key)
 		if key == "n" then vim.cmd("tabnew") return end
-		if key == "c" then vim.cmd("tabc") return end
+		if key == "x" then vim.cmd("tabc") return end
 		if key == "a" then vim.cmd("tabo") return end
 		if key == "l" then vim.cmd("tabn") return end
 		if key == "h" then vim.cmd("tabp") return end
@@ -134,4 +134,6 @@ map.set("n", "t", "<nop>", { desc = "[T]ab" })
 -- buffers
 map.set("n", "<leader>b", "<NOP>", { desc = "Buffer" })
 map.set("n", "<leader>bo", ":%bd|e#", { desc = "[B]uffer close all but [O]ne" })
+map.set("n", "<leader>bn", ":bn<CR>", { desc = "Next [B]uffer" })
+map.set("n", "<leader>bp", ":bp<CR>", { desc = "Previous [B]uffer" })
 map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "[B]uffer [S]et path to current " })
