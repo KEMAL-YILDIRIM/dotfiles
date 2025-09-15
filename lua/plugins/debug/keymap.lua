@@ -9,16 +9,16 @@ vim.keymap.set('n', '<f5>', function()
 end, { desc = 'debug: start/continue' })
 vim.keymap.set('n', '<f11>', dap.step_into, { desc = 'debug: step into' })
 vim.keymap.set('n', '<f10>', dap.step_over, { desc = 'debug: step over' })
-vim.keymap.set('n', '<s-f10>', dap.step_back, { desc = 'debug: step over' })
+vim.keymap.set('n', '<s-f10>', dap.step_back, { desc = 'debug: step back' })
 vim.keymap.set('n', '<s-f11>', dap.step_out, { desc = 'debug: step out' })
 vim.keymap.set('n', '<f9>', dap.toggle_breakpoint, { desc = 'debug: toggle breakpoint' })
 vim.keymap.set('n', '<s-f9>',
   function() dap.set_breakpoint(vim.fn.input('Breakpoint condition: ')) end,
   { desc = 'debug: conditional breakpoint' })
-vim.keymap.set('n', '<f12>', dapui.toggle, { desc = 'debug: see last session result.' })
+vim.keymap.set('n', '<f12>', dap.run_last, { desc = 'debug: see last test.' })
+vim.keymap.set('n', '<s-f12>', dapui.toggle, { desc = 'debug: see last session result.' })
 
 -- Eval var under cursor
-vim.keymap.set("n", "<s-f12>", function()
-  require("dapui").eval(nil, { enter = true })
-end)
+vim.keymap.set("n", "<f6>", function() require("dapui").eval(nil, { enter = true }) end)
+vim.keymap.set('n', '<s-f6>', dap.repl.toggle, { desc = 'debug: repl toggle' })
 return {}
