@@ -14,33 +14,6 @@ dap.configurations.cs = {
   -- Debug specific test (will be configured dynamically)
   {
     type = "coreclr",
-    name = "Debug Specific Test",
-    request = "launch",
-    program = "dotnet",
-    args = {}, -- Will be set dynamically
-    cwd = "${workspaceFolder}",
-    stopOnEntry = false,
-    console = "integratedTerminal",
-  },
-  {
-    type = "coreclr",
-    name = "Debug All Tests",
-    request = "launch",
-    program = "dotnet",
-    args = function()
-      local info = require 'plugins.debug.utils'.get_test_assembly_info()
-      if not info then return {} end
-      return { "test", info.dll_path, "--logger", "console;verbosity=detailed" }
-    end,
-    cwd = function()
-      local info = require 'plugins.debug.utils'.get_test_assembly_info()
-      return info and info.project_dir or vim.fn.getcwd()
-    end,
-    stopOnEntry = false,
-    console = "integratedTerminal",
-  },
-  {
-    type = "coreclr",
     name = "launch - netcoredbg",
     request = "launch",
     program = function()
@@ -54,32 +27,11 @@ dap.configurations.cs = {
 
       -- pick
       require "plugins.debug.utils".build_project(project_path)
-      local filter = string.format("Debug/.*/%s",
-        vim.fn.fnamemodify(project_path, ":t:r"))
-      local bin_path = string.format("%s/bin", vim.fn.fnamemodify(project_path, ":h"))
-      vim.notify("Project path: " .. project_path)
-      local selected = require("dap.utils").pick_file({
-        filter      = filter,
-        executables = false,
-        path        = bin_path,
-      })
-
-      -- output message
-      local info = {
-        { " filter: " .. filter, "MoreMsg" },
-        { " path: " .. bin_path, "MoreMsg" }
-      }
-      if type(selected) ~= type("v:t_string") then
-        vim.notify("Invalid project name! " .. project_path)
-        return nil
-      end
-
-      table.insert(info, 1,
-        { " selected: " .. selected, "WarningMsg" })
-      vim.fn.chdir(vim.fn.fnamemodify(selected, ":h")) -- important for setting debug path
-      vim.api.nvim_echo(info, true, {})
-
-      return selected
+      local filename = vim.fn.fnamemodify(project_path, ":t:r") .. ".dll"
+      local debug_path = string.format("%s/bin/Debug/.*/", vim.fn.fnamemodify(project_path, ":h"))
+      local dll = vim.fn.findfile(filename, debug_path, 1)
+      vim.notify("debug dll -> " .. dll)
+      return dll
     end,
   },
   {
@@ -120,16 +72,16 @@ dap.configurations.cs = {
 
       local res = vim.system({ "dotnet", "sln", vim.g.roslyn_nvim_selected_solution, "list" }):wait()
       local csproj_files = vim.iter(vim.split(res.stdout, "\n"))
-        :map(function(it)
-          local fullpath = vim.fs.normalize(vim.fs.joinpath(
-            solution_dir, it))
-          if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
-            return fullpath
-          else
-            return nil
-          end
-        end)
-        :totable()
+          :map(function(it)
+            local fullpath = vim.fs.normalize(vim.fs.joinpath(
+              solution_dir, it))
+            if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
+              return fullpath
+            else
+              return nil
+            end
+          end)
+          :totable()
 
       return require("dap.utils").pick_process({
         filter = function(proc)
