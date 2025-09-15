@@ -30,23 +30,5 @@ local function lsp_attach(event)
   --  For example, in C this would take you to the header
   map('<leader>lc', lsp.buf.declaration, 'Goto De[C]laration')
 
-  -- The following two autocommands are used to highlight references of the
-  -- word under your cursor when your cursor rests there for a little while.
-  --    See `:help CursorHold` for information about when this is executed
-  --
-  -- When you move your cursor, the highlights will be cleared (the second autocommand).
-  local api,client = vim.api,nil
-  if event and event.data then client = lsp.get_client_by_id(event.data.client_id) end
-  if client and client.server_capabilities.documentHighlightProvider then
-    api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-      buffer = event.buf,
-      callback = lsp.buf.document_highlight,
-    })
-
-    api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-      buffer = event.buf,
-      callback = lsp.buf.clear_references,
-    })
-  end
 end
 return lsp_attach
