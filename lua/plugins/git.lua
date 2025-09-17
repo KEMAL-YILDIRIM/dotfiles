@@ -49,7 +49,8 @@ return {
         vim.keymap.set('n', '<leader>gsl', function() gs.blame_line { full = true } end,
           { desc = '[G]it Signs: blame line' })
         vim.keymap.set('n', '<leader>gd', function() gs.diffthis() end, { desc = '[G]it Signs: diff this' })
-        vim.keymap.set('v', '<leader>gr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, { desc = '[G]it Signs: [R]eset hunk' })
+        vim.keymap.set('v', '<leader>gr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end,
+          { desc = '[G]it Signs: [R]eset hunk' })
 
 
         -- Text object
@@ -58,8 +59,11 @@ return {
 
         -- Setup key mappings for git operations
         vim.keymap.set('n', '<leader>gts', ':Telescope git_status<CR>', { noremap = true })
-        vim.keymap.set('n', '<leader>gh', ':Telescope git_commits<CR>', { noremap = true })
-        vim.keymap.set('n', '<leader>gc', ':Telescope git_bcommits<CR>', { noremap = true })
+        vim.keymap.set('n', '<leader>gh', ':Telescope git_commits<CR>', { noremap = true, desc = "[G]it [H]istory" })
+        local tb = require("telescope.builtin")
+        vim.keymap.set('n', '<leader>gc', function()
+          require("telescope.builtin").git_bcommits({ cwd = vim.fn.expand("%:p:h") })
+        end, { noremap = true, desc = "[G]it [C]ommits" })
         vim.keymap.set('n', '<leader>gb', ':Telescope git_branches<CR>', { noremap = true })
         vim.keymap.set("n", "<leader>gtw", "<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
           { desc = 'Telescope [G]it [W]orktrees', silent = true })
@@ -93,19 +97,19 @@ return {
     -- setting the keybinding for LazyGit with 'keys' is recommended in
     -- order to load the plugin when the command is run for the first time
     keys = {
-      { "<leader>gg", "<CMD>LazyGit<CR>", desc = "[G]it Lazy[G]it" },
+      { "<leader>gg", "<CMD>:LazyGitCurrentFile<CR>", desc = "[G]it Lazy[G]it" },
     }
   },
   { -- Neo git
     "NeogitOrg/neogit",
     enabled = false,
     dependencies = {
-      "nvim-lua/plenary.nvim", -- required
+      "nvim-lua/plenary.nvim",  -- required
       "sindrets/diffview.nvim", -- optional - Diff integration
 
       -- Only one of these is needed, not both.
       "nvim-telescope/telescope.nvim", -- optional
-      "ibhagwan/fzf-lua",           -- optional
+      "ibhagwan/fzf-lua",              -- optional
     },
     config = function()
       require("neogit").setup {}
@@ -114,8 +118,6 @@ return {
         { silent = true, noremap = true, desc = 'Neo [G]it: [C]ommit' })
       vim.keymap.set('n', '<leader>gp', ':Neogit pull<CR>', { silent = true, noremap = true, desc = 'Neo [G]it: [P]ull' })
       vim.keymap.set('n', '<leader>gh', ':Neogit push<CR>', { silent = true, noremap = true, desc = 'Neo [G]it: Pu[S]h' })
-      vim.keymap.set('n', '<leader>gb', ':Telescope git_branches<CR>',
-        { silent = true, noremap = true, desc = 'Neo [G]it: [B]ranch' })
       vim.keymap.set('n', '<leader>gl', ':G blame<CR>', { silent = true, noremap = true, desc = 'Neo [G]it: b[L]ame' })
       vim.keymap.set('n', '<leader>gd', ':DiffviewOpen<CR>',
         { silent = true, noremap = true, desc = 'Neo [G]it: [D]iffview' })
