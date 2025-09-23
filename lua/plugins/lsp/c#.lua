@@ -21,11 +21,9 @@ return {
 				"https://github.com/KEMAL-YILDIRIM/rzls.nvim",
 				ft = "razor",
 				branch = "windows",
-				dev = true,
 				config = true,
 			},
 		},
-		dev = true,
 		opts = { broad_search = true, lock_target = false, debug = false },
 		init = function()
 			vim.lsp.config("roslyn", {
