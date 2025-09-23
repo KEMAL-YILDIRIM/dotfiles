@@ -17,7 +17,7 @@ return {
       require "plugins/debug/c#"
       require "plugins/debug/lua"
       require "plugins/debug/ui"
-      require('nvim-dap-virtual-text').setup()
+      -- require('nvim-dap-virtual-text').setup()
       require "plugins.debug.keymap"
     end,
   },

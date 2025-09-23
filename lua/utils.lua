@@ -134,7 +134,6 @@ end
 
 F.roslyn_cmd = function(opts)
 	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
-	local attach = require 'plugins.lsp.attach'
 	local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath "data", "mason", "packages"))
 	local roslyn_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "roslyn", "libexec"))
 	local roslyn_cmd = {

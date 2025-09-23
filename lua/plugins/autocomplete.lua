@@ -189,7 +189,7 @@ return {
         preselect = cmp.PreselectMode.None,
         completion = {
           completeopt = 'menu,menuone,preview',
-          keyword_length = 2
+          keyword_length = 1
         },
         formatting = {
           fields = { "kind", "abbr", "menu" },

@@ -21,6 +21,7 @@ dapui.setup({
 
   -- Set dapui window
   render = {
+    indent = 2,
     max_type_length = 60,
     max_value_lines = 200,
   },

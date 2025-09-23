@@ -9,10 +9,10 @@ return {
   },
   config = function()
     local api = vim.api
-    local attach = require 'plugins.lsp.attach'
+    local keymap = require 'plugins.lsp.keymap'
     api.nvim_create_autocmd('LspAttach', {
       group = api.nvim_create_augroup('aug-lsp-attach', { clear = true }),
-      callback = attach
+      callback = keymap
     })
     vim.diagnostic.config({ virtual_text = true })
   end,

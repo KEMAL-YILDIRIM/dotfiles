@@ -103,22 +103,42 @@ end, { noremap = true, desc = "[Q]uickfix Toggle" })
 
 
 -- tabs
+local tab_mode_active = false
+
 local function tab_actions()
-	-- move between tab commands without unnecessary repetations
-	local ns_id = vim.api.nvim_create_namespace("tab_actions");
-	print("Entered tab mode " .. ns_id)
-	vim.on_key(function(_, key)
-		if key == "n" then vim.cmd("tabnew") return end
-		if key == "x" then vim.cmd("tabc") return end
-		if key == "a" then vim.cmd("tabo") return end
-		if key == "l" then vim.cmd("tabn") return end
-		if key == "h" then vim.cmd("tabp") return end
-		if key == "d" then vim.cmd("tabnew %") return end
+	if tab_mode_active then
+		return -- Prevent multiple activations
+	end
 
-		vim.on_key(nil, ns_id)
-		print("Exited tab mode " .. ns_id)
+	tab_mode_active = true
+	vim.notify("Tab mode active - press n/x/a/l/h/d or any other key to exit", vim.log.levels.INFO)
 
-	end, ns_id)
+	-- Create temporary keymaps only for tab mode
+	local temp_maps = {
+		{ 'n', 'n', function() vim.cmd("tabnew"); tab_mode_active = false end },
+		{ 'n', 'x', function() vim.cmd("tabc"); tab_mode_active = false end },
+		{ 'n', 'a', function() vim.cmd("tabo"); tab_mode_active = false end },
+		{ 'n', 'l', function() vim.cmd("tabn"); tab_mode_active = false end },
+		{ 'n', 'h', function() vim.cmd("tabp"); tab_mode_active = false end },
+		{ 'n', 'd', function() vim.cmd("tabnew %"); tab_mode_active = false end },
+	}
+
+	-- Set temporary maps
+	for _, map_def in ipairs(temp_maps) do
+		vim.keymap.set(map_def[1], map_def[2], map_def[3], { buffer = true })
+	end
+
+	-- Set up one-time autocmd to clean up on any other key or mode change
+	local group = vim.api.nvim_create_augroup("TabModeCleanup", { clear = true })
+	vim.api.nvim_create_autocmd({"InsertEnter", "CmdlineEnter", "VisualEnter"}, {
+		group = group,
+		once = true,
+		callback = function()
+			tab_mode_active = false
+			vim.notify("Tab mode exited", vim.log.levels.INFO)
+			vim.api.nvim_del_augroup_by_id(group)
+		end
+	})
 end
 
 map.set("n", "tm", tab_actions, { desc = "[T]ab [M]ode" })
