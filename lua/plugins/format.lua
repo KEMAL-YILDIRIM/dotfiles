@@ -37,6 +37,32 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 return {
+  { -- Collection of various small independent plugins/modules
+    'echasnovski/mini.nvim',
+    version = '*',
+    config = function()
+      require('mini.ai').setup({
+        n_lines = 500,
+        mappings = {
+          -- Main textobject prefixes
+          around = 'a',
+          inside = 'i',
+
+          -- Next/last textobjects
+          around_next = 'an',
+          inside_next = 'in',
+          around_last = 'ap',
+          inside_last = 'ip',
+
+          -- Move cursor to corresponding edge of `a` textobject
+          goto_left = 'g[',
+          goto_right = 'g]',
+        },
+      })
+      require('mini.pairs').setup() -- use default config
+      require('mini.surround').setup()
+    end,
+  },
 	{
 		-- Detect tabstop and shiftwidth automatically
 		'tpope/vim-sleuth',

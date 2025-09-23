@@ -8,19 +8,19 @@ local _format = require("luasnip.extras.fmt").fmt
 
 
 local function get_namespace()
-    local file_path    = vim.fn.expand("%:p:h")
-    local project_path = F.find_csproj_file(file_path)
+    local file_path = vim.fs.normalize(vim.fn.expand("%:p:h")) -- full path without last path section
+    local project_file_path = F.find_csproj_file(file_path)
 
-    local project_root = vim.fn.fnamemodify(project_path, ":h") or "/"
+    local project_root = vim.fn.fnamemodify(project_file_path, ":h") or "/"
     local rel_path     = vim.fs.relpath(project_root, file_path) or "/"
     local namespace    = string.gsub(vim.fs.normalize(rel_path), '/', '.')
 
     -- If we're in the root, use the project name
-    if namespace == "" then
-        namespace = vim.fn.fnamemodify(project_root, ":t")
+    if namespace == "" or namespace == "." then
+        namespace = vim.fn.fnamemodify(project_file_path, ":t:r") -- last path section (tail) without extension
     end
 
-    return namespace
+    return namespace .. ";"
 end
 
 
@@ -133,6 +133,8 @@ local function generate_assignments()
 end
 
 ls.add_snippets("cs", {
+
+    _snippet("namespace_snip", { _text("namespace "), _func(get_namespace) }),
 
     _snippet("interface_snip", _format([[
 using System;

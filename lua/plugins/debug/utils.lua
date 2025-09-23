@@ -3,17 +3,14 @@ M = {}
 -- https://github.com/mfussenegger/nvim-dap/wiki/Cookbook#making-debugging-net-easier
 M.build_project = function(csproj_path)
   local cmd = "dotnet build -c Debug " .. csproj_path .. " --nologo -v q"
-  local result = "Build: ❗"
+  local result = "Build: ❗\n"
 
   local output = F.cmd(cmd)
   if output ~= nil then
-    result = "Build: ✔️ "
+    result = "Build: ✔️\n"
   end
 
-  vim.api.nvim_echo({
-    { result,        "WarningMsg" },
-    { "executed: " .. cmd, "MoreMsg" },
-  }, true, {})
+  vim.notify(result .. "executed: " .. cmd .. "\n", vim.log.levels.INFO)
 end
 
 -- Custom function to build and get test assembly path
@@ -69,7 +66,7 @@ end
 function M.run_all_tests()
   local info = get_test_assembly_info()
   if not info then return end
-  
+
   local cmd = string.format('dotnet test "%s" --logger "console;verbosity=detailed"', info.project_file)
   vim.cmd('split | resize 15 | terminal ' .. cmd)
 end
@@ -78,10 +75,10 @@ end
 function M.run_file_tests()
   local info = get_test_assembly_info()
   if not info then return end
-  
+
   local current_file = vim.fn.expand('%:t:r')
-  local cmd = string.format('dotnet test "%s" --filter "FullyQualifiedName~%s" --logger "console;verbosity=detailed"', 
-                           info.project_file, current_file)
+  local cmd = string.format('dotnet test "%s" --filter "FullyQualifiedName~%s" --logger "console;verbosity=detailed"',
+    info.project_file, current_file)
   vim.cmd('split | resize 15 | terminal ' .. cmd)
 end
 
@@ -92,12 +89,12 @@ function M.run_test_under_cursor()
     vim.notify("No test method found under cursor", vim.log.levels.WARN)
     return
   end
-  
+
   local info = get_test_assembly_info()
   if not info then return end
-  
-  local cmd = string.format('dotnet test "%s" --filter "FullyQualifiedName~%s" --logger "console;verbosity=detailed"', 
-                           info.project_file, test_info.full_name)
+
+  local cmd = string.format('dotnet test "%s" --filter "FullyQualifiedName~%s" --logger "console;verbosity=detailed"',
+    info.project_file, test_info.full_name)
   vim.cmd('split | resize 15 | terminal ' .. cmd)
 end
 
@@ -108,23 +105,23 @@ function M.debug_test_under_cursor()
     vim.notify("No test method found under cursor", vim.log.levels.WARN)
     return
   end
-  
+
   local info = get_test_assembly_info()
   if not info then return end
-  
+
   -- Update DAP configuration dynamically
   local dap = require 'dap'
   dap.configurations.cs[1].args = {
-    "test", 
-    info.dll_path, 
-    "--filter", 
+    "test",
+    info.dll_path,
+    "--filter",
     "FullyQualifiedName=" .. test_info.full_name,
-    "--logger", 
+    "--logger",
     "console;verbosity=detailed"
   }
   dap.configurations.cs[1].cwd = info.project_dir
   dap.configurations.cs[1].name = "Debug: " .. test_info.method_name
-  
+
   -- Start debugging
   dap.run(dap.configurations.cs[1])
 end

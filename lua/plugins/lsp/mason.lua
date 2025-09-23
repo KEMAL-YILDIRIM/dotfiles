@@ -34,6 +34,9 @@ return
 			'css-lsp',
 			'html-lsp',
 			"tailwindcss-language-server",
+			"typescrip-language-server",
+			"lemminx",
+			"netcoredbg",
 			"roslyn",
 			"rzls"
 		})

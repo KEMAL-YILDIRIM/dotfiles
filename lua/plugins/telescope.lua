@@ -43,7 +43,7 @@ return {
         local tail = vim.fs.basename(path)
         local parent = vim.fs.dirname(path)
         if parent == "." then return tail end
-        return string.format("%s\t\t%s", tail, parent)
+        return string.format("%-80s |  %-20s", tail, parent)
       end
 
 
@@ -144,9 +144,9 @@ return {
           },
         },
         pickers = {
-          -- find_files = {
-          -- 	theme = "ivy"
-          -- },
+          lsp_document_symbols = {
+            theme = "ivy"
+          },
           buffers = {
             mappings = {
               i = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
@@ -199,12 +199,11 @@ return {
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>sc', function()
         -- You can pass additional configuration to telescope to change theme, layout, etc.
-        -- p
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
           previewer = false,
         })
-      end, { desc = '[S]earch in [c]urrent buffer' })
+      end, { desc = '[S]earch in [C]urrent buffer' })
 
       -- Also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
