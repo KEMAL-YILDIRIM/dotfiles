@@ -5,7 +5,7 @@ require 'options'
 require 'utils'
 
 -- [[ Basic Keymaps ]]
-require 'keymaps'
+require 'keymap'
 
 -- [[ Configure and install plugins ]]
 require 'lazy-plugins'

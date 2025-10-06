@@ -38,10 +38,15 @@ return {
 					end,
 				},
 				cmd = F.roslyn_cmd({ rzls = true }),
-				on_attach = require('plugins.lsp.keymap'),
+				on_attach = require("plugins.lsp.keymap"),
 				settings = {
 					["csharp|background_analysis"] = {
-						dotnet_compiler_diagnostics_scope = "fullSolution"
+						dotnet_compiler_diagnostics_scope = "openFiles",
+						dotnet_analyzer_diagnostics_scope = "openFiles",
+					},
+					["csharp|completion"] = {
+						dotnet_provide_regex_completions = true,
+						dotnet_show_name_completion_suggestions = true,
 					},
 					["csharp|inlay_hints"] = {
 						csharp_enable_inlay_hints_for_implicit_object_creation = true,
@@ -62,7 +67,7 @@ return {
 					},
 					["csharp|symbol_search"] = {
 						dotnet_search_reference_assemblies = true,
-					}
+					},
 				},
 			})
 			vim.lsp.enable("roslyn")
@@ -74,6 +79,6 @@ return {
 					cshtml = "razor",
 				},
 			})
-		end
-	}
+		end,
+	},
 }

@@ -144,9 +144,9 @@ return {
           },
         },
         pickers = {
-          lsp_document_symbols = {
-            theme = "ivy"
-          },
+          -- lsp_document_symbols = {
+          --   theme = "ivy"
+          -- },
           buffers = {
             mappings = {
               i = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
