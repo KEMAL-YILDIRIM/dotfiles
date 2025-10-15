@@ -14,6 +14,7 @@ dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
 
 
 -- more minimal ui
+---@diagnostic disable-next-line: missing-fields
 dapui.setup({
   expand_lines = true,
   controls = { enabled = false }, -- no extra play/step buttons
@@ -32,8 +33,8 @@ dapui.setup({
       elements = {
         { id = "scopes", size = 1.0 }, -- 100% of this panel is scopes
       },
-      size = 15,                       -- height in lines (adjust to taste)
-      position = "bottom",             -- "left", "right", "top", "bottom"
+      size = 100,                       -- height in lines (adjust to taste)
+      position = "left",             -- "left", "right", "top", "bottom"
     },
   },
 })

@@ -4,9 +4,19 @@ local function lsp_attach(event)
 		vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc })
 	end
 
-	vim.keymap.set("n", "<leader>l", "<NOP>", { desc = "LSP" })
+	-- jump to lsp document window
+	vim.keymap.set("i", "<C-l>", function()
+		vim.cmd.stopinsert()
+		vim.lsp.buf.signature_help()
+		vim.defer_fn(function()
+			vim.cmd.wincmd("w")
+		end, 100)
+		vim.keymap.set("n", "q", ":close<CR>", { buffer = true })
+	end)
+
 	--  To jump back, press <C-T>.
 	local builtin = require("telescope.builtin")
+	map("<leader>l", "<nop>", "nop")
 	map("<leader>ld", builtin.lsp_definitions, "Goto [D]efinition")
 	map("<leader>lf", builtin.lsp_references, "Goto re[F]erences")
 	map("<leader>li", builtin.lsp_implementations, "Goto [I]mplementation")

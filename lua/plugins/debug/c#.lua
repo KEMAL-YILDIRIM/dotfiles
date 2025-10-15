@@ -38,14 +38,7 @@ dap.configurations.cs = {
     type = "coreclr",
     name = "attach .NET",
     request = "attach",
-    processId = function()
-      return require("dap.utils").pick_process({
-        filter = function(proc)
-          ---@diagnostic disable-next-line: return-type-mismatch
-          return proc.name:match(".*/Debug/.*") and not proc.name:find("vstest.console.dll")
-        end,
-      })
-    end,
+    processId = require("dap.utils").pick_process,
   },
   {
     type = "coreclr",
