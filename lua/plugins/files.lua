@@ -5,6 +5,7 @@ return {
 		---@module 'oil'
 		---@type oil.SetupOpts
 		opts = {
+			delete_to_trash = true,
 			lsp_file_methods = {
 				-- Set to true to autosave buffers that are updated with LSP willRenameFiles
 				-- Set to "unmodified" to only save unmodified buffers
@@ -64,7 +65,10 @@ return {
 		-- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
 		lazy = false,
 		init = function()
-			vim.keymap.set("n", "<leader>e", "<CMD>Oil<CR>", { desc = "Files" })
+			-- vim.keymap.set("n", "<leader>e", "<CMD>Oil<CR>", { desc = "Files" })
+			vim.keymap.set("n", "<leader>e", function()
+				require("oil").open_float()
+			end, { desc = "Files" })
 		end,
 	},
 }
