@@ -4,22 +4,19 @@ F.log = function(v)
 	return v
 end
 
-
 F.reload = function(v)
 	require("plenary.reload").reload_module(v)
 	return require(v)
 end
 
-
 local random = math.random
 F.uuid = function()
-	local template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-	return string.gsub(template, '[xy]', function(c)
-		local v = (c == 'x') and random(0, 0xf) or random(8, 0xb)
-		return string.format('%x', v)
+	local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+	return string.gsub(template, "[xy]", function(c)
+		local v = (c == "x") and random(0, 0xf) or random(8, 0xb)
+		return string.format("%x", v)
 	end)
 end
-
 
 F.index_of = function(tbl, value)
 	for i, v in ipairs(tbl) do
@@ -29,7 +26,6 @@ F.index_of = function(tbl, value)
 	end
 	return nil
 end
-
 
 ---Runs the command and returns output with an ok
 ---@param cmd any
@@ -75,7 +71,6 @@ F.cmd = function(cmd, path)
 	return result
 end
 
-
 -- Return a key with the given value (or nil if not found).  If there are
 -- multiple keys with that value, the particular key returned is arbitrary.
 F.key_of = function(tbl, value)
@@ -86,7 +81,6 @@ F.key_of = function(tbl, value)
 	end
 	return nil
 end
-
 
 ---Read file from the path
 ---@param path string
@@ -107,8 +101,6 @@ F.read_file = function(path)
 
 	return content
 end
-
-
 
 -- csharp helper section
 local excluded_dirs = {
@@ -134,7 +126,7 @@ end
 
 F.roslyn_cmd = function(opts)
 	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
-	local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath "data", "mason", "packages"))
+	local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages"))
 	local roslyn_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "roslyn", "libexec"))
 	local roslyn_cmd = {
 		"dotnet",
@@ -146,18 +138,20 @@ F.roslyn_cmd = function(opts)
 
 	if opts and opts.rzls then
 		vim.opt.rtp:append("D:/Nvim/rzls.nvim")
-		local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
+		local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec", "RazorExtension"))
 		vim.list_extend(roslyn_cmd, {
-			'--razorSourceGenerator=' ..
-				vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll')),
-			'--razorDesignTimePath=' ..
-				vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets')),
-			'--extension=' ..
-				vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, 'RazorExtension', 'Microsoft.VisualStudioCode.RazorExtension.dll')),
+			"--razorSourceGenerator="
+				.. vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll")),
+			"--razorDesignTimePath=" .. vim.fs.normalize(
+				vim.fs.joinpath(rzls_mason_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets")
+			),
+			"--extension=" .. vim.fs.normalize(
+				vim.fs.joinpath(rzls_mason_path, "RazorExtension", "Microsoft.VisualStudioCode.RazorExtension.dll")
+			),
 		})
 	end
 
-	return roslyn_cmd;
+	return roslyn_cmd
 end
 
 F.find_csproj_file = function(path)
@@ -176,10 +170,7 @@ F.find_csproj_file = function(path)
 					F.log("Project file found: " .. name)
 					return name
 				end
-			elseif fs_obj_type == "directory"
-				and not is_excluded(name)
-				and not inspected[name]
-			then
+			elseif fs_obj_type == "directory" and not is_excluded(name) and not inspected[name] then
 				dirs[#dirs + 1] = name
 			end
 		end

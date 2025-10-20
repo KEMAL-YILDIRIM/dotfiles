@@ -17,17 +17,21 @@ return {
 		-- "seblyng/roslyn.nvim",
 		dir = "D:/Nvim/roslyn.nvim",
 		dev = true,
-		opts = { broad_search = true, lock_target = true, debug = false },
-		dependencies = {
-			{
-				-- "tris203/rzls.nvim",
-				dir = "D:/Nvim/rzls.nvim",
-				dev = true,
-				ft = "razor",
-				config = true,
-			},
-		},
+		opts = { broad_search = true, lock_target = true, debug = true },
+		-- dependencies = {
+		-- 	{
+		-- 		-- "tris203/rzls.nvim",
+		-- 		dir = "D:/Nvim/rzls.nvim",
+		-- 		dev = true,
+		-- 		ft = "razor",
+		-- 		config = true,
+		-- 	},
+		-- },
 		init = function()
+			vim.g.dotnet_errors_only = true
+			vim.g.dotnet_show_project_file = false
+			vim.cmd("compiler dotnet")
+
 			vim.lsp.config("roslyn", {
 				handlers = {
 					["textDocument/hover"] = function(err, result, ctx, config)
@@ -37,7 +41,7 @@ return {
 						vim.lsp.handlers["textDocument/hover"](err, result, ctx, config)
 					end,
 				},
-				cmd = F.roslyn_cmd({ rzls = true }),
+				cmd = F.roslyn_cmd({ rzls = false }),
 				on_attach = require("plugins.lsp.keymap"),
 				settings = {
 					["csharp|background_analysis"] = {
@@ -73,12 +77,12 @@ return {
 			vim.lsp.enable("roslyn")
 
 			-- We add the Razor file types before the plugin loads.
-			vim.filetype.add({
-				extension = {
-					razor = "razor",
-					cshtml = "razor",
-				},
-			})
+			-- vim.filetype.add({
+			-- 	extension = {
+			-- 		razor = "razor",
+			-- 		cshtml = "razor",
+			-- 	},
+			-- })
 		end,
 	},
 }

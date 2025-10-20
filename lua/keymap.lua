@@ -176,7 +176,7 @@ end
 
 map.set("n", "tm", tab_actions, { desc = "[T]ab [M]ode" })
 map.set("n", "tn", "<CMD>tabnew<CR>", { desc = "[T]ab open [N]ew" }) -- open new tab
-map.set("n", "tx", "<CMD>tabc<CR>", { desc = "[T]ab close [C]urrent" }) -- close current tab
+map.set("n", "tc", "<CMD>tabc<CR>", { desc = "[T]ab close [C]urrent" }) -- close current tab
 map.set("n", "to", "<CMD>tabo<CR>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
 map.set("n", "tl", "<CMD>tabn<CR>", { desc = "[T]ab Next" }) --  go to next tab
 map.set("n", "th", "<CMD>tabp<CR>", { desc = "[T]ab Previous" }) --  go to previous tab

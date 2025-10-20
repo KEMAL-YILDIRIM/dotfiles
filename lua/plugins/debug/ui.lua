@@ -33,7 +33,7 @@ dapui.setup({
       elements = {
         { id = "scopes", size = 1.0 }, -- 100% of this panel is scopes
       },
-      size = 100,                       -- height in lines (adjust to taste)
+      size = 80,                       -- height in lines (adjust to taste)
       position = "left",             -- "left", "right", "top", "bottom"
     },
   },
