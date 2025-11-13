@@ -12,6 +12,11 @@ return {
 		-- enabled = false,
 		---@module 'oil'
 		---@type oil.SetupOpts
+		-- Optional dependencies
+		dependencies = { { "echasnovski/mini.icons", opts = {} } },
+		-- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons
+		-- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+		lazy = false,
 		opts = {
 			delete_to_trash = true,
 			lsp_file_methods = {
@@ -66,17 +71,13 @@ return {
 				},
 			},
 			use_default_keymaps = true,
+			float = {
+				padding = 1,
+				max_width = 0.9,
+				max_height = 0.9,
+				border = "rounded",
+			},
 		},
-		float = {
-			max_width = 0.5,
-			max_height = 1,
-			border = "rounded",
-		},
-		-- Optional dependencies
-		dependencies = { { "echasnovski/mini.icons", opts = {} } },
-		-- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons
-		-- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
-		lazy = false,
 		init = function()
 			-- vim.keymap.set("n", "<leader>e", "<CMD>Oil<CR>", { desc = "Files" })
 			vim.keymap.set("n", "<leader>e", function()
