@@ -1,17 +1,3 @@
-vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-	pattern = "*",
-	callback = function()
-		local clients = vim.lsp.get_clients({ name = "roslyn" })
-		if not clients or #clients == 0 then
-			return
-		end
-
-		local buffers = vim.lsp.get_buffers_by_client_id(clients[1].id)
-		for _, buf in ipairs(buffers) do
-			vim.lsp.util._refresh("textDocument/diagnostic", { bufnr = buf })
-		end
-	end,
-})
 return {
 	{
 		-- "seblyng/roslyn.nvim",
@@ -23,16 +9,12 @@ return {
 		-- 		-- "tris203/rzls.nvim",
 		-- 		dir = "D:/Nvim/rzls.nvim",
 		-- 		dev = true,
-		-- 		ft = "razor",
 		-- 		config = true,
 		-- 	},
 		-- },
 		init = function()
-			vim.g.dotnet_errors_only = true
-			vim.g.dotnet_show_project_file = false
-			vim.cmd("compiler dotnet")
-
 			vim.lsp.config("roslyn", {
+				-- handlers = vim.tbl_extend("error", require("rzls.roslyn_handlers"), {
 				handlers = {
 					["textDocument/hover"] = function(err, result, ctx, config)
 						if result and result.contents and result.contents.value then

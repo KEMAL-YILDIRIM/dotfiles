@@ -9,8 +9,12 @@ map.set("n","gc","<nop>")
 map.set("n","gcc","<nop>")
 
 -- Set highlight on search, but clear on pressing CTRL + x in normal mode
-vim.opt.hlsearch = true
-map.set("n", "<C-c>", "<CMD>nohlsearch<CR>", { desc = "Clear highlight search in normal mode" })
+vim.o.hlsearch = true
+map.set("n", "//", function ()
+  if vim.v.hlsearch == 1 then
+    vim.cmd('nohlsearch')
+  end
+end, { desc = 'Clear search highlight if active' })
 
 -- return to normal mode
 map.set("i", "<C-c>", "<esc><esc><esc>", { desc = "Press ESC" })
@@ -65,14 +69,6 @@ map.set({ "n", "v" }, "<leader>yp", function()
 			vim.notify("Copied: " .. result)
 		end)
 end, { desc = "Copy current buffer path to system clipboard" })
-
--- save and quit
-map.set("n", "<C-s>", "<nop>", { desc = "[S]ave" })
-map.set("n", "<C-s>f", "<CMD>:w!<CR>", { noremap = true, desc = "[S]ave [F]ile" })
-map.set("n", "<C-s>a", "<CMD>:wa!<CR>", { noremap = true, desc = "[S]ave [A]ll buffers" })
-map.set("n", "<C-s>o", "<CMD>:w!<CR><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
-map.set("n", "<C-s>q", "<CMD>:wq!<CR>", { noremap = true, desc = "[S]ave and [Q]uit" })
-map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
 -- quickfix
 map.set("n", "<leader>qn", "<CMD>:cn<CR>", { noremap = true, desc = "[Q]uickfix [N]ext" })
@@ -190,3 +186,16 @@ map.set("n", "<leader>bo", ":%bd|e#<CR>", { desc = "[B]uffer close all but [O]ne
 map.set("n", "<leader>bn", ":bn<CR>", { desc = "Next [B]uffer" })
 map.set("n", "<leader>bp", ":bp<CR>", { desc = "Previous [B]uffer" })
 map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "[B]uffer [S]et path to current " })
+
+-- save and quit
+map.set("n","<leader>s", "<nop>", { desc = "[S]ave" })
+map.set("n","<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "[S]ave [F]ile" })
+map.set("n","<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "[S]ave [A]ll buffers" })
+map.set("n","<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
+map.set("n","<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "[S]ave and [Q]uit" })
+map.set("n", "Q", "<nop>", { desc = "No map for Q" })
+
+-- session
+vim.keymap.set("n", "<leader>sd", function() require("persistence").load() end, {desc = "load the session for the current directory"})
+vim.keymap.set("n", "<leader>ss", function() require("persistence").select() end,{desc = "select a session to load"})
+vim.keymap.set("n", "<leader>sl", function() require("persistence").load({ last = true }) end,{desc = "load the last session"})

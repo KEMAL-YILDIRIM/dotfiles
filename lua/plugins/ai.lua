@@ -1,4 +1,4 @@
-vim.keymap.set("n", "<leader>ac", "<CMD>CodeCompanionChat Toggle<CR>", { desc = "[A]I Code Companion Chat [T]oggle" })
+vim.keymap.set("n", "<leader>aa", "<CMD>CodeCompanionChat Toggle<CR>", { desc = "[A]I Code Companion Chat [T]oggle" })
 return {
 	{
 		"olimorris/codecompanion.nvim",

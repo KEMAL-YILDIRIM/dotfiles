@@ -1,7 +1,7 @@
 -- color scheme
-vim.opt.termguicolors = true
-vim.opt.background = "dark"
-vim.opt.signcolumn = "yes"
+vim.o.termguicolors = true
+vim.o.background = "dark"
+vim.o.signcolumn = "yes"
 
 -- tailwind colors can be found at https://tailscan.com/_nuxt/colors.*.js
 ---Read the colors.json and gets the color palette

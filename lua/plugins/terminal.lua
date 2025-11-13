@@ -1,4 +1,4 @@
-local state = {
+--[[ local state = {
 	terminal = {
 		buf = -1,
 		win = -1,
@@ -30,7 +30,7 @@ local toggle_terminal = function()
 	if not vim.api.nvim_win_is_valid(state.terminal.win) then
 		state.terminal = create_terminal({ buf = state.terminal.buf })
 		if vim.bo[state.terminal.buf].buftype ~= "terminal" then
-			vim.cmd(":terminal pwsh.exe --NoLogo")
+			vim.cmd(":terminal nu")
 		end
 	else
 		vim.api.nvim_win_hide(state.terminal.win)
@@ -41,8 +41,8 @@ vim.api.nvim_create_autocmd('TermOpen', {
 	group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
 	callback = function()
 		-- Shell settings
-		vim.opt.number = false
-		vim.opt.relativenumber = false
+		vim.o.number = false
+		vim.o.relativenumber = false
 		vim.cmd("startinsert")
 	end,
 })
@@ -54,7 +54,7 @@ vim.keymap.set('n', '<leader>ts', function()
 	-- make
 	-- dotnet run cwd
 	vim.fn.chansend(state.terminal.job_id, { '\r\n' })
-end, { desc = "[T]erminal [S]end command" })
+end, { desc = "[T]erminal [S]end command" }) ]]
 
 
 return {
@@ -78,7 +78,7 @@ return {
 	},
 	{
 		'akinsho/toggleterm.nvim',
-		enabled = false,
+		enabled = true,
 		event = "VeryLazy",
 		cmd = "ToggleTerm",
 		version = "*",
@@ -89,14 +89,14 @@ return {
 				terminal_mappings = true,
 				-- direction = 'float',
 				-- shell = "pwsh.exe -NoLogo -NoProfile",
-				shell = "pwsh.exe -NoLogo",
+				shell = "nu",
 				auto_scroll = true,
 				-- persist_mode = true,
 				persist_size = true,
 				close_on_exit = true,
 			})
 
-			vim.keymap.set({ 'n', 't' }, '<c-\\>', '<cmd>:3ToggleTerm direction=vertical size=100<CR>',
+			vim.keymap.set({ 'n', 't' }, '<leader>tt', '<cmd>:3ToggleTerm direction=vertical size=80<CR>',
 				{ desc = "[T]erminal [T]oggle" })
 		end
 	}

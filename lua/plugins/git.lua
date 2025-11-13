@@ -53,32 +53,14 @@ return {
 				vim.keymap.set("n", "<leader>gst", gs.stage_hunk, { desc = "[G]it Signs: stage hunk toggle" })
 				vim.keymap.set("n", "<leader>gsa", gs.reset_buffer, { desc = "[G]it Signs: reset buffer" })
 				vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "[G]it Signs: preview hunk" })
-				vim.keymap.set(
-					"n",
-					"<leader>gsb",
-					gs.toggle_current_line_blame,
-					{ desc = "[G]it Signs: blame current line" }
-				)
-				vim.keymap.set("n", "<leader>gsd", function()
-					gs.diffthis("~")
-				end, { desc = "[G]it Signs: diff this ~" })
-				vim.keymap.set("n", "<leader>gsl", function()
-					gs.blame_line({ full = true })
-				end, { desc = "[G]it Signs: blame line" })
-				vim.keymap.set("n", "<leader>gd", function()
-					vim.cmd("DiffviewOpen")
-				end, { desc = "[G]it Signs: diff this" })
-				vim.keymap.set("v", "<leader>gr", function()
-					gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-				end, { desc = "[G]it Signs: [R]eset hunk" })
+				vim.keymap.set( "n", "<leader>gsb", gs.toggle_current_line_blame, { desc = "[G]it Signs: blame current line" })
+				vim.keymap.set("n", "<leader>gsd", function() gs.diffthis("~") end, { desc = "[G]it Signs: diff this ~" })
+				vim.keymap.set("n", "<leader>gsl", function() gs.blame_line({ full = true }) end, { desc = "[G]it Signs: blame line" })
+				vim.keymap.set("n", "<leader>gd", function() vim.cmd("DiffviewOpen") end, { desc = "[G]it Signs: diff this" })
+				vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "[G]it Signs: [R]eset hunk" })
 
 				-- Text object
-				vim.keymap.set(
-					{ "o", "x" },
-					"ih",
-					":<C-U>Gitsigns select_hunk<CR>",
-					{ desc = "[G]itsigns select hunk", silent = true }
-				)
+				vim.keymap.set( { "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "[G]itsigns select hunk", silent = true })
 
 				-- Setup key mappings for git operations
 				vim.keymap.set("n", "<leader>gts", ":Telescope git_status<CR>", { noremap = true })

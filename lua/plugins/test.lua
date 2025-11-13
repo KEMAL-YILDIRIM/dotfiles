@@ -22,7 +22,12 @@ return {
       neotest.setup({
         log_level = 1,
         adapters = {
-          require("neotest-dotnet")
+          require("neotest-dotnet")({
+            dap = {
+              adapter_name = "coreclr",
+              args = { justMyCode = false },
+            }
+          })
         }
       })
       vim.keymap.set("n", "<leader>ur", function() neotest.run.run() end, { desc = "[R]un Test" })

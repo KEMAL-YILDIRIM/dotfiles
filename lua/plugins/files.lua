@@ -1,4 +1,12 @@
 return {
+	-- Lua
+	{
+		"folke/persistence.nvim",
+		event = "BufReadPre", -- this will only start session saving when an actual file was opened
+		opts = {
+			-- add any custom options here
+		},
+	},
 	{
 		"stevearc/oil.nvim",
 		-- enabled = false,
@@ -58,6 +66,11 @@ return {
 				},
 			},
 			use_default_keymaps = true,
+		},
+		float = {
+			max_width = 0.5,
+			max_height = 1,
+			border = "rounded",
 		},
 		-- Optional dependencies
 		dependencies = { { "echasnovski/mini.icons", opts = {} } },

@@ -18,7 +18,7 @@ vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = 'a'
+vim.o.mouse = "a"
 
 -- Don't show the mode, since it's already in status line
 vim.o.showmode = false
@@ -26,7 +26,7 @@ vim.o.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this.o.on if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.o.clipboard = 'unnamedplus'
+vim.o.clipboard = "unnamedplus"
 
 -- Autosave
 vim.o.autowriteall = true
@@ -44,7 +44,7 @@ vim.o.ignorecase = true
 vim.o.smartcase = true
 
 -- Keep signcolumn on by default
-vim.o.signcolumn = 'yes'
+vim.o.signcolumn = "yes"
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -55,13 +55,16 @@ vim.o.splitright = true
 vim.o.splitbelow = true
 
 -- Preview substitutions live, as you type!
-vim.o.inccommand = 'split'
+vim.o.inccommand = "split"
 
 -- Show which line your cursor is on
 vim.o.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
+
+-- Windows 10 cmd shell pipe
+vim.o.shellpipe = ">"
 
 -- File list style into tree mode
 vim.cmd("let g:netrw_liststyle = 3")

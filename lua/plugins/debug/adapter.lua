@@ -19,6 +19,7 @@ return {
       require "plugins/debug/ui"
       -- require('nvim-dap-virtual-text').setup()
       require "plugins.debug.keymap"
+      require "plugins.debug.utils"
     end,
   },
 }

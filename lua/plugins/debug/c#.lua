@@ -11,7 +11,17 @@ dap.adapters.coreclr = netcoredbg_adapter
 dap.adapters.netcoredbg = netcoredbg_adapter
 
 dap.configurations.cs = {
-  -- Debug specific test (will be configured dynamically)
+  -- Debug specific test (configured dynamically via F.debug_test_under_cursor)
+  {
+    type = "coreclr",
+    name = "Debug Test",
+    request = "launch",
+    program = "dotnet",
+    args = {}, -- Will be set dynamically
+    cwd = "${workspaceFolder}",
+    stopAtEntry = false,
+    console = "integratedTerminal",
+  },
   {
     type = "coreclr",
     name = "launch - netcoredbg",
@@ -26,7 +36,7 @@ dap.configurations.cs = {
       end
 
       -- pick
-      require "plugins.debug.utils".build_project(project_path)
+      F.build_project(project_path)
       local filename = vim.fn.fnamemodify(project_path, ":t:r") .. ".dll"
       local debug_path = string.format("%s/bin/Debug/.*/", vim.fn.fnamemodify(project_path, ":h"))
       local dll = vim.fn.findfile(filename, debug_path, 1)

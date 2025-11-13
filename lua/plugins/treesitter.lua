@@ -36,7 +36,6 @@ return {
       local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
       --[[
 
-      -- vim.opt.rtp:append("D:/Nvim/tree-sitter-razor")
       parser_config.razor = {
         install_info = {
           url = "D:/Nvim/tree-sitter-razor",
@@ -47,7 +46,6 @@ return {
       }
       -- vim.filetype.add({ extension = { razor = "razor" } })
 
-      vim.opt.rtp:append("D:/Nvim/tree-sitter-cshtml")
       parser_config.cshtml = {
         install_info = {
           url = "D:/Nvim/tree-sitter-cshtml", -- local path or git repo
