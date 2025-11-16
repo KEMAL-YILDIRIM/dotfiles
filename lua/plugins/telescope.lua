@@ -201,8 +201,8 @@ return {
 					},
 					buffers = {
 						mappings = {
-							i = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
-							n = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope [D]elete buffer" } },
+							i = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope Delete buffer" } },
+							n = { ["<C-x>"] = actions.delete_buffer, desc = { "Telescope Delete buffer" } },
 						},
 					},
 				},
@@ -220,30 +220,30 @@ return {
 
 			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>f", "<nop>", { desc = "[S]earch Telescope" })
-			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "[S]earch [H]elp" })
-			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[S]earch [F]iles" })
-			vim.keymap.set("n", "<leader>fw", builtin.grep_string, { desc = "[S]earch grep [W]ord" })
-			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "[S]earch live [G]rep" })
-			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
-			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "[S]earch [R]esume" })
-			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = "[S]earch Recent Files[.]" })
-			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[S]earch existing [B]uffers" })
-			vim.keymap.set("n", "<leader>ft", ":TodoTelescope<CR>", { desc = "[S]earch [T]odo marks" })
-			vim.keymap.set("n", "<leader>fm", live_multigrep, { desc = "[S]earch [M]ultigrep" })
+			vim.keymap.set("n", "<leader>f", "<nop>", { desc = "Search Telescope" })
+			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Search Help" })
+			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Search Keymaps" })
+			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Search Files" })
+			vim.keymap.set("n", "<leader>fw", builtin.grep_string, { desc = "Search grep Word" })
+			vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Search live Grep" })
+			vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Search Diagnostics" })
+			vim.keymap.set("n", "<leader>fr", builtin.resume, { desc = "Search Resume" })
+			vim.keymap.set("n", "<leader>f.", builtin.oldfiles, { desc = "Search Recent Files." })
+			vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Search existing Buffers" })
+			vim.keymap.set("n", "<leader>ft", ":TodoTelescope<CR>", { desc = "Search Todo marks" })
+			vim.keymap.set("n", "<leader>fm", live_multigrep, { desc = "Search Multigrep" })
 
 			vim.keymap.set("n", "<leader>fo", function()
 				builtin.find_files({ cwd = "C:/Users/Kemal Yildirim/OneDrive/Dokumanlar/Obsidian" })
-			end, { desc = "[S]earch [O]bsidian" })
+			end, { desc = "Search Obsidian" })
 
 			vim.keymap.set("n", "<leader>fn", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("config") })
-			end, { desc = "[S]earch [N]eovim files" })
+			end, { desc = "Search Neovim files" })
 
 			vim.keymap.set("n", "<leader>fp", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("data") .. "/lazy" })
-			end, { desc = "[S]earch Neovim [P]lugin files" })
+			end, { desc = "Search Neovim Plugin files" })
 
 			-- Slightly advanced example of overriding default behavior and theme
 			vim.keymap.set("n", "<leader>fc", function()
@@ -252,7 +252,7 @@ return {
 					winblend = 10,
 					previewer = false,
 				}))
-			end, { desc = "[S]earch in [C]urrent buffer" })
+			end, { desc = "Search in Current buffer" })
 
 			-- Also possible to pass additional configuration options.
 			--  See `:help telescope.builtin.live_grep()` for information about particular keys
@@ -261,7 +261,7 @@ return {
 					grep_open_files = true,
 					prompt_title = "Live Grep in Open Files",
 				})
-			end, { desc = "[S]earch [/] in Open Files" })
+			end, { desc = "Search / in Open Files" })
 		end,
 	},
 }

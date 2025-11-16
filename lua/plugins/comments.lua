@@ -12,8 +12,8 @@ return {
         config = function()
             local api = require('Comment.api')
 
-            vim.keymap.set('n', '<leader>cl', api.toggle.linewise.current, { desc = '[C]omment out current [l]ine' })
-            vim.keymap.set('n', '<leader>cb', api.toggle.blockwise.current, { desc = '[C]omment out current [b]lock' })
+            vim.keymap.set('n', '<leader>cl', api.toggle.linewise.current, { desc = 'Comment out current line' })
+            vim.keymap.set('n', '<leader>cb', api.toggle.blockwise.current, { desc = 'Comment out current block' })
 
             local esc = vim.api.nvim_replace_termcodes(
                 '<ESC>', true, false, true
@@ -32,9 +32,9 @@ return {
             end)
 
             vim.keymap.set({ 'n', 'v' }, '<leader>ci', '<cmd>cib<cr><leader>cl<cr>',
-                { desc = '[C]omment [I]nside block' })
+                { desc = 'Comment inside block' })
             vim.keymap.set({ 'n', 'v' }, '<leader>ca', '<cmd>cab<cr><leader>cl<cr>',
-                { desc = '[C]omment [A]round block' })
+                { desc = 'Comment around block' })
         end
     },
 }

@@ -41,7 +41,7 @@ map.set("n", "<C-d>", "<C-d>zz", { desc = "Page down while keeping cursor at the
 map.set("n", "<C-u>", "<C-u>zz", { desc = "Page down while keeping cursor at the middle of the page" })
 
 -- preserve paste buffer
-map.set("x", "<leader>p", [["_dP]], { desc = "Preserve [P]aste buffer" })
+map.set("x", "<leader>p", [["_dP]], { desc = "Preserve Paste buffer" })
 
 -- coppy to system clipboard so not loose it while navigate between files
 map.set({ "n", "v" }, "<leader>y", "<nop>", { desc = "Copy" })
@@ -71,8 +71,8 @@ map.set({ "n", "v" }, "<leader>yp", function()
 end, { desc = "Copy current buffer path to system clipboard" })
 
 -- quickfix
-map.set("n", "<leader>qn", "<CMD>:cn<CR>", { noremap = true, desc = "[Q]uickfix [N]ext" })
-map.set("n", "<leader>qp", "<CMD>:cp<CR>", { noremap = true, desc = "[Q]uickfix [P]revious" })
+map.set("n", "<leader>qn", "<CMD>:cn<CR>", { noremap = true, desc = "Quickfix Next" })
+map.set("n", "<leader>qp", "<CMD>:cp<CR>", { noremap = true, desc = "Quickfix Previous" })
 map.set("n", "<leader>qq", function()
 	local qf_exists = false
 	for _, win in pairs(vim.fn.getwininfo()) do
@@ -87,7 +87,7 @@ map.set("n", "<leader>qq", function()
 	if not vim.tbl_isempty(vim.fn.getqflist()) then
 		vim.cmd("copen")
 	end
-end, { noremap = true, desc = "[Q]uickfix Toggle" })
+end, { noremap = true, desc = "Quickfix Toggle" })
 
 -- tabs
 local tab_mode_active = false
@@ -170,29 +170,29 @@ local function tab_actions()
 	})
 end
 
-map.set("n", "tm", tab_actions, { desc = "[T]ab [M]ode" })
-map.set("n", "tn", "<CMD>tabnew<CR>", { desc = "[T]ab open [N]ew" }) -- open new tab
-map.set("n", "tc", "<CMD>tabc<CR>", { desc = "[T]ab close [C]urrent" }) -- close current tab
-map.set("n", "to", "<CMD>tabo<CR>", { desc = "[T]ab close [A]ll but this" }) -- close current tab
-map.set("n", "tl", "<CMD>tabn<CR>", { desc = "[T]ab Next" }) --  go to next tab
-map.set("n", "th", "<CMD>tabp<CR>", { desc = "[T]ab Previous" }) --  go to previous tab
-map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "[T]ab [D]uplicate current buffer in new tab" })
-map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "[T]ab open last used [T]ab" })
-map.set("n", "t", "<nop>", { desc = "[T]ab" })
+map.set("n", "tm", tab_actions, { desc = "Tab Mode" })
+map.set("n", "tn", "<CMD>tabnew<CR>", { desc = "Tab open New" }) -- open new tab
+map.set("n", "tc", "<CMD>tabc<CR>", { desc = "Tab close Current" }) -- close current tab
+map.set("n", "to", "<CMD>tabo<CR>", { desc = "Tab close All but this" }) -- close current tab
+map.set("n", "tl", "<CMD>tabn<CR>", { desc = "Tab Next" }) --  go to next tab
+map.set("n", "th", "<CMD>tabp<CR>", { desc = "Tab Previous" }) --  go to previous tab
+map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "Tab Duplicate current buffer in new tab" })
+map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "Tab open last used Tab" })
+map.set("n", "t", "<nop>", { desc = "Tab" })
 
 -- buffers
 map.set("n", "<leader>b", "<nop>", { desc = "Buffer" })
-map.set("n", "<leader>bo", ":%bd|e#<CR>", { desc = "[B]uffer close all but [O]ne" })
-map.set("n", "<leader>bn", ":bn<CR>", { desc = "Next [B]uffer" })
-map.set("n", "<leader>bp", ":bp<CR>", { desc = "Previous [B]uffer" })
-map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "[B]uffer [S]et path to current " })
+map.set("n", "<leader>bo", ":%bd|e#<CR>", { desc = "Buffer close all but One" })
+map.set("n", "<leader>bn", ":bn<CR>", { desc = "Next Buffer" })
+map.set("n", "<leader>bp", ":bp<CR>", { desc = "Previous Buffer" })
+map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "Buffer Set path to current " })
 
 -- save and quit
-map.set("n","<leader>s", "<nop>", { desc = "[S]ave" })
-map.set("n","<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "[S]ave [F]ile" })
-map.set("n","<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "[S]ave [A]ll buffers" })
-map.set("n","<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "[S]ave and [S]ource out" })
-map.set("n","<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "[S]ave and [Q]uit" })
+map.set("n","<leader>s", "<nop>", { desc = "Save" })
+map.set("n","<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "Save File" })
+map.set("n","<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "Save All buffers" })
+map.set("n","<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "Save and Source out" })
+map.set("n","<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
 map.set("n", "Q", "<nop>", { desc = "No map for Q" })
 
 -- session

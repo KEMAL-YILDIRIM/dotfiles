@@ -35,7 +35,7 @@ return {
 						gs.next_hunk()
 					end)
 					return "<Ignore>"
-				end, { expr = true, desc = "[G]it Signs: next hunk" })
+				end, { expr = true, desc = "Git Signs: next hunk" })
 
 				vim.keymap.set("n", "<leader>gsh", function()
 					if vim.wo.diff then
@@ -45,22 +45,22 @@ return {
 						gs.prev_hunk()
 					end)
 					return "<Ignore>"
-				end, { expr = true, desc = "[G]it Signs: previous hunk" })
+				end, { expr = true, desc = "Git Signs: previous hunk" })
 
 				-- Actions
-				vim.keymap.set("n", "<leader>g", "<NOP>", { desc = "[G]it" })
-				vim.keymap.set("n", "<leader>gss", gs.stage_buffer, { desc = "[G]it Signs: stage buffer" })
-				vim.keymap.set("n", "<leader>gst", gs.stage_hunk, { desc = "[G]it Signs: stage hunk toggle" })
-				vim.keymap.set("n", "<leader>gsa", gs.reset_buffer, { desc = "[G]it Signs: reset buffer" })
-				vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "[G]it Signs: preview hunk" })
-				vim.keymap.set( "n", "<leader>gsb", gs.toggle_current_line_blame, { desc = "[G]it Signs: blame current line" })
-				vim.keymap.set("n", "<leader>gsd", function() gs.diffthis("~") end, { desc = "[G]it Signs: diff this ~" })
-				vim.keymap.set("n", "<leader>gsl", function() gs.blame_line({ full = true }) end, { desc = "[G]it Signs: blame line" })
-				vim.keymap.set("n", "<leader>gd", function() vim.cmd("DiffviewOpen") end, { desc = "[G]it Signs: diff this" })
-				vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "[G]it Signs: [R]eset hunk" })
+				vim.keymap.set("n", "<leader>g", "<NOP>", { desc = "Git" })
+				vim.keymap.set("n", "<leader>gss", gs.stage_buffer, { desc = "Git Signs: stage buffer" })
+				vim.keymap.set("n", "<leader>gst", gs.stage_hunk, { desc = "Git Signs: stage hunk toggle" })
+				vim.keymap.set("n", "<leader>gsa", gs.reset_buffer, { desc = "Git Signs: reset buffer" })
+				vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "Git Signs: preview hunk" })
+				vim.keymap.set( "n", "<leader>gsb", gs.toggle_current_line_blame, { desc = "Git Signs: blame current line" })
+				vim.keymap.set("n", "<leader>gsd", function() gs.diffthis("~") end, { desc = "Git Signs: diff this ~" })
+				vim.keymap.set("n", "<leader>gsl", function() gs.blame_line({ full = true }) end, { desc = "Git Signs: blame line" })
+				vim.keymap.set("n", "<leader>gd", function() vim.cmd("DiffviewOpen") end, { desc = "Git Signs: diff this" })
+				vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git Signs: Reset hunk" })
 
 				-- Text object
-				vim.keymap.set( { "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "[G]itsigns select hunk", silent = true })
+				vim.keymap.set( { "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { desc = "Gitsigns select hunk", silent = true })
 
 				-- Setup key mappings for git operations
 				vim.keymap.set("n", "<leader>gts", ":Telescope git_status<CR>", { noremap = true })
@@ -68,20 +68,20 @@ return {
 					"n",
 					"<leader>gh",
 					":Telescope git_commits<CR>",
-					{ noremap = true, desc = "[G]it [H]istory" }
+					{ noremap = true, desc = "Git History" }
 				)
 				require("telescope").load_extension("git_file_history")
 				local tb = require("telescope.builtin")
 				vim.keymap.set("n", "<leader>gc", function()
 					require("telescope").extensions.git_file_history.git_file_history()
 					-- require("telescope.builtin").git_bcommits({ cwd = vim.fn.expand("%:p:h") })
-				end, { noremap = true, desc = "[G]it [C]ommits" })
+				end, { noremap = true, desc = "Git Commits" })
 				vim.keymap.set("n", "<leader>gb", ":Telescope git_branches<CR>", { noremap = true })
 				vim.keymap.set(
 					"n",
 					"<leader>gtw",
 					"<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
-					{ desc = "Telescope [G]it [W]orktrees", silent = true }
+					{ desc = "Telescope Git Worktrees", silent = true }
 				)
 				vim.keymap.set(
 					"n",
@@ -116,7 +116,7 @@ return {
 		-- setting the keybinding for LazyGit with 'keys' is recommended in
 		-- order to load the plugin when the command is run for the first time
 		keys = {
-			{ "<leader>gg", "<CMD>:LazyGitCurrentFile<CR>", desc = "[G]it Lazy[G]it" },
+			{ "<leader>gg", "<CMD>:LazyGitCurrentFile<CR>", desc = "Git LazyGit" },
 		},
 	},
 	{ -- Neo git
@@ -132,36 +132,36 @@ return {
 		},
 		config = function()
 			require("neogit").setup({})
-			vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", { silent = true, noremap = true, desc = "Neo [G]it: " })
+			vim.keymap.set("n", "<leader>gg", ":Neogit<CR>", { silent = true, noremap = true, desc = "Neo Git: " })
 			vim.keymap.set(
 				"n",
 				"<leader>gc",
 				":Neogit commit<CR>",
-				{ silent = true, noremap = true, desc = "Neo [G]it: [C]ommit" }
+				{ silent = true, noremap = true, desc = "Neo Git: Commit" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>gp",
 				":Neogit pull<CR>",
-				{ silent = true, noremap = true, desc = "Neo [G]it: [P]ull" }
+				{ silent = true, noremap = true, desc = "Neo Git: Pull" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>gh",
 				":Neogit push<CR>",
-				{ silent = true, noremap = true, desc = "Neo [G]it: Pu[S]h" }
+				{ silent = true, noremap = true, desc = "Neo Git: PuSh" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>gl",
 				":G blame<CR>",
-				{ silent = true, noremap = true, desc = "Neo [G]it: b[L]ame" }
+				{ silent = true, noremap = true, desc = "Neo Git: bLame" }
 			)
 			vim.keymap.set(
 				"n",
 				"<leader>gd",
 				":DiffviewOpen<CR>",
-				{ silent = true, noremap = true, desc = "Neo [G]it: [D]iffview" }
+				{ silent = true, noremap = true, desc = "Neo Git: Diffview" }
 			)
 		end,
 	},

@@ -17,20 +17,20 @@ local function lsp_attach(event)
 	--  To jump back, press <C-T>.
 	local builtin = require("telescope.builtin")
 	map("<leader>l", "<nop>", "")
-	map("<leader>ld", builtin.lsp_definitions, "Goto [D]efinition")
-	map("<leader>lf", builtin.lsp_references, "Goto re[F]erences")
-	map("<leader>li", builtin.lsp_implementations, "Goto [I]mplementation")
-	map("<leader>lt", builtin.lsp_type_definitions, "[T]ype Definition")
-	map("<leader>ls", builtin.lsp_document_symbols, "Document [S]ymbols")
-	map("<leader>lw", builtin.lsp_dynamic_workspace_symbols, "[W]orkspace Symbols")
-	map("<leader>lr", lsp.buf.rename, "[R]ename")
-	map("<leader>la", lsp.buf.code_action, "Code [A]ction")
+	map("<leader>ld", builtin.lsp_definitions, "Goto Definition")
+	map("<leader>lf", builtin.lsp_references, "Goto reFerences")
+	map("<leader>li", builtin.lsp_implementations, "Goto Implementation")
+	map("<leader>lt", builtin.lsp_type_definitions, "Type Definition")
+	map("<leader>ls", builtin.lsp_document_symbols, "Document Symbols")
+	map("<leader>lw", builtin.lsp_dynamic_workspace_symbols, "Workspace Symbols")
+	map("<leader>lr", lsp.buf.rename, "Rename")
+	map("<leader>la", lsp.buf.code_action, "Code Action")
 	map("<space>lh", function()
 		vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = 0 }), { bufnr = 0 })
-	end, "Enable Inlay [H]ints")
+	end, "Enable Inlay Hints")
 	map("<space>ll", function()
 		vim.lsp.codelens.refresh({ bufnr = 0 })
-	end, "Refresh Code [L]ens")
+	end, "Refresh Code Lens")
 
 	-- Opens a popup that displays documentation about the word under your cursor
 	--  See `:help K` for why this keymap
@@ -48,6 +48,6 @@ local function lsp_attach(event)
 
 	-- WARN: This is not Goto Definition, this is Goto Declaration.
 	--  For example, in C this would take you to the header
-	map("<leader>lc", lsp.buf.declaration, "Goto De[C]laration")
+	map("<leader>lc", lsp.buf.declaration, "Goto DeClaration")
 end
 return lsp_attach

@@ -74,7 +74,7 @@ return {
 			require("luasnip.loaders.from_vscode").lazy_load()
 		end,
 	},
-	{ -- Autocompletion NvimCmp
+	--[[ { -- Autocompletion NvimCmp
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     enabled = true,
@@ -224,11 +224,11 @@ return {
         },
       })
     end,
-  },
-	--[[ { -- Autocompletion Blink
+  }, ]]
+	{ -- Autocompletion Blink
 		"saghen/blink.cmp",
 		dependencies = {
-			{ "L3MON4D3/LuaSnip", version = "v2.*" },
+			-- { "L3MON4D3/LuaSnip", version = "v2.*" },
 			{ "saghen/blink.compat", lazy = true, verson = false },
 		},
 		version = "1.*",
@@ -237,7 +237,7 @@ return {
 		---@type blink.cmp.Config
 		opts = {
 			keymap = {
-				preset = "default",
+				preset = "none",
 
 				["<C-.>"] = { "show", "show_documentation", "hide_documentation" },
 				["<C-c>"] = { "cancel", "fallback" },
@@ -252,6 +252,61 @@ return {
 				["<C-l>"] = { "snippet_forward", "fallback" },
 				["<C-h>"] = { "snippet_backward", "fallback" },
 			},
+
+			completion = {
+				menu = {
+          border = "rounded",
+          winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
+					--[[ draw = {
+						padding = 1,
+						components = {
+							kind_icon = {
+								text = function(ctx)
+									if vim.tbl_contains({ "Path" }, ctx.source_name) then
+										local mini_icon, _ =
+											require("mini.icons").get_icon(ctx.item.data.type, ctx.label)
+										if mini_icon then
+											return mini_icon .. ctx.icon_gap
+										end
+									end
+
+									local icon = require("lspkind").symbolic(ctx.kind, { mode = "symbol" })
+									return icon .. ctx.icon_gap
+								end,
+
+								-- Optionally, use the highlight groups from mini.icons
+								-- You can also add the same function for `kind.highlight` if you want to
+								-- keep the highlight groups in sync with the icons.
+								highlight = function(ctx)
+									if vim.tbl_contains({ "Path" }, ctx.source_name) then
+										local mini_icon, mini_hl =
+											require("mini.icons").get_icon(ctx.item.data.type, ctx.label)
+										if mini_icon then
+											return mini_hl
+										end
+									end
+									return ctx.kind_hl
+								end,
+							},
+							kind = {
+								-- Optional, use highlights from mini.icons
+								highlight = function(ctx)
+									if vim.tbl_contains({ "Path" }, ctx.source_name) then
+										local mini_icon, mini_hl =
+											require("mini.icons").get_icon(ctx.item.data.type, ctx.label)
+										if mini_icon then
+											return mini_hl
+										end
+									end
+									return ctx.kind_hl
+								end,
+							},
+						},
+						-- columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } }, --cmp like display
+					}, ]]
+				},
+			},
+
 			appearance = {
 				nerd_font_variant = "mono",
 			},
@@ -259,8 +314,8 @@ return {
 			fuzzy = {
 				sorts = {
 					"exact",
-					"sort_text",
 					"score",
+					"sort_text",
 				},
 			},
 
@@ -273,13 +328,17 @@ return {
 
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer", "obsidian", "obsidian_new", "obsidian_tags" },
+				per_filetype = {
+					sql = { "dadbod" },
+				},
 				providers = {
+					dadbod = { module = "vim_dadbod_completion.blink" },
 					obsidian = { name = "obsidian", module = "blink.compat.source" },
 					obsidian_new = { name = "obsidian_new", module = "blink.compat.source" },
 					obsidian_tags = { name = "obsidian_tags", module = "blink.compat.source" },
 				},
 			},
 		},
-	}, ]]
+	},
 }
 -- vim: ts=2 sts=2 sw=2 et
