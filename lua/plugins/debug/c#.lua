@@ -46,7 +46,7 @@ dap.configurations.cs = {
   },
   {
     type = "coreclr",
-    name = "attach .NET",
+    name = "attach - netcoredbg",
     request = "attach",
     processId = require("dap.utils").pick_process,
   },

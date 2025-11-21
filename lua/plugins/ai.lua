@@ -1,17 +1,18 @@
-vim.keymap.set("n", "<leader>aa", "<CMD>CodeCompanionChat Toggle<CR>", { desc = "[A]I Code Companion Chat [T]oggle" })
 return {
 	{
 		"olimorris/codecompanion.nvim",
 		event = "InsertEnter",
 		opts = {
 			-- adapters = {
-			--   anthropic = function()
-			--     return require("codecompanion.adapters").extend("anthropic", {
-			--       env = {
-			--         api_key = vim.env.ANTHROPIC_API_KEY
-			--       },
-			--     })
-			--   end,
+			-- 	http = {
+			-- 		anthropic = function()
+			-- 			return require("codecompanion.adapters").extend("anthropic", {
+			-- 				env = {
+			-- 					api_key = vim.env.ANTHROPIC_API_KEY,
+			-- 				},
+			-- 			})
+			-- 		end,
+			-- 	},
 			-- },
 			strategies = {
 				chat = {
@@ -28,10 +29,19 @@ return {
 			"nvim-lua/plenary.nvim",
 			"nvim-treesitter/nvim-treesitter",
 		},
+		init = function()
+			vim.keymap.set(
+				"n",
+				"<leader>aa",
+				"<CMD>CodeCompanionChat Toggle<CR>",
+				{ desc = "AI Code Companion Chat Toggle" }
+			)
+		end,
 	},
 	{
 		"zbirenbaum/copilot.lua",
 		cmd = "Copilot",
+		enabled = false,
 		event = "InsertEnter",
 		config = function()
 			require("copilot").setup({

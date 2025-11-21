@@ -17,7 +17,7 @@ map.set("n", "//", function ()
 end, { desc = 'Clear search highlight if active' })
 
 -- return to normal mode
-map.set("i", "<C-c>", "<esc><esc><esc>", { desc = "Press ESC" })
+map.set( {"i","c"}, "<C-c>", "<ESC><ESC>", { desc = "Press ESC" })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows

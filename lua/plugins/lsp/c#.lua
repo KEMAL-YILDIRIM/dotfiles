@@ -3,7 +3,7 @@ return {
 		-- "seblyng/roslyn.nvim",
 		dir = "D:/Nvim/roslyn.nvim",
 		dev = true,
-		opts = { broad_search = true, lock_target = true, debug = true },
+		opts = { filewatching = "roslyn", broad_search = true, lock_target = true, debug = true },
 		-- dependencies = {
 		-- 	{
 		-- 		-- "tris203/rzls.nvim",

@@ -185,7 +185,11 @@ namespace {}
 		)
 	),
 
-	_snippet("ctor", {
+	_snippet("summary_snip", {
+		_text({ "/// <summary>", "/// ", "///  returns ", "/// </summary>" }),
+	}),
+
+	_snippet("ctor_snip", {
 		_text({ "    /// <summary>", "    /// Initializes a new instance of the " }),
 		_func(function()
 			local class_info = get_class_info()
