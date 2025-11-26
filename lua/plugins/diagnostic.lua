@@ -63,51 +63,64 @@ return {
 	},
 	{
 		"folke/trouble.nvim",
+		event = "BufEnter",
 		opts = { function() end },
 		cmd = "Trouble",
 		keys = {},
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-			"folke/todo-comments.nvim",
-		},
-		config = function()
-			-- Debug keymap
-			vim.keymap.set("n", "<leader>dp", vim.diagnostic.goto_prev, { desc = "Go to Previous diagnostic message" })
-			vim.keymap.set("n", "<leader>dn", vim.diagnostic.goto_next, { desc = "Go to Next diagnostic message" })
-			vim.keymap.set("n", "<leader>dm", vim.diagnostic.open_float, { desc = "Show diagnostic error Messages" })
-
-			vim.keymap.set(
-				"n",
-				"<leader>dx",
-				"<cmd>Trouble diagnostics toggle<cr>",
-				{ desc = "Open/close trouble list" }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>ds",
-				"<cmd>Trouble symbols toggle focus=false<cr>",
-				{ desc = "Open trouble Document Symbols" }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>dd",
-				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-				{ desc = "Open trouble Document diagnostics" }
-			)
-			vim.keymap.set("n", "<leader>dq", "<cmd>Trouble qflist toggle<cr>", { desc = "Open trouble Quickfix list" })
-			vim.keymap.set(
-				"n",
-				"<leader>dl",
-				"<cmd>Trouble loclist toggle<cr>",
-				{ desc = "Open trouble Location list" }
-			)
-			vim.keymap.set("n", "<leader>dt", "<cmd>Trouble todo<CR>", { desc = "Open Todos in trouble" })
-			vim.keymap.set(
-				"n",
-				"<leader>dr",
-				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
-				{ desc = "Open References/definitions in trouble" }
-			)
+		init = function(opts)
+      --because the default d key conflict with the delete actions we need to define it as a which key registration rather then vim.keymap.set
+			local wk = require("which-key")
+			wk.add({
+				{ "<leader>d", group = "[D]iagnostics" },
+				{
+					"<leader>dp",
+					"<CMD>Trouble diagnostics prev<CR>",
+					mode = "n",
+					desc = "Previous diagnostic message",
+				},
+				{
+					"<leader>dn",
+					"<CMD>Trouble diagnostics next<CR>",
+					mode = "n",
+					desc = "Toggle workspace diagnostic",
+				},
+				{
+					"<leader>dw",
+					"<CMD>Trouble diagnostics toggle<CR>",
+					mode = "n",
+					desc = "Toggle diagnostic list",
+				},
+				{
+					"<leader>ds",
+					"<CMD>Trouble symbols toggle focus=false<CR>",
+					mode = "n",
+					desc = "Document symbols",
+				},
+				{
+					"<leader>dd",
+					"<CMD>Trouble diagnostics toggle filter.buf=0<CR>",
+					mode = "n",
+					desc = "Toggle document diagnostics",
+				},
+				{
+					"<leader>dq",
+					"<CMD>Trouble qflist toggle<CR>",
+					mode = "n",
+					desc = "Toggle diagnostic quickfix",
+				},
+				{
+					"<leader>dl",
+					"<CMD>Trouble loclist toggle<CR>",
+					mode = "n",
+					desc = "Toggle location list",
+				},
+				{
+					"<leader>dr",
+					"<CMD>Trouble lsp toggle focus=false win.position=right<CR>",
+					mode = "n",
+					desc = "Open References/definitions in trouble",
+				},
+			})
 		end,
 	},
 }

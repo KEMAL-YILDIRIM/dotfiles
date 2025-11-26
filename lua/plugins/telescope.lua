@@ -220,7 +220,7 @@ return {
 
 			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
-			vim.keymap.set("n", "<leader>f", "<nop>", { desc = "Search Telescope" })
+			vim.keymap.set("n", "<leader>f", "<NOP>", { desc = "Search Telescope" })
 			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Search Help" })
 			vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Search Keymaps" })
 			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Search Files" })

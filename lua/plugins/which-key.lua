@@ -1,14 +1,14 @@
-vim.keymap.set("n", "<leader>s", "nop", { desc = "Save", noremap = true })
-vim.keymap.set("n", "<leader>f", "nop", { desc = "Find", noremap = true })
-vim.keymap.set("n", "<leader>o", "nop", { desc = "Obsidian", noremap = true })
-vim.keymap.set("n", "<leader>t", "nop", { desc = "Terminal", noremap = true })
-vim.keymap.set("n", "<leader>q", "nop", { desc = "Quickfix", noremap = true })
-vim.keymap.set("n", "<leader>u", "nop", { desc = "Unit Test", noremap = true })
-vim.keymap.set("n", "<leader>d", "nop", { desc = "Diagnostics", noremap = true })
-vim.keymap.set("n", "<leader>c", "nop", { desc = "Comment", noremap = true })
-vim.keymap.set("n", "<leader>=", "nop", { desc = "Format", noremap = true })
-vim.keymap.set("n", "<leader>g", "nop", { desc = "Git", noremap = true })
-vim.keymap.set("n", "<leader>a", "nop", { desc = "AI", noremap = true })
+vim.keymap.set("n", "<leader>s", "<NOP>", { desc = "Save", noremap = true })
+vim.keymap.set("n", "<leader>f", "<NOP>", { desc = "Find", noremap = true })
+vim.keymap.set("n", "<leader>o", "<NOP>", { desc = "Obsidian", noremap = true })
+vim.keymap.set("n", "<leader>t", "<NOP>", { desc = "Terminal", noremap = true })
+vim.keymap.set("n", "<leader>q", "<NOP>", { desc = "Quickfix", noremap = true })
+vim.keymap.set("n", "<leader>u", "<NOP>", { desc = "Unit Test", noremap = true })
+vim.keymap.set("n", "<leader>d", "<NOP>", { desc = "Diagnostics", noremap = false })
+vim.keymap.set("n", "<leader>c", "<NOP>", { desc = "Comment", noremap = true })
+vim.keymap.set("n", "<leader>=", "<NOP>", { desc = "Format", noremap = true })
+vim.keymap.set("n", "<leader>g", "<NOP>", { desc = "Git", noremap = true })
+vim.keymap.set("n", "<leader>a", "<NOP>", { desc = "AI", noremap = true })
 return {
 	{
 		"folke/which-key.nvim",
@@ -25,8 +25,8 @@ return {
 				},
 			},
 		},
-		config = function()
-			require("which-key")
+		config = function(opts)
+			require("which-key").setup(opts);
 		end,
 	},
 }

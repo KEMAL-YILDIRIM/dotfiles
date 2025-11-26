@@ -81,9 +81,8 @@ F.key_of = function(tbl, value)
 	return nil
 end
 
-local esc = vim.api.nvim_replace_termcodes("<ESC>", true, false, true)
 F.triggerESC = function()
-	vim.api.nvim_feedkeys(esc, "nx", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, false, true), "nx", false)
 end
 
 ---Read file from the path

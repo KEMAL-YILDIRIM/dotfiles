@@ -121,10 +121,10 @@ F.roslyn_cmd = function(opts)
 			"--razorSourceGenerator="
 				.. vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll")),
 			"--razorDesignTimePath=" .. vim.fs.normalize(
-				vim.fs.joinpath(rzls_mason_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets")
+				vim.fs.joinpath(rzls_mason_path, "Microsoft.NET.Sdk.Razor.DesignTime.targets")
 			),
 			"--extension=" .. vim.fs.normalize(
-				vim.fs.joinpath(rzls_mason_path, "RazorExtension", "Microsoft.VisualStudioCode.RazorExtension.dll")
+				vim.fs.joinpath(rzls_mason_path, "Microsoft.VisualStudioCode.RazorExtension.dll")
 			),
 		})
 	end

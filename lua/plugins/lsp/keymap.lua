@@ -16,7 +16,7 @@ local function lsp_attach(event)
 
 	--  To jump back, press <C-T>.
 	local builtin = require("telescope.builtin")
-	map("<leader>l", "<nop>", "")
+	map("<leader>l", "<NOP>", "")
 	map("<leader>ld", builtin.lsp_definitions, "Goto Definition")
 	map("<leader>lf", builtin.lsp_references, "Goto reFerences")
 	map("<leader>li", builtin.lsp_implementations, "Goto Implementation")

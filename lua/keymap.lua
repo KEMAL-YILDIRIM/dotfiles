@@ -5,19 +5,19 @@ vim.g.mapleader = " "
 local map = vim.keymap
 
 -- reset defaults
-map.set("n","gc","<nop>")
-map.set("n","gcc","<nop>")
+map.set("n", "gc", "<NOP>")
+map.set("n", "gcc", "<NOP>")
 
 -- Set highlight on search, but clear on pressing CTRL + x in normal mode
 vim.o.hlsearch = true
-map.set("n", "//", function ()
-  if vim.v.hlsearch == 1 then
-    vim.cmd('nohlsearch')
-  end
-end, { desc = 'Clear search highlight if active' })
+map.set("n", "//", function()
+	if vim.v.hlsearch == 1 then
+		vim.cmd("nohlsearch")
+	end
+end, { desc = "Clear search highlight if active" })
 
 -- return to normal mode
-map.set( {"i","c"}, "<C-c>", "<ESC><ESC>", { desc = "Press ESC" })
+map.set({ "i", "x" }, "<C-c>", "<ESC><ESC>", { desc = "Press ESC" })
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -44,7 +44,7 @@ map.set("n", "<C-u>", "<C-u>zz", { desc = "Page down while keeping cursor at the
 map.set("x", "<leader>p", [["_dP]], { desc = "Preserve Paste buffer" })
 
 -- coppy to system clipboard so not loose it while navigate between files
-map.set({ "n", "v" }, "<leader>y", "<nop>", { desc = "Copy" })
+map.set({ "n", "v" }, "<leader>y", "<NOP>", { desc = "Copy" })
 map.set({ "n", "v" }, "<leader>yy", [["+y]], { desc = "Copy text to system clipboard" })
 map.set({ "n", "v" }, "<leader>ya", "ggVGy", { desc = "Copy all on page" })
 map.set({ "n", "v" }, "<leader>yp", function()
@@ -63,11 +63,11 @@ map.set({ "n", "v" }, "<leader>yp", function()
 		"4. Filename only: " .. results[4],
 		"5. Extension: " .. results[5],
 	}, { prompt = "Choose to copy to clipboard:" }, function(choice)
-			local i = tonumber(string.sub(choice, 1, 1)) or 1
-			local result = results[i]
-			vim.fn.setreg("+y", result)
-			vim.notify("Copied: " .. result)
-		end)
+		local i = tonumber(string.sub(choice, 1, 1)) or 1
+		local result = results[i]
+		vim.fn.setreg("+y", result)
+		vim.notify("Copied: " .. result)
+	end)
 end, { desc = "Copy current buffer path to system clipboard" })
 
 -- quickfix
@@ -178,24 +178,30 @@ map.set("n", "tl", "<CMD>tabn<CR>", { desc = "Tab Next" }) --  go to next tab
 map.set("n", "th", "<CMD>tabp<CR>", { desc = "Tab Previous" }) --  go to previous tab
 map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "Tab Duplicate current buffer in new tab" })
 map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "Tab open last used Tab" })
-map.set("n", "t", "<nop>", { desc = "Tab" })
+map.set("n", "t", "<NOP>", { desc = "Tab" })
 
 -- buffers
-map.set("n", "<leader>b", "<nop>", { desc = "Buffer" })
+map.set("n", "<leader>b", "<NOP>", { desc = "Buffer" })
 map.set("n", "<leader>bo", ":%bd|e#<CR>", { desc = "Buffer close all but One" })
 map.set("n", "<leader>bn", ":bn<CR>", { desc = "Next Buffer" })
 map.set("n", "<leader>bp", ":bp<CR>", { desc = "Previous Buffer" })
 map.set({ "n", "v" }, "<leader>bs", ":cd %:h<CR>", { desc = "Buffer Set path to current " })
 
 -- save and quit
-map.set("n","<leader>s", "<nop>", { desc = "Save" })
-map.set("n","<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "Save File" })
-map.set("n","<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "Save All buffers" })
-map.set("n","<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "Save and Source out" })
-map.set("n","<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
-map.set("n", "Q", "<nop>", { desc = "No map for Q" })
+map.set("n", "<leader>s", "<NOP>", { desc = "Save" })
+map.set("n", "<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "Save File" })
+map.set("n", "<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "Save All buffers" })
+map.set("n", "<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "Save and Source out" })
+map.set("n", "<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
+map.set("n", "Q", "<NOP>", { desc = "No map for Q" })
 
 -- session
-vim.keymap.set("n", "<leader>sd", function() require("persistence").load() end, {desc = "load the session for the current directory"})
-vim.keymap.set("n", "<leader>ss", function() require("persistence").select() end,{desc = "select a session to load"})
-vim.keymap.set("n", "<leader>sl", function() require("persistence").load({ last = true }) end,{desc = "load the last session"})
+vim.keymap.set("n", "<leader>sd", function()
+	require("persistence").load()
+end, { desc = "load the session for the current directory" })
+vim.keymap.set("n", "<leader>ss", function()
+	require("persistence").select()
+end, { desc = "select a session to load" })
+vim.keymap.set("n", "<leader>sl", function()
+	require("persistence").load({ last = true })
+end, { desc = "load the last session" })
