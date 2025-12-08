@@ -101,6 +101,15 @@ F.build_cmd = function()
 	return cmd
 end
 
+F.rzls_path = function()
+	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
+	local nvim_data_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages"))
+	local rzls_mason_path = vim.fs.normalize(
+		vim.fs.joinpath(nvim_data_path, "rzls", "libexec", "Microsoft.AspNetCore.Razor.LanguageServer.dll")
+	)
+	return rzls_mason_path
+end
+
 -- Adding additonal functionality to utils
 F.roslyn_cmd = function(opts)
 	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
@@ -116,15 +125,15 @@ F.roslyn_cmd = function(opts)
 
 	if opts and opts.rzls then
 		vim.opt.rtp:append("D:/Nvim/rzls.nvim")
-		local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec", "RazorExtension"))
+		local rzls_mason_path = vim.fs.normalize(vim.fs.joinpath(nvim_data_path, "rzls", "libexec"))
 		vim.list_extend(roslyn_cmd, {
 			"--razorSourceGenerator="
 				.. vim.fs.normalize(vim.fs.joinpath(rzls_mason_path, "Microsoft.CodeAnalysis.Razor.Compiler.dll")),
 			"--razorDesignTimePath=" .. vim.fs.normalize(
-				vim.fs.joinpath(rzls_mason_path, "Microsoft.NET.Sdk.Razor.DesignTime.targets")
+				vim.fs.joinpath(rzls_mason_path, "Targets", "Microsoft.NET.Sdk.Razor.DesignTime.targets")
 			),
 			"--extension=" .. vim.fs.normalize(
-				vim.fs.joinpath(rzls_mason_path, "Microsoft.VisualStudioCode.RazorExtension.dll")
+				vim.fs.joinpath(rzls_mason_path, "RazorExtension", "Microsoft.VisualStudioCode.RazorExtension.dll")
 			),
 		})
 	end

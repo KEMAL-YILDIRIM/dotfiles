@@ -36,7 +36,7 @@ return {
 			"lemminx",
 			"netcoredbg",
 			"roslyn",
-			"rzls",
+			"rzls"
 		})
 		require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 

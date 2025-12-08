@@ -160,9 +160,9 @@ return {
 			},
 		},
 		init = function()
-			vim.keymap.set({ "n", "t" }, "<leader>tt", function()
+			vim.keymap.set({ "n", "t" }, "<leader>/", function()
 				Snacks.terminal()
-			end, { desc = "Terminal Toggle" })
+			end, { desc = "Terminal" })
 		end,
 	},
 }

@@ -1,23 +1,23 @@
 local ls = require("luasnip")
-local s, i, f = ls.snippet, ls.insert_node, ls.function_node
-local fmt = require("luasnip.extras.fmt").fmt
+local _snippet, _input, _function = ls.snippet, ls.insert_node, ls.function_node
+local _format = require("luasnip.extras.fmt").fmt
 
 local same = function(index)
-    return f(function(arg)
+    return _function(function(arg)
         return arg[1]
     end, { index })
 end
 
 ls.add_snippets("all", {
-    s("sameTest", fmt([[example:{}, function: {}]], { i(1), same(1) }))
+    _snippet("sameTest", _format([[example:{}, function: {}]], { _input(1), same(1) }))
 })
 
 ls.add_snippets("lua", {
-    s("req", fmt([[local {} = require "{}"]], {
-        f(function(import_name)
+    _snippet("req", _format([[local {} = require "{}"]], {
+        _function(function(import_name)
             local parts = vim.split(import_name[1][1], ".", { places = true, trimempty = true })
             return parts[#parts] or ""
         end, { 1 }),
-        i(1),
+        _input(1),
     })),
 })

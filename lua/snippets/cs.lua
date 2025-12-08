@@ -135,10 +135,10 @@ end
 
 ls.add_snippets("cs", {
 
-	_snippet("namespace_snip", { _text("namespace "), _func(get_namespace), _text(";") }),
+	_snippet("namespace", { _text("namespace "), _func(get_namespace), _text(";") }),
 
 	_snippet(
-		"interface_snip",
+		"interface",
 		_format(
 			[[
 using System;
@@ -162,7 +162,7 @@ namespace {}
 	),
 
 	_snippet(
-		"class_snip",
+		"class",
 		_format(
 			[[
 using System;
@@ -185,11 +185,11 @@ namespace {}
 		)
 	),
 
-	_snippet("summary_snip", {
+	_snippet("summary", {
 		_text({ "/// <summary>", "/// ", "///  returns ", "/// </summary>" }),
 	}),
 
-	_snippet("ctor_snip", {
+	_snippet("ctor", {
 		_text({ "    /// <summary>", "    /// Initializes a new instance of the " }),
 		_func(function()
 			local class_info = get_class_info()

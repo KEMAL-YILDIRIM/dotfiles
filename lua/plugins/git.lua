@@ -27,9 +27,9 @@ return {
 				local gs = package.loaded.gitsigns
 
 				-- Navigation
-				vim.keymap.set("n", "<leader>gsl", function()
+				vim.keymap.set("n", "<leader>ghn", function()
 					if vim.wo.diff then
-						return "<leader>gsl"
+						return "<leader>ghl"
 					end
 					vim.schedule(function()
 						gs.next_hunk()
@@ -37,9 +37,9 @@ return {
 					return "<Ignore>"
 				end, { expr = true, desc = "Git Signs: next hunk" })
 
-				vim.keymap.set("n", "<leader>gsh", function()
+				vim.keymap.set("n", "<leader>ghp", function()
 					if vim.wo.diff then
-						return "<leader>gsh"
+						return "<leader>ghh"
 					end
 					vim.schedule(function()
 						gs.prev_hunk()
@@ -49,13 +49,13 @@ return {
 
 				-- Actions
 				vim.keymap.set("n", "<leader>g", "<NOP>", { desc = "Git" })
-				vim.keymap.set("n", "<leader>gss", gs.stage_buffer, { desc = "Git Signs: stage buffer" })
-				vim.keymap.set("n", "<leader>gst", gs.stage_hunk, { desc = "Git Signs: stage hunk toggle" })
-				vim.keymap.set("n", "<leader>gsa", gs.reset_buffer, { desc = "Git Signs: reset buffer" })
+				vim.keymap.set("n", "<leader>ghs", gs.stage_buffer, { desc = "Git Signs: stage buffer" })
+				vim.keymap.set("n", "<leader>ght", gs.stage_hunk, { desc = "Git Signs: stage hunk toggle" })
+				vim.keymap.set("n", "<leader>gha", gs.reset_buffer, { desc = "Git Signs: reset buffer" })
 				vim.keymap.set("n", "<leader>gp", gs.preview_hunk, { desc = "Git Signs: preview hunk" })
-				vim.keymap.set( "n", "<leader>gsb", gs.toggle_current_line_blame, { desc = "Git Signs: blame current line" })
-				vim.keymap.set("n", "<leader>gsd", function() gs.diffthis("~") end, { desc = "Git Signs: diff this ~" })
-				vim.keymap.set("n", "<leader>gsl", function() gs.blame_line({ full = true }) end, { desc = "Git Signs: blame line" })
+				vim.keymap.set( "n", "<leader>ghb", gs.toggle_current_line_blame, { desc = "Git Signs: blame current line" })
+				vim.keymap.set("n", "<leader>ghd", function() gs.diffthis("~") end, { desc = "Git Signs: diff this ~" })
+				vim.keymap.set("n", "<leader>ghl", function() gs.blame_line({ full = true }) end, { desc = "Git Signs: blame line" })
 				vim.keymap.set("n", "<leader>gd", function() vim.cmd("DiffviewOpen") end, { desc = "Git Signs: diff this" })
 				vim.keymap.set("v", "<leader>gr", function() gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "Git Signs: Reset hunk" })
 
@@ -66,9 +66,9 @@ return {
 				vim.keymap.set("n", "<leader>gts", ":Telescope git_status<CR>", { noremap = true })
 				vim.keymap.set(
 					"n",
-					"<leader>gh",
+					"<leader>gl",
 					":Telescope git_commits<CR>",
-					{ noremap = true, desc = "Git History" }
+					{ noremap = true, desc = "Git Log" }
 				)
 				require("telescope").load_extension("git_file_history")
 				local tb = require("telescope.builtin")

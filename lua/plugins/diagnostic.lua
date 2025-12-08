@@ -71,24 +71,24 @@ return {
       --because the default d key conflict with the delete actions we need to define it as a which key registration rather then vim.keymap.set
 			local wk = require("which-key")
 			wk.add({
-				{ "<leader>d", group = "[D]iagnostics" },
+				{ "<leader>d", group = "Diagnostics" },
 				{
 					"<leader>dp",
 					"<CMD>Trouble diagnostics prev<CR>",
 					mode = "n",
-					desc = "Previous diagnostic message",
+					desc = "Previous message",
 				},
 				{
 					"<leader>dn",
 					"<CMD>Trouble diagnostics next<CR>",
 					mode = "n",
-					desc = "Toggle workspace diagnostic",
+					desc = "Next message",
 				},
 				{
 					"<leader>dw",
 					"<CMD>Trouble diagnostics toggle<CR>",
 					mode = "n",
-					desc = "Toggle diagnostic list",
+					desc = "Workspace diagnostic",
 				},
 				{
 					"<leader>ds",
@@ -100,25 +100,25 @@ return {
 					"<leader>dd",
 					"<CMD>Trouble diagnostics toggle filter.buf=0<CR>",
 					mode = "n",
-					desc = "Toggle document diagnostics",
+					desc = "Document diagnostics",
 				},
 				{
 					"<leader>dq",
 					"<CMD>Trouble qflist toggle<CR>",
 					mode = "n",
-					desc = "Toggle diagnostic quickfix",
+					desc = "Diagnostic quickfix",
 				},
 				{
 					"<leader>dl",
 					"<CMD>Trouble loclist toggle<CR>",
 					mode = "n",
-					desc = "Toggle location list",
+					desc = "Location list",
 				},
 				{
 					"<leader>dr",
 					"<CMD>Trouble lsp toggle focus=false win.position=right<CR>",
 					mode = "n",
-					desc = "Open References/definitions in trouble",
+					desc = "References/definitions in trouble",
 				},
 			})
 		end,

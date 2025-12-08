@@ -192,7 +192,8 @@ map.set("n", "<leader>s", "<NOP>", { desc = "Save" })
 map.set("n", "<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "Save File" })
 map.set("n", "<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "Save All buffers" })
 map.set("n", "<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "Save and Source out" })
-map.set("n", "<leader>sq", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
+map.set("n", "<leader>sw", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
+map.set("n", "<leader>sq", "<CMD>:q!<CR>", { noremap = true, desc = "Quit without saving" })
 map.set("n", "Q", "<NOP>", { desc = "No map for Q" })
 
 -- session

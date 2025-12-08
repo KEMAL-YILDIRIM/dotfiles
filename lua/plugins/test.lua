@@ -3,7 +3,7 @@ return {
     'nvim-lua/plenary.nvim',
     config = function()
       -- planary test
-      vim.keymap.set("n", "<leader>up", "<Plug>PlenaryTestFile", { desc = "Plenary Test" })
+      vim.keymap.set("n", "<leader>tp", "<Plug>PlenaryTestFile", { desc = "Plenary Test" })
     end
   },
   {
@@ -30,13 +30,13 @@ return {
           })
         }
       })
-      vim.keymap.set("n", "<leader>ur", function() neotest.run.run() end, { desc = "Run Test" })
-      vim.keymap.set("n", "<leader>ut", function() neotest.summary.toggle() end, { desc = "Toggle Summary" })
-      vim.keymap.set("n", "<leader>uf", function() neotest.run.run(vim.fn.exp("%")) end,
+      vim.keymap.set("n", "<leader>tr", function() neotest.run.run() end, { desc = "Run Test" })
+      vim.keymap.set("n", "<leader>tt", function() neotest.summary.toggle() end, { desc = "Toggle Summary" })
+      vim.keymap.set("n", "<leader>ta", function() neotest.run.run(vim.fn.exp("%")) end,
         { desc = "Run all tests on the File" })
-      vim.keymap.set("n", "<leader>ud", function() neotest.run.run({ strategy = "dap" }) end,
+      vim.keymap.set("n", "<leader>td", function() neotest.run.run({ strategy = "dap" }) end,
         { desc = "Debug Test" })
-      vim.keymap.set("n", "<leader>us", function() neotest.run.stop() end, { desc = "Stop Test" })
+      vim.keymap.set("n", "<leader>ts", function() neotest.run.stop() end, { desc = "Stop Test" })
     end
   }
 }
