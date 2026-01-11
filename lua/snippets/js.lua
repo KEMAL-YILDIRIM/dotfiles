@@ -10,9 +10,9 @@ ls.add_snippets("javascript", {
 	_snippet(
 		"function",
 		_format(
-			[[function {} {{
-			{}
-			}}]],
+[[function {}() {{
+{}
+}}]],
 			{_input(1),_input(0)}
 		)
 	),
