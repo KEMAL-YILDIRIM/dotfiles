@@ -63,10 +63,27 @@ vim.o.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
 
+-- File list style into tree mode
+vim.cmd("let g:netrw_liststyle = 3")
+
 -- Windows 10 cmd shell pipe
 vim.o.shellpipe = ">"
 
--- File list style into tree mode
-vim.cmd("let g:netrw_liststyle = 3")
+-- Check if nushell is installed before setting it
+if vim.fn.executable("nu") == 1 then
+	vim.opt.shell = "nu"
+
+	-- -c tells nushell to run the following string as a command
+	vim.opt.shellcmdflag = "-c"
+
+	-- Reset quoting settings that are often specific to cmd.exe
+	vim.opt.shellquote = ""
+	vim.opt.shellxquote = ""
+
+	-- Configure how Neovim pipes and redirects output for Nushell
+	-- Nushell uses 'err>' for stderr redirection
+	vim.opt.shellpipe = "| save %s --force"
+	vim.opt.shellredir = "out> %s"
+end
 
 -- vim: ts=2 sts=2 sw=2 et

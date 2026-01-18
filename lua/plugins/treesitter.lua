@@ -27,7 +27,7 @@ return {
         indent = { enable = true },
         textobjects = {
           select = {
-            enable = false,
+            enable = false, -- for mini ai to be functional
           }
         }
       }
@@ -68,6 +68,7 @@ return {
   },
   { -- playground
     'nvim-treesitter/playground',
+    lazy = true,
     enable = false
   }
 }

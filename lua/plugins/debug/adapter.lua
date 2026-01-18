@@ -13,13 +13,12 @@ return {
       'nvim-neotest/nvim-nio',
     },
     config = function()
-      local dap = require("dap")
+      -- utils must be loaded before since it defines dependent functions
+      require "plugins.debug.utils"
       require "plugins/debug/c#"
       require "plugins/debug/lua"
       require "plugins/debug/ui"
-      -- require('nvim-dap-virtual-text').setup()
       require "plugins.debug.keymap"
-      require "plugins.debug.utils"
     end,
   },
 }

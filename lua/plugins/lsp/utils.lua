@@ -26,40 +26,22 @@ F.find_csproj_file = function(path)
 	end, { upward = true, path = path })[1]
 end
 
-F.build_project = function(csproj_path)
-	local result = "Build: ❗\n"
+-- Async build with callback (non-blocking, calls on_complete when done)
+---@param csproj_path string
+---@param on_complete fun(success: boolean, dll_path: string|nil)
+F.build_project_async = function(csproj_path, on_complete)
 	if not csproj_path then
-		vim.notify(result .. "csproj path is missing!", vim.log.levels.INFO)
+		vim.notify("Build: ❗ csproj path is missing!", vim.log.levels.ERROR)
+		if on_complete then on_complete(false, nil) end
 		return
 	end
 
-	local cmd = { "dotnet", "build", csproj_path, "-clp:ErrorsOnly", "--nologo", "-c", "debug" }
-	local output_lines = {}
+	local project_name = vim.fn.fnamemodify(csproj_path, ":t:r")
+	local project_dir = vim.fn.fnamemodify(csproj_path, ":h")
+	vim.notify("Building " .. project_name .. "...", vim.log.levels.INFO)
 
-	local on_exit = function()
-		local qf_items = {}
-		for _, line in ipairs(output_lines) do
-			local filename, lnum, col, text = line:match("([^%(]+)%((%d+),(%d+)%)%s*:%s*error%s*[%w%d]+:%s*(.*)")
-			if filename and lnum and col and text then
-				table.insert(qf_items, {
-					filename = filename,
-					lnum = tonumber(lnum),
-					col = tonumber(col),
-					text = text,
-					type = "E",
-				})
-			elseif line:match("error") then
-				table.insert(qf_items, { text = line, type = "E" })
-			end
-		end
-		if #qf_items > 0 then
-			vim.fn.setqflist(qf_items, "r")
-			vim.cmd("copen")
-		else
-			result = "Build: ✔️\n"
-		end
-		vim.notify(result .. "executed: " .. vim.inspect(cmd) .. "\n", vim.log.levels.INFO)
-	end
+	local cmd = { "dotnet", "build", csproj_path, "-clp:ErrorsOnly", "--nologo", "-c", "Debug" }
+	local output_lines = {}
 
 	vim.fn.jobstart(cmd, {
 		stdout_buffered = true,
@@ -67,25 +49,57 @@ F.build_project = function(csproj_path)
 		on_stdout = function(_, data)
 			if data then
 				for _, line in ipairs(data) do
-					if line ~= "" then
-						table.insert(output_lines, line)
-					end
+					if line ~= "" then table.insert(output_lines, line) end
 				end
 			end
 		end,
 		on_stderr = function(_, data)
 			if data then
 				for _, line in ipairs(data) do
-					if line ~= "" then
-						table.insert(output_lines, line)
-					end
+					if line ~= "" then table.insert(output_lines, line) end
 				end
 			end
 		end,
-		on_exit = function()
-			on_exit()
+		on_exit = function(_, exit_code)
+			vim.schedule(function()
+				if exit_code ~= 0 then
+					local qf_items = {}
+					for _, line in ipairs(output_lines) do
+						local filename, lnum, col, text = line:match("([^%(]+)%((%d+),(%d+)%)%s*:%s*error%s*[%w%d]+:%s*(.*)")
+						if filename and lnum and col and text then
+							table.insert(qf_items, {
+								filename = filename,
+								lnum = tonumber(lnum),
+								col = tonumber(col),
+								text = text,
+								type = "E",
+							})
+						elseif line:match("error") then
+							table.insert(qf_items, { text = line, type = "E" })
+						end
+					end
+					if #qf_items > 0 then
+						vim.fn.setqflist(qf_items, "r")
+						vim.cmd("copen")
+					end
+					vim.notify("Build: ❗ Failed", vim.log.levels.ERROR)
+					if on_complete then on_complete(false, nil) end
+				else
+					vim.notify("Build: ✔️ " .. project_name, vim.log.levels.INFO)
+					local filename = project_name .. ".dll"
+					local debug_path = string.format("%s/bin/Debug/.*/", project_dir)
+					local dll = vim.fn.findfile(filename, debug_path, 1)
+					if dll == "" then dll = nil end
+					if on_complete then on_complete(true, dll) end
+				end
+			end)
 		end,
 	})
+end
+
+-- Legacy async build (no callback)
+F.build_project = function(csproj_path)
+	F.build_project_async(csproj_path, nil)
 end
 
 F.build_cmd = function()

@@ -4,10 +4,17 @@ vim.keymap.set("n", "<s-f5>", function()
 	dap.terminate()
 end, { desc = "debug: terminate" })
 vim.keymap.set("n", "<f5>", function()
-	if vim.filetype.match({ buf = 0, filename = "%.lua" }) then
+	local ft = vim.bo.filetype
+	if ft == "lua" then
 		require("osv").launch({ port = 8086 })
+		dap.continue()
+	elseif ft == "cs" then
+		-- Use async build for C# to avoid blocking and file locking issues
+		F.refresh_dap_cs_configs()
+		F.dap_continue_with_build()
+	else
+		dap.continue()
 	end
-	dap.continue()
 end, { desc = "debug: start/continue" })
 vim.keymap.set("n", "<f11>", dap.step_into, { desc = "debug: step into" })
 vim.keymap.set("n", "<f10>", dap.step_over, { desc = "debug: step over" })

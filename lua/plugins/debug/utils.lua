@@ -1,4 +1,5 @@
 -- Custom function to build and get test assembly path
+local dap = require("dap")
 F.get_test_assembly_info = function()
 	local cwd = vim.fn.getcwd()
 
@@ -48,6 +49,7 @@ F.get_test_assembly_info = function()
 end
 
 -- Run all tests
+
 F.run_all_tests = function()
 	local info = F.get_test_assembly_info()
 	if not info then
@@ -96,7 +98,6 @@ F.run_test_under_cursor = function()
 end
 
 -- Debug specific test method
-local dap = require("dap")
 F.debug_test_under_cursor = function()
 	local test_info = F.find_test_method_under_cursor()
 	if not test_info then
