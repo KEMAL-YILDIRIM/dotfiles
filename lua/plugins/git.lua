@@ -1,6 +1,7 @@
 return {
 	{ "tpope/vim-fugitive" },
 	{ "sindrets/diffview.nvim" },
+	{ "isak102/telescope-git-file-history.nvim" },
 	{
 		dir = "D:/Nvim/repos.nvim",
 		name = "repos",
@@ -69,8 +70,10 @@ return {
 					":Telescope git_commits<CR>",
 					{ noremap = true, desc = "Git Log" }
 				)
+				require("telescope").load_extension("git_file_history")
 				vim.keymap.set("n", "<leader>gc", function()
-					require("telescope.builtin").git_bcommits({ use_git_root = true })
+					require("telescope").extensions.git_file_history.git_file_history()
+					-- require("telescope.builtin").git_bcommits({ use_git_root = true })
 				end, { noremap = true, desc = "Git Commits" })
 				vim.keymap.set("n", "<leader>gb", ":Telescope git_branches<CR>", { noremap = true })
 				vim.keymap.set(

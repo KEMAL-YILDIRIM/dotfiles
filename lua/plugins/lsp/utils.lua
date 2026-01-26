@@ -126,9 +126,9 @@ F.roslyn_cmd = function()
 		"--stdio",
 		"--logLevel=Information",
 		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
-		-- "--razorSourceGenerator=" .. roslyn_mason_path .. "/Microsoft.CodeAnalysis.Razor.Compiler.dll",
-		-- "--razorDesignTimePath=" .. roslyn_mason_path .. "/Microsoft.NET.Sdk.Razor.DesignTime.targets",
-		-- "--extension=" .. roslyn_mason_path .. "/Microsoft.VisualStudioCode.RazorExtension.dll",
+		"--razorSourceGenerator=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.CodeAnalysis.Razor.Compiler.dll",
+		"--razorDesignTimePath=" .. roslyn_mason_path .. "/.razorExtension/Targets/Microsoft.NET.Sdk.Razor.DesignTime.targets",
+		"--extension=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.VisualStudioCode.RazorExtension.dll",
 	}
 
 	return roslyn_cmd
