@@ -1,9 +1,9 @@
 return {
 	{
-		-- "seblyng/roslyn.nvim",
-		dir = "D:/Nvim/roslyn.nvim",
-		dev = true,
-		opts = { filewatching = "roslyn", broad_search = true, lock_target = true, debug = true },
+		"seblyng/roslyn.nvim",
+		-- dir = "D:/Nvim/roslyn.nvim",
+		-- dev = true,
+		opts = { filewatching = "roslyn", broad_search = true, lock_target = false, debug = true },
 		init = function()
 			vim.lsp.config("roslyn", {
 				-- handlers = vim.tbl_extend("error", require("rzls.roslyn_handlers"), {
@@ -46,6 +46,11 @@ return {
 					},
 					["csharp|symbol_search"] = {
 						dotnet_search_reference_assemblies = true,
+					},
+					-- Formatting settings - these should be overridden by .editorconfig if present
+					["csharp|formatting"] = {
+						-- These are defaults, .editorconfig takes precedence
+						dotnet_organize_imports_on_format = true,
 					},
 				},
 			})

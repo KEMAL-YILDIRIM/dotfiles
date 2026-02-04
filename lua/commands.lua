@@ -40,6 +40,14 @@ end, {
 	desc = "Reload the plugin we are testing, need to update this command if you testing another plugin",
 })
 
+vim.api.nvim_create_user_command("ClearRecentFiles", function(opts)
+	local permanent = opts.bang
+	F.clear_recent_files({ permanent = permanent })
+end, {
+	bang = true,
+	desc = "Clear recent files cache. Use ! for permanent deletion of shada file",
+})
+
 --[[ vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*.txt",
 	desc = 'Create a new tab and display help inside that',

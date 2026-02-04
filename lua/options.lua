@@ -3,6 +3,9 @@
 -- NOTE: You can change these.o.ons as you wish!
 --  For more.o.ons, you can see `:help.o.on-list`
 
+-- Platform detection (used by utils.lua and other modules)
+vim.g.is_win = vim.fn.has('win32') == 1
+
 -- Make line numbers default
 vim.o.number = true
 vim.o.relativenumber = true

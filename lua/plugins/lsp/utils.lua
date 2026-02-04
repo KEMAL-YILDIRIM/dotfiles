@@ -32,7 +32,9 @@ end
 F.build_project_async = function(csproj_path, on_complete)
 	if not csproj_path then
 		vim.notify("Build: ❗ csproj path is missing!", vim.log.levels.ERROR)
-		if on_complete then on_complete(false, nil) end
+		if on_complete then
+			on_complete(false, nil)
+		end
 		return
 	end
 
@@ -43,20 +45,24 @@ F.build_project_async = function(csproj_path, on_complete)
 	local cmd = { "dotnet", "build", csproj_path, "-clp:ErrorsOnly", "--nologo", "-c", "Debug" }
 	local output_lines = {}
 
-	vim.fn.jobstart(cmd, {
+	F.safe_jobstart(cmd, {
 		stdout_buffered = true,
 		stderr_buffered = true,
 		on_stdout = function(_, data)
 			if data then
 				for _, line in ipairs(data) do
-					if line ~= "" then table.insert(output_lines, line) end
+					if line ~= "" then
+						table.insert(output_lines, line)
+					end
 				end
 			end
 		end,
 		on_stderr = function(_, data)
 			if data then
 				for _, line in ipairs(data) do
-					if line ~= "" then table.insert(output_lines, line) end
+					if line ~= "" then
+						table.insert(output_lines, line)
+					end
 				end
 			end
 		end,
@@ -65,7 +71,8 @@ F.build_project_async = function(csproj_path, on_complete)
 				if exit_code ~= 0 then
 					local qf_items = {}
 					for _, line in ipairs(output_lines) do
-						local filename, lnum, col, text = line:match("([^%(]+)%((%d+),(%d+)%)%s*:%s*error%s*[%w%d]+:%s*(.*)")
+						local filename, lnum, col, text =
+							line:match("([^%(]+)%((%d+),(%d+)%)%s*:%s*error%s*[%w%d]+:%s*(.*)")
 						if filename and lnum and col and text then
 							table.insert(qf_items, {
 								filename = filename,
@@ -83,14 +90,32 @@ F.build_project_async = function(csproj_path, on_complete)
 						vim.cmd("copen")
 					end
 					vim.notify("Build: ❗ Failed", vim.log.levels.ERROR)
-					if on_complete then on_complete(false, nil) end
+					if on_complete then
+						on_complete(false, nil)
+					end
 				else
 					vim.notify("Build: ✔️ " .. project_name, vim.log.levels.INFO)
 					local filename = project_name .. ".dll"
-					local debug_path = string.format("%s/bin/Debug/.*/", project_dir)
-					local dll = vim.fn.findfile(filename, debug_path, 1)
-					if dll == "" then dll = nil end
-					if on_complete then on_complete(true, dll) end
+					-- Normalize project_dir first, then build pattern
+					local norm_dir = vim.fs.normalize(project_dir)
+					local pattern = norm_dir .. "/bin/Debug/*/" .. filename
+					local matches = vim.fn.glob(pattern, false, true)
+					local dll = nil
+					if #matches > 0 then
+						dll = vim.fs.normalize(matches[1])
+					else
+						-- Fallback: use vim.fs.find for recursive search
+						local found = vim.fs.find(filename, {
+							path = norm_dir .. "/bin/Debug",
+							type = "file",
+						})
+						if #found > 0 then
+							dll = vim.fs.normalize(found[1])
+						end
+					end
+					if on_complete then
+						on_complete(true, dll)
+					end
 				end
 			end)
 		end,
@@ -127,7 +152,9 @@ F.roslyn_cmd = function()
 		"--logLevel=Information",
 		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
 		"--razorSourceGenerator=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.CodeAnalysis.Razor.Compiler.dll",
-		"--razorDesignTimePath=" .. roslyn_mason_path .. "/.razorExtension/Targets/Microsoft.NET.Sdk.Razor.DesignTime.targets",
+		"--razorDesignTimePath="
+			.. roslyn_mason_path
+			.. "/.razorExtension/Targets/Microsoft.NET.Sdk.Razor.DesignTime.targets",
 		"--extension=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.VisualStudioCode.RazorExtension.dll",
 	}
 

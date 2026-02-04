@@ -242,7 +242,7 @@ return {
 			end, { desc = "Search Neovim files" })
 
 			vim.keymap.set("n", "<leader>fp", function()
-				builtin.find_files({ cwd = vim.fn.stdpath("data") .. "/lazy" })
+				builtin.find_files({ cwd = vim.fn.stdpath("data") })
 			end, { desc = "Search Neovim Plugin files" })
 
 			-- Slightly advanced example of overriding default behavior and theme

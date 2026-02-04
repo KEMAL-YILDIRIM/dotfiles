@@ -4,7 +4,14 @@ return {
 		"folke/persistence.nvim",
 		event = "BufReadPre", -- this will only start session saving when an actual file was opened
 		opts = {
-			-- add any custom options here
+			pre_save = function()
+				-- Clean up stale shada temp files before session save
+				local shada_dir = vim.fn.stdpath('state') .. '/shada'
+				local tmp_files = vim.fn.glob(shada_dir .. '/main.shada.tmp.*', false, true)
+				for _, f in ipairs(tmp_files) do
+					pcall(os.remove, f)
+				end
+			end,
 		},
 	},
 	{

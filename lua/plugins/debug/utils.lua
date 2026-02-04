@@ -14,7 +14,7 @@ F.get_test_assembly_info = function()
 	end
 
 	-- Build the project
-	local build_result = vim.fn.system('dotnet build "' .. test_project .. '" --nologo -v q')
+	local build_result = F.safe_system('dotnet build "' .. test_project .. '" --nologo -v q')
 	if vim.v.shell_error ~= 0 then
 		vim.notify("Build failed: " .. build_result, vim.log.levels.ERROR)
 		return nil
