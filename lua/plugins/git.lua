@@ -1,7 +1,22 @@
 local FileHistory = function()
   -- Custom file history that handles renames properly
-  local file_path = vim.fn.expand('%:.') -- relative path
-  local cmd = { 'git', 'log', '--follow', '--pretty=format:%H %ad %s', '--date=short', '--', file_path }
+  local abs_path = vim.fn.expand('%:p') -- absolute path of current file
+  local file_dir = vim.fn.fnamemodify(abs_path, ':h') -- directory containing the file
+
+  -- Find git root from file's directory
+  local git_root = vim.fn.systemlist({ 'git', '-C', file_dir, 'rev-parse', '--show-toplevel' })[1]
+  if vim.v.shell_error ~= 0 or not git_root then
+    vim.notify('Not in a git repository: ' .. file_dir, vim.log.levels.WARN)
+    return
+  end
+
+  -- Get path relative to git root
+  git_root = git_root:gsub('\\', '/'):gsub('/$', '')
+  abs_path = abs_path:gsub('\\', '/')
+  local file_path = abs_path:sub(#git_root + 2) -- +2 to skip the trailing slash
+
+  -- Use --name-only to get the actual file path at each commit (handles renames)
+  local cmd = { 'git', '-C', git_root, 'log', '--follow', '--pretty=format:%H %ad %s', '--date=short', '--name-only', '--', file_path }
   local result = F.safe_systemlist(cmd)
 
   if vim.v.shell_error ~= 0 or #result == 0 then
@@ -10,11 +25,20 @@ local FileHistory = function()
   end
 
   local commits = {}
-  for _, line in ipairs(result) do
+  local i = 1
+  while i <= #result do
+    local line = result[i]
     local hash, date, message = line:match('^(%x+)%s+(%d%d%d%d%-%d%d%-%d%d)%s+(.*)$')
     if hash and date then
-      table.insert(commits, { hash = hash, date = date, message = message or '', path = file_path })
+      -- Skip empty lines and get the file path (next non-empty line after commit info)
+      i = i + 1
+      while i <= #result and result[i] == '' do
+        i = i + 1
+      end
+      local commit_path = (i <= #result and not result[i]:match('^%x+%s+%d%d%d%d%-%d%d%-%d%d')) and result[i] or file_path
+      table.insert(commits, { hash = hash, date = date, message = message or '', path = commit_path })
     end
+    i = i + 1
   end
 
   if #commits == 0 then
@@ -32,6 +56,7 @@ local FileHistory = function()
           display = entry.date .. ' ' .. entry.hash:sub(1, 7) .. ' ' .. entry.message,
           ordinal = entry.hash .. entry.date .. entry.message,
           path = entry.path,
+          git_root = git_root,
         }
       end,
     }),
@@ -42,7 +67,24 @@ local FileHistory = function()
       actions.select_default:replace(function()
         local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
-        vim.cmd('Gedit ' .. selection.value .. ':' .. selection.path)
+        -- Show the file content at the selected commit in a new buffer
+        local ref = selection.value .. ':' .. selection.path
+        local existing = vim.fn.bufnr(ref)
+        if existing ~= -1 then
+          vim.api.nvim_set_current_buf(existing)
+          return
+        end
+        local content = F.safe_system({ 'git', '-C', selection.git_root, '--no-pager', 'show', ref })
+        local buf = vim.api.nvim_create_buf(true, true)
+        vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, '\n'))
+        vim.api.nvim_buf_set_name(buf, ref)
+        vim.bo[buf].buftype = 'nofile'
+        vim.bo[buf].modifiable = false
+        vim.api.nvim_set_current_buf(buf)
+        local ft = vim.filetype.match({ filename = selection.path })
+        if ft then
+          vim.bo[buf].filetype = ft
+        end
       end)
       return true
     end,
@@ -55,13 +97,13 @@ local FileHistory = function()
         if self.state.bufname == entry.value .. ':' .. entry.path then
           return
         end
-        local content = F.safe_system('git --no-pager show ' .. entry.value .. ':"' .. entry.path .. '"')
+        local content = F.safe_system({ 'git', '-C', entry.git_root, '--no-pager', 'show', entry.value .. ':' .. entry.path })
         vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, vim.split(content, '\n'))
         require('telescope.previewers.utils').highlighter(self.state.bufnr, vim.filetype.match({ filename = entry.path }))
       end,
     }),
   }):find()
-end 
+end
 return {
   { "tpope/vim-fugitive" },
   { "sindrets/diffview.nvim" },

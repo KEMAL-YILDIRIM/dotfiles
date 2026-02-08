@@ -47,72 +47,100 @@ return {
     enabled = true,
   },
   {
-    -- Modern formatting plugin (recommended)
-    'stevearc/conform.nvim',
-    enabled = true,
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
+    -- none-ls: Community fork of null-ls for formatting and diagnostics
+    'nvimtools/none-ls.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    event = { 'BufReadPre', 'BufNewFile' },
     keys = {
       {
         '<leader>==',
         function()
-          require('conform').format { async = false, timeout_ms = 3000 }
+          vim.lsp.buf.format { async = false, timeout_ms = 3000 }
         end,
         mode = '',
-        desc = 'Format buffer with conform',
+        desc = 'Format buffer',
       },
     },
     config = function()
-      -- Use Windows-compatible path resolution from utils
-      local formatters = {}
-      if F.is_win then
-        formatters = {
-          stylua = F.get_conform_formatter('stylua', {
-            cwd = function()
-              return vim.fn.stdpath 'config'
-            end,
-          }),
-          prettier = F.get_conform_formatter 'prettier',
-          csharpier = F.get_conform_formatter 'csharpier',
-        }
+      local null_ls = require 'null-ls'
+      local formatting = null_ls.builtins.formatting
+
+      -- Helper to get Mason executable path on Windows
+      local function get_command(name)
+        if not F.is_win then
+          return name
+        end
+        local exe = F.get_executable(name)
+        if type(exe) == 'table' then
+          return exe.command
+        end
+        return exe
       end
 
-      require('conform').setup {
-        formatters = formatters,
-        formatters_by_ft = {
-          lua = { 'stylua' },
-          javascript = { 'prettier' },
-          typescript = { 'prettier' },
-          javascriptreact = { 'prettier' },
-          typescriptreact = { 'prettier' },
-          json = { 'prettier' },
-          yaml = { 'prettier' },
-          markdown = { 'prettier' },
-          html = { 'prettier' },
-          css = { 'prettier' },
-          -- C#: Use LSP (Roslyn) when .editorconfig exists, otherwise csharpier
-          cs = function(bufnr)
-            local root = vim.fs.root(bufnr, { '.editorconfig', '.git', '*.sln', '*.csproj' })
-            if root and vim.fn.filereadable(root .. '/.editorconfig') == 1 then
-              -- Use Roslyn LSP formatting - it respects .editorconfig
-              vim.notify('Using Roslyn LSP formatting (editorconfig found at: ' .. root .. ')', vim.log.levels.INFO)
-              return { lsp_format = 'prefer' }
-            end
-            vim.notify('Using CSharpier (no editorconfig found)', vim.log.levels.INFO)
-            return { 'csharpier' }
+      -- Helper to get extra args for node-based tools
+      local function get_extra_args(name)
+        if not F.is_win then
+          return nil
+        end
+        local exe = F.get_executable(name)
+        if type(exe) == 'table' then
+          return exe.args
+        end
+        return nil
+      end
+
+      local sources = {
+        -- Lua
+        formatting.stylua.with {
+          command = get_command 'stylua',
+          cwd = function()
+            return vim.fn.stdpath 'config'
           end,
         },
-        default_format_opts = {
-          timeout_ms = 3000,
-          lsp_format = 'fallback',
+        -- JavaScript/TypeScript/Web
+        formatting.prettier.with {
+          command = get_command 'prettier',
+          extra_args = get_extra_args 'prettier',
+          filetypes = {
+            'javascript',
+            'javascriptreact',
+            'typescript',
+            'typescriptreact',
+            'json',
+            'yaml',
+            'markdown',
+            'html',
+            'css',
+          },
         },
-        -- Uncomment to format on save
-        -- format_on_save = {
-        --   timeout_ms = 3000,
-        --   lsp_format = 'fallback',
-        -- },
+        -- C#
+        formatting.csharpier.with {
+          command = get_command 'csharpier',
+          condition = function(utils)
+            -- Only use csharpier if no .editorconfig (otherwise prefer LSP)
+            local root = vim.fs.root(0, { '.editorconfig', '.git', '*.sln', '*.csproj' })
+            if root and vim.fn.filereadable(root .. '/.editorconfig') == 1 then
+              return false
+            end
+            return true
+          end,
+        },
       }
-      vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+
+      null_ls.setup {
+        sources = sources,
+        -- Uncomment to format on save
+        -- on_attach = function(client, bufnr)
+        --   if client.supports_method 'textDocument/formatting' then
+        --     vim.api.nvim_create_autocmd('BufWritePre', {
+        --       buffer = bufnr,
+        --       callback = function()
+        --         vim.lsp.buf.format { bufnr = bufnr, timeout_ms = 3000 }
+        --       end,
+        --     })
+        --   end
+        -- end,
+      }
     end,
   },
 }

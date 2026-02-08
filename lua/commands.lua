@@ -1,9 +1,6 @@
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.hl.on_yank()`
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "Highlight when yanking (copying) text",
 	group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -16,7 +13,6 @@ vim.api.nvim_create_user_command("FileInfo", function()
 	local current_file = vim.fn.expand("%:p")
 	local stat = vim.loop.fs_stat(current_file)
 	if stat then
-		-- print(vim.inspect(stat))
 		local creation_time = os.date("%Y-%m-%d %H:%M:%S", stat.birthtime.sec)
 		print(stat.type .. " / created_at: " .. creation_time .. " / size: " .. stat.size)
 	else
