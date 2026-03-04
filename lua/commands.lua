@@ -36,12 +36,20 @@ end, {
 	desc = "Reload the plugin we are testing, need to update this command if you testing another plugin",
 })
 
-vim.api.nvim_create_user_command("ClearRecentFiles", function(opts)
+vim.api.nvim_create_user_command('ClearShada', function(opts)
 	local permanent = opts.bang
-	F.clear_recent_files({ permanent = permanent })
+	local target = opts.args ~= '' and opts.args or nil
+	F.clear_shada({ permanent = permanent, target = target })
 end, {
 	bang = true,
-	desc = "Clear recent files cache. Use ! for permanent deletion of shada file",
+	nargs = '?',
+	complete = function()
+		local suffixes = F.get_shada_tmp_suffixes()
+		local completions = { 'tmp' }
+		vim.list_extend(completions, suffixes)
+		return completions
+	end,
+	desc = 'Clear shada files. No args: clear recent files. !: delete all. "tmp": delete all tmp. Single letter: delete specific tmp file',
 })
 
 --[[ vim.api.nvim_create_autocmd("BufEnter", {

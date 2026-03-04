@@ -16,7 +16,7 @@ local dotnet_utility_commands = {
 }
 
 -- user commands
-vim.api.nvim_create_user_command("Net", function(opts)
+vim.api.nvim_create_user_command("Dotnet", function(opts)
 	local fargs = opts.fargs
 	local cmd = fargs[1]
 	local args = #fargs > 1 and vim.list_slice(fargs, 2, #fargs) or {}

@@ -3,17 +3,14 @@ return {
 		"olimorris/codecompanion.nvim",
 		event = "InsertEnter",
 		opts = {
-			-- adapters = {
-			-- 	http = {
-			-- 		anthropic = function()
-			-- 			return require("codecompanion.adapters").extend("anthropic", {
-			-- 				env = {
-			-- 					api_key = vim.env.ANTHROPIC_API_KEY,
-			-- 				},
-			-- 			})
-			-- 		end,
-			-- 	},
-			-- },
+			interactions = {
+				chat = {
+					adapter = "opencode",
+				},
+				inline = {
+					adapter = "opencode",
+				},
+			},
 			strategies = {
 				chat = {
 					keymaps = {
@@ -49,7 +46,7 @@ return {
 					keymap = {
 						jump_prev = "[[",
 						jump_next = "]]",
-						accept = "<CR>",
+						accept = "<Tab>",
 						refresh = "gr",
 						open = "<C-a>",
 					},

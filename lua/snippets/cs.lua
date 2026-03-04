@@ -8,14 +8,15 @@ local _format = require("luasnip.extras.fmt").fmt
 local function get_namespace()
 	local file_path = vim.fs.normalize(vim.fn.expand("%:p:h")) -- full path without last path section
 	local project_file_path = F.find_csproj_file(file_path)
+	local project_name = vim.fn.fnamemodify(project_file_path, ":t:r")
 
 	local project_root = vim.fn.fnamemodify(project_file_path, ":h") or "/"
 	local rel_path = vim.fs.relpath(project_root, file_path) or "/"
-	local namespace = string.gsub(vim.fs.normalize(rel_path), "/", ".")
+	local namespace = string.gsub(vim.fs.normalize(vim.fs.joinpath(project_name, rel_path)), "/", ".")
 
 	-- If we're in the root, use the project name
 	if namespace == "" or namespace == "." then
-		namespace = vim.fn.fnamemodify(project_file_path, ":t:r") -- last path section (tail) without extension
+		namespace = project_without_ext
 	end
 
 	return namespace
@@ -143,12 +144,11 @@ ls.add_snippets("cs", {
 			[[
 using System;
 
-namespace {}
+namespace {};
+
+public interface {}
 {{
-    public interface {}
-    {{
-        {}
-    }}
+		{}
 }}
     ]],
 			{
@@ -167,12 +167,11 @@ namespace {}
 			[[
 using System;
 
-namespace {}
+namespace {};
+
+public class {}
 {{
-    public class {}
-    {{
-        {}
-    }}
+		{}
 }}
     ]],
 			{

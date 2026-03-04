@@ -249,35 +249,128 @@ F.triggerESC = function()
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>", true, false, true), "nx", false)
 end
 
----Clear the recent files (oldfiles) cache
----@param opts? { permanent: boolean } If permanent is true, also clears the shada file
-F.clear_recent_files = function(opts)
+---Get the shada directory path (normalized)
+---@return string
+F.get_shada_dir = function()
+	return vim.fs.normalize(vim.fn.stdpath('state') .. '/shada')
+end
+
+---Get all .tmp files in the shada directory
+---@return string[] Full paths to tmp files
+F.get_shada_tmp_files = function()
+	local dir = F.get_shada_dir()
+	local pattern = dir .. '/main.shada.tmp.*'
+	local files = vim.fn.glob(pattern, false, true)
+	return files
+end
+
+---Get the suffix letters from existing shada tmp files
+---@return string[] Single-character suffixes
+F.get_shada_tmp_suffixes = function()
+	local files = F.get_shada_tmp_files()
+	local suffixes = {}
+	for _, file in ipairs(files) do
+		local suffix = file:match('%.tmp%.(%a)$')
+		if suffix then
+			table.insert(suffixes, suffix)
+		end
+	end
+	table.sort(suffixes)
+	return suffixes
+end
+
+---Clear shada files
+---@param opts? { permanent: boolean, target: string|nil }
+--- permanent (bang): delete main.shada + all tmp files
+--- target = "tmp": delete all tmp files only
+--- target = single letter: delete specific main.shada.tmp.<letter>
+F.clear_shada = function(opts)
 	opts = opts or {}
+	local dir = F.get_shada_dir()
 
-	-- Clear the in-memory oldfiles list
-	vim.v.oldfiles = {}
-
-	if not opts.permanent then
-		-- Write empty oldfiles to shada
-		vim.cmd("wshada!")
-		vim.notify("Recent files cache cleared", vim.log.levels.INFO)
-
+	-- No target, no bang: clear oldfiles in memory + wshada
+	if not opts.permanent and not opts.target then
+		vim.v.oldfiles = {}
+		vim.cmd('wshada!')
+		vim.notify('Recent files cache cleared', vim.log.levels.INFO)
 		return true
 	end
 
-	-- Get shada file path
-	local shada_path = vim.fn.stdpath("state") .. "/shada/main.shada"
-	shada_path = vim.fs.normalize(shada_path)
+	-- Target: delete specific tmp file(s)
+	if opts.target then
+		if opts.target == 'tmp' then
+			-- Delete all tmp files
+			local files = F.get_shada_tmp_files()
+			if #files == 0 then
+				vim.notify('No shada tmp files found', vim.log.levels.WARN)
+				return true
+			end
+			local deleted, failed = 0, 0
+			for _, file in ipairs(files) do
+				local ok, err = os.remove(file)
+				if ok then
+					deleted = deleted + 1
+				else
+					vim.notify('Failed to delete: ' .. file .. ' (' .. (err or 'unknown') .. ')', vim.log.levels.ERROR)
+					failed = failed + 1
+				end
+			end
+			local msg = 'Deleted ' .. deleted .. ' shada tmp file(s)'
+			if failed > 0 then
+				msg = msg .. ' (' .. failed .. ' failed)'
+			end
+			vim.notify(msg, vim.log.levels.INFO)
+			return failed == 0
+		end
 
-	-- Delete the shada file if it exists
-	if vim.fn.filereadable(shada_path) == 1 then
-		local ok, err = os.remove(shada_path)
-		if ok then
-			vim.notify("Recent files cache cleared permanently", vim.log.levels.INFO)
-		else
-			vim.notify("Failed to delete shada file: " .. (err or "unknown error"), vim.log.levels.ERROR)
+		-- Single letter: delete specific tmp file
+		local file = dir .. '/main.shada.tmp.' .. opts.target
+		if vim.fn.filereadable(file) == 0 then
+			vim.notify('File not found: main.shada.tmp.' .. opts.target, vim.log.levels.WARN)
 			return false
 		end
+		local ok, err = os.remove(file)
+		if ok then
+			vim.notify('Deleted main.shada.tmp.' .. opts.target, vim.log.levels.INFO)
+		else
+			vim.notify('Failed to delete main.shada.tmp.' .. opts.target .. ': ' .. (err or 'unknown'), vim.log.levels.ERROR)
+			return false
+		end
+		return true
+	end
+
+	-- Bang (permanent): delete main.shada + all tmp files
+	if opts.permanent then
+		vim.v.oldfiles = {}
+		local main_shada = dir .. '/main.shada'
+		local deleted, failed = 0, 0
+
+		if vim.fn.filereadable(main_shada) == 1 then
+			local ok, err = os.remove(main_shada)
+			if ok then
+				deleted = deleted + 1
+			else
+				vim.notify('Failed to delete main.shada: ' .. (err or 'unknown'), vim.log.levels.ERROR)
+				failed = failed + 1
+			end
+		end
+
+		for _, file in ipairs(F.get_shada_tmp_files()) do
+			local ok, err = os.remove(file)
+			if ok then
+				deleted = deleted + 1
+			else
+				vim.notify('Failed to delete: ' .. file .. ' (' .. (err or 'unknown') .. ')', vim.log.levels.ERROR)
+				failed = failed + 1
+			end
+		end
+
+		local msg = 'Shada cleared permanently (' .. deleted .. ' file(s) deleted)'
+		if failed > 0 then
+			msg = msg .. ' (' .. failed .. ' failed)'
+		end
+		vim.notify(msg, vim.log.levels.INFO)
+		return failed == 0
 	end
 
 	return true
