@@ -1,5 +1,10 @@
 -- See `:help.o.
 
+-- Disable unused providers to suppress checkhealth warnings
+vim.g.loaded_python3_provider = 0
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+
 -- Make line numbers default
 vim.o.number = true
 vim.o.relativenumber = true
@@ -61,7 +66,7 @@ vim.o.cursorline = true
 vim.o.scrolloff = 10
 
 -- File list style into tree mode
-vim.cmd("let g:netrw_liststyle = 3")
+vim.g.netrw_liststyle = 3
 
 -- Windows 10 cmd shell pipe
 vim.o.shellpipe = ">"
@@ -82,5 +87,8 @@ if vim.fn.executable("nu") == 1 then
 	vim.opt.shellpipe = "| save %s --force"
 	vim.opt.shellredir = "out> %s"
 end
+
+-- Disable built-in auto-completion (0.12+); we use blink.cmp instead
+vim.o.autocomplete = false
 
 -- vim: ts=2 sts=2 sw=2 et

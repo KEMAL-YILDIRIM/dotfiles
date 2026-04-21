@@ -1,3 +1,23 @@
+local ShowGitInSplit = function(git_args, buf_name, filetype)
+	local existing = vim.fn.bufnr(buf_name)
+	if existing ~= -1 then
+		vim.cmd('vsplit')
+		vim.api.nvim_set_current_buf(existing)
+		return
+	end
+	local content = F.safe_system(git_args)
+	local buf = vim.api.nvim_create_buf(true, true)
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, '\n'))
+	vim.api.nvim_buf_set_name(buf, buf_name)
+	vim.bo[buf].buftype = 'nofile'
+	vim.bo[buf].modifiable = false
+	vim.cmd('vsplit')
+	vim.api.nvim_set_current_buf(buf)
+	if filetype then
+		vim.bo[buf].filetype = filetype
+	end
+end
+
 local FileHistory = function()
 	-- Custom file history that handles renames properly
 	local abs_path = vim.fn.expand("%:p") -- absolute path of current file
@@ -80,25 +100,9 @@ local FileHistory = function()
 				actions.select_default:replace(function()
 					local selection = action_state.get_selected_entry()
 					actions.close(prompt_bufnr)
-					-- Show the file content at the selected commit in a new buffer
-					local ref = selection.value .. ":" .. selection.path
-					local existing = vim.fn.bufnr(ref)
-					if existing ~= -1 then
-						vim.api.nvim_set_current_buf(existing)
-						return
-					end
-					local content = F.safe_system({ "git", "-C", selection.git_root, "--no-pager", "show", ref })
-					local buf = vim.api.nvim_create_buf(true, true)
-					vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, "\n"))
-					vim.api.nvim_buf_set_name(buf, ref)
-					vim.bo[buf].buftype = "nofile"
-					vim.bo[buf].modifiable = false
-					vim.cmd("vsplit")
-					vim.api.nvim_set_current_buf(buf)
+					local ref = selection.value .. ':' .. selection.path
 					local ft = vim.filetype.match({ filename = selection.path })
-					if ft then
-						vim.bo[buf].filetype = ft
-					end
+					ShowGitInSplit({ 'git', '-C', selection.git_root, '--no-pager', 'show', ref }, ref, ft)
 				end)
 				return true
 			end,
@@ -197,7 +201,7 @@ return {
 				end, { desc = "Git Signs: blame line" })
 				vim.keymap.set("n", "<leader>gd", function()
 					vim.cmd("DiffviewOpen")
-				end, { desc = "Git Signs: diff this" })
+				end, { desc = "DiffviewOpen -- %" })
 				vim.keymap.set("v", "<leader>gr", function()
 					gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
 				end, { desc = "Git Signs: Reset hunk" })
@@ -217,9 +221,24 @@ return {
 				vim.keymap.set("n", "<leader>gts", ":Telescope git_status<CR>", { noremap = true })
 				vim.keymap.set("n", "<leader>gl", ":Telescope git_commits<CR>", { noremap = true, desc = "Git Log" })
 				vim.keymap.set("n", "<leader>gf", FileHistory, { noremap = true, desc = "Git File History" })
-				vim.keymap.set("n", "<leader>gc", function()
-					require("telescope.builtin").git_bcommits({ use_git_root = true })
-				end, { noremap = true, desc = "Git Commits" })
+			vim.keymap.set('n', '<leader>gc', function()
+				local cwd = vim.fn.expand('%:p:h')
+				require('telescope.builtin').git_bcommits({
+					cwd = cwd,
+					attach_mappings = function(prompt_bufnr)
+						local actions = require('telescope.actions')
+						local action_state = require('telescope.actions.state')
+						actions.select_default:replace(function()
+							local selection = action_state.get_selected_entry()
+							actions.close(prompt_bufnr)
+							local hash = selection.value
+							local file = vim.fn.expand('%:t')
+							ShowGitInSplit({ 'git', '-C', cwd, '--no-pager', 'show', hash, '--', file }, hash, 'diff')
+						end)
+						return true
+					end,
+				})
+			end, { noremap = true, desc = 'Git Commits' })
 				vim.keymap.set("n", "<leader>gb", ":Telescope git_branches<CR>", { noremap = true })
 				vim.keymap.set(
 					"n",
@@ -261,6 +280,7 @@ return {
 		-- order to load the plugin when the command is run for the first time
 		keys = {
 			{ "<leader>gg", "<CMD>:LazyGitCurrentFile<CR>", desc = "Git LazyGit" },
+			{ "<leader>gr", "<CMD>:lua require('telescope').extensions.lazygit.lazygit()<CR>", desc = "Git LazyGit" },
 		},
 	},
 }

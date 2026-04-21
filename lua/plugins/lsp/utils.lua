@@ -150,7 +150,7 @@ F.roslyn_cmd = function()
 		vim.fs.normalize(vim.fs.joinpath(roslyn_mason_path, "Microsoft.CodeAnalysis.LanguageServer.dll")),
 		"--stdio",
 		"--logLevel=Information",
-		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.get_log_path()),
+		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.log.get_filename()),
 		"--razorSourceGenerator=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.CodeAnalysis.Razor.Compiler.dll",
 		"--razorDesignTimePath="
 			.. roslyn_mason_path

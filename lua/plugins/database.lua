@@ -59,7 +59,7 @@ return {
 				vim.keymap.set("n", "<leader>dbq", "<Plug>(DBUI_Quit)", { buffer = true })
 				vim.keymap.set("n", "<leader>dbr", "<Plug>(DBUI_Redraw)", { buffer = true })
 			end,
-			desc = "Set keymaps for dbui",
+			desc = "Set keymaps for sql",
 		})
 
 		vim.api.nvim_create_autocmd("FileType", {
@@ -69,7 +69,7 @@ return {
 				vim.keymap.set("n", "yh", "<Plug>(DBUI_YankHeader)", { buffer = true })
 				vim.keymap.set("n", "yc", "<Plug>(DBUI_YankCellValue)", { buffer = true })
 			end,
-			desc = "Set keymaps for dbui",
+			desc = "Set keymaps for dbout",
 		})
 
 		vim.api.nvim_create_autocmd("FileType", {

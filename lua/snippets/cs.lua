@@ -22,30 +22,34 @@ local function get_namespace()
 	return namespace
 end
 
+-- Helper: synchronously request documentSymbol from the first active LSP client
+local function request_document_symbols()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/documentSymbol' })
+	if not clients or #clients == 0 then
+		return nil
+	end
+	local params = { textDocument = vim.lsp.util.make_text_document_params(bufnr) }
+	local result, err = clients[1]:request_sync('textDocument/documentSymbol', params, 1000, bufnr)
+	if err or not result or not result.result then
+		return nil
+	end
+	return result.result
+end
+
 -- Function to get class information from Roslyn LSP
 local function get_class_info()
-	local params = {
-		textDocument = vim.lsp.util.make_text_document_params(),
-		position = vim.lsp.util.make_position_params(0, "utf-8").position,
-	}
-
-	local symbols = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, 1000)
-
+	local symbols = request_document_symbols()
 	if not symbols then
 		return nil
 	end
-
-	for _, res in pairs(symbols) do
-		if res.result then
-			for _, symbol in ipairs(res.result) do
-				if symbol.kind == 5 then -- ClassSymbol
-					return {
-						name = symbol.name,
-						range = symbol.range,
-						detail = symbol.detail,
-					}
-				end
-			end
+	for _, symbol in ipairs(symbols) do
+		if symbol.kind == 5 then -- ClassSymbol
+			return {
+				name = symbol.name,
+				range = symbol.range,
+				detail = symbol.detail,
+			}
 		end
 	end
 	return nil
@@ -53,33 +57,22 @@ end
 
 -- Function to get class fields from Roslyn LSP
 local function get_class_fields()
-	local params = {
-		textDocument = vim.lsp.util.make_text_document_params(),
-		position = vim.lsp.util.make_position_params(0, "utf-8").position,
-	}
-
-	local result = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, 1000)
+	local symbols = request_document_symbols()
 	local fields = {}
-
-	if not result then
+	if not symbols then
 		return fields
 	end
-
-	for _, res in pairs(result) do
-		if res.result then
-			for _, symbol in ipairs(res.result) do
-				if symbol.kind == 5 then -- Class
-					-- Process children of the class
-					if symbol.children then
-						for _, child in ipairs(symbol.children) do
-							if child.kind == 8 then -- Field
-								table.insert(fields, {
-									name = child.name,
-									detail = child.detail,
-									range = child.range,
-								})
-							end
-						end
+	for _, symbol in ipairs(symbols) do
+		if symbol.kind == 5 then -- Class
+			-- Process children of the class
+			if symbol.children then
+				for _, child in ipairs(symbol.children) do
+					if child.kind == 8 then -- Field
+						table.insert(fields, {
+							name = child.name,
+							detail = child.detail,
+							range = child.range,
+						})
 					end
 				end
 			end

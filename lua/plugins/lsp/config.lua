@@ -14,6 +14,5 @@ return {
       group = api.nvim_create_augroup('aug-lsp-attach', { clear = true }),
       callback = keymap
     })
-    vim.diagnostic.config({ virtual_text = true })
   end,
 }

@@ -11,7 +11,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 vim.api.nvim_create_user_command("FileInfo", function()
 	local current_file = vim.fn.expand("%:p")
-	local stat = vim.loop.fs_stat(current_file)
+	local stat = vim.uv.fs_stat(current_file)
 	if stat then
 		local creation_time = os.date("%Y-%m-%d %H:%M:%S", stat.birthtime.sec)
 		print(stat.type .. " / created_at: " .. creation_time .. " / size: " .. stat.size)

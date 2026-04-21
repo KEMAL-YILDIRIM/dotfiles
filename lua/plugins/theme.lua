@@ -1,14 +1,14 @@
 -- color scheme
 vim.o.termguicolors = true
-vim.o.background = "dark"
-vim.o.signcolumn = "yes"
+vim.o.background = 'dark'
+vim.o.signcolumn = 'yes'
 
 -- tailwind colors can be found at https://tailscan.com/_nuxt/colors.*.js
 ---Read the colors.json and gets the color palette
 ---@param theme string
 ---@return table
 local function get_colors(theme)
-  local cur_path = "~/AppData/Local/nvim/lua/colors.json"
+  local cur_path = '~/AppData/Local/nvim/lua/colors.json'
   local content = F.read_file(cur_path)
   if content == nil then
     return {}
@@ -31,10 +31,10 @@ end
 
 return {
   { -- zen mode
-    "folke/zen-mode.nvim",
+    'folke/zen-mode.nvim',
     enabled = false,
     dependencies = {
-      "folke/twilight.nvim",
+      'folke/twilight.nvim',
     },
     opts = {
       window = {
@@ -42,11 +42,11 @@ return {
       },
       wezterm = {
         enabled = true,
-      }
-    }
+      },
+    },
   },
   { -- rainbow delimiter
-    "HiPhish/rainbow-delimiters.nvim",
+    'HiPhish/rainbow-delimiters.nvim',
     enabled = false,
     config = function()
       -- This module contains a number of default definitions
@@ -76,39 +76,43 @@ return {
         },
         blacklist = { 'c', 'cpp' },
       }
-    end
+    end,
   },
   { -- lspkind adds vscode-like pictograms
     'onsails/lspkind.nvim',
     config = function()
-      local lspkind = require('lspkind')
+      local lspkind = require 'lspkind'
       lspkind.init()
     end,
   },
   { -- nvim-colorizer show colors in badges
-    "catgoose/nvim-colorizer.lua",
-    event = "BufReadPre",
+    'catgoose/nvim-colorizer.lua',
+    event = 'BufReadPre',
     config = function()
-      require('colorizer').setup({
-        filetypes = {
-          "*",
-          css = { names = true },
-          html = { names = true }
+      require('colorizer').setup {
+        options = {
+          parsers = {
+            css = true, -- preset: enables names, hex, rgb, hsl, oklch
+            tailwind = { enable = true },
+          },
+          display = {
+            mode = 'virtualtext',
+            virtualtext = { position = 'after' },
+          },
         },
-        user_default_options = { css = true, css_fn = true, mode = 'foreground', names = false }
-      })
-    end
+      }
+    end,
   },
   { -- catppuccin
     'catppuccin/nvim',
     lazy = false,
     priority = 1000,
     config = function()
-      local colors = get_colors("custom")
-      require('catppuccin').setup({
+      local colors = get_colors 'custom'
+      require('catppuccin').setup {
         highlight = {
           enable = true,
-          additional_vim_regex_highlighting = false
+          additional_vim_regex_highlighting = false,
         },
         color_overrides = {
           macchiato = {
@@ -139,9 +143,9 @@ return {
             base = colors.black[350],
             mantle = colors.black[400],
             crust = colors.black[500],
-          }
-        }
-      })
+          },
+        },
+      }
 
       vim.cmd.colorscheme 'catppuccin-macchiato'
 

@@ -3,73 +3,44 @@ return {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup {
-        ensure_installed = {
-          'bash', 'c', 'rust', 'c_sharp',
-          'html', 'css', "markdown", "markdown_inline",
-          'lua', 'vim', 'latex', 'vimdoc',
-          'sql',
-          'json', 'regex', 'javascript'
-        },
-        -- Autoinstall languages that are not installed
-        auto_install = true,
-        highlight = {
-          enable = true,
-          disable = function(lang, buf)
-            local max_filesize = 200 * 1024 -- 200 KB
-            local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-            if ok and stats and stats.size > max_filesize then
-              return true
-            end
-          end,
-        },
-        indent = { enable = true },
-        textobjects = {
-          select = {
-            enable = false, -- for mini ai to be functional
-          }
-        }
+      -- Let find-msvc-tools (used by tree-sitter's cc crate) auto-detect the MSVC toolset
+      -- version, headers, and libs. Setting only VCINSTALLDIR is enough to trigger its
+      -- fast path without hardcoding any version-specific paths.
+      if not vim.env.VCINSTALLDIR then
+        vim.env.VCINSTALLDIR = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\VC\\'
+      end
+
+      require('nvim-treesitter').setup {}
+
+      require('nvim-treesitter').install {
+        'bash', 'c', 'rust', 'c_sharp',
+        'html', 'css', 'markdown', 'markdown_inline',
+        'lua', 'vim', 'latex', 'vimdoc',
+        'sql', 'json', 'regex', 'javascript',
       }
 
-      ---@class parser_config
-      local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-      --[[
+      -- Enable highlight with large-file guard
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('treesitter-highlight', { clear = true }),
+        callback = function(ev)
+          local max_filesize = 200 * 1024 -- 200 KB
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(ev.buf))
+          if ok and stats and stats.size > max_filesize then
+            vim.treesitter.stop(ev.buf)
+          else
+            pcall(vim.treesitter.start, ev.buf)
+          end
+        end,
+      })
 
-      parser_config.razor = {
-        install_info = {
-          url = "D:/Nvim/tree-sitter-razor",
-          files = { "src/scanner.c", "src/parser.c" },
-        },
-        filetype = { "razor" },
-        used_by = { "razor", "aspnetcorerazor" },
-      }
-      -- vim.filetype.add({ extension = { razor = "razor" } })
-
-      parser_config.cshtml = {
-        install_info = {
-          url = "D:/Nvim/tree-sitter-cshtml", -- local path or git repo
-          files = { "src/scanner.c", "src/parser.c" },        -- note that some parsers also require src/scanner.c or src/scanner.cc
-          -- optional entries:
-          -- branch = "main",                         -- default branch in case of git repo if different from master
-          -- generate_requires_npm = false,           -- if stand-alone parser without npm dependencies
-          -- requires_generate_from_grammar = false,  -- if folder contains pre-generated src/parser.c
-        },
-        filetype = { "cshtml" }, -- if filetype does not match the parser name
-
-        -- Experimental: Use multiple parsers
-        used_by = { "html", "c_sharp" },
-      }
-      vim.filetype.add({ extension = { cshtml = "cshtml" } })
-      vim.treesitter.language.register('cshtml', { 'cshtml' })
-
-      ]]
+      -- Enable treesitter-based indentation
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('treesitter-indent', { clear = true }),
+        callback = function()
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
+      })
     end,
   },
-  { -- playground
-    'nvim-treesitter/playground',
-    lazy = true,
-    enable = false
-  }
 }
 -- vim: ts=2 sts=2 sw=2 et
