@@ -1,6 +1,5 @@
 local servers = {
 	lemminx = {},
-	stylua = {},
 	ts_ls = {},
 	roslyn_ls = {},
 	pyright = {},

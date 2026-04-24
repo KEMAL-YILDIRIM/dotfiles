@@ -49,7 +49,7 @@ vim.api.nvim_create_autocmd({ "InsertLeave" }, {
 		end
 
 		local client = clients[1]
-		for buf, _ in pairs(client.attached_buffers) do
+		for _, buf in ipairs(vim.lsp.get_buffers_by_client_id(client.id)) do
 			if vim.api.nvim_buf_is_loaded(buf) then
 				local params = { textDocument = vim.lsp.util.make_text_document_params(buf) }
 				client:request('textDocument/diagnostic', params, nil, buf)

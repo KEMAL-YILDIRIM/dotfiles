@@ -18,7 +18,6 @@ return {
 				},
 				cmd = F.roslyn_cmd(),
 				lazy = false,
-				on_attach = require("plugins.lsp.keymap"),
 				settings = {
 					["csharp|background_analysis"] = {
 						dotnet_compiler_diagnostics_scope = "openFiles",
