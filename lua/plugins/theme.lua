@@ -87,7 +87,7 @@ return {
   },
   { -- nvim-colorizer show colors in badges
     'catgoose/nvim-colorizer.lua',
-    event = 'BufReadPre',
+    event = { 'BufReadPre', 'BufEnter' },
     config = function()
       require('colorizer').setup {
         options = {
@@ -110,10 +110,6 @@ return {
     config = function()
       local colors = get_colors 'custom'
       require('catppuccin').setup {
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
         color_overrides = {
           macchiato = {
             mauve = colors.green[600],

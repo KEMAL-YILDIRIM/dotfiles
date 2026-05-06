@@ -7,7 +7,11 @@ return {
       opts = {}
     },
   },
-  config = function()
+  init = function()
+    -- Register LspAttach early (in init, not config) so the autocmd exists
+    -- before roslyn.nvim attaches on the first BufEnter. If registered inside
+    -- config() the lazy-load of nvim-lspconfig races with roslyn's attach and
+    -- the buffer-local keymaps (K, <leader>ld, etc.) are never created.
     local api = vim.api
     local keymap = require 'plugins.lsp.keymap'
     api.nvim_create_autocmd('LspAttach', {

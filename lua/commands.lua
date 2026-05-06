@@ -52,6 +52,13 @@ end, {
 	desc = 'Clear shada files. No args: clear recent files. !: delete all. "tmp": delete all tmp. Single letter: delete specific tmp file',
 })
 
+-- open help in vertical split
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "help",
+	command = "wincmd L",
+})
+
+
 --[[ vim.api.nvim_create_autocmd("BufEnter", {
 	pattern = "*.txt",
 	desc = 'Create a new tab and display help inside that',
@@ -76,12 +83,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 			end)
 		end
 	end,
-})
-
--- open help in vertical split
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "help",
-	command = "wincmd L",
 })
 
 -- auto resize splits when the terminal's window is resized
