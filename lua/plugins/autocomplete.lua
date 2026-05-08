@@ -9,33 +9,10 @@ return {
     build = 'make install_jsregexp CC=gcc',
     config = function()
       local ls = require 'luasnip'
-      vim.snippet.expand = ls.lsp_expand
 
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.snippet.active = function(filter)
-        filter = filter or { direction = 1 }
-
-        if filter.direction == 1 then
-          return ls.expand_or_jumpable()
-        else
-          return ls.jumpable(filter.direction)
-        end
-      end
-
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.snippet.jump = function(direction)
-        if direction == 1 then
-          if ls.expandable() then
-            return ls.expand_or_jump()
-          else
-            return ls.jumpable(1) and ls.jump(1)
-          end
-        else
-          return ls.jumpable(-1) and ls.jump(-1)
-        end
-      end
-
-      vim.snippet.stop = ls.unlink_current
+      -- NOTE: vim.snippet.* overrides removed — blink.cmp handles the LuaSnip
+      -- bridge via `snippets = { preset = 'luasnip' }` and monkey-patching
+      -- vim.snippet conflicts with blink's internal wiring.
 
       ls.config.set_config {
         history = true,
@@ -47,29 +24,18 @@ return {
         loadfile(ft_path)()
       end
 
-      vim.keymap.set({ 'i', 's' }, '<C-l>', function()
-        return vim.snippet.active { direction = 1 } and vim.snippet.jump(1)
-      end, { silent = true })
+      -- TODO: decide whether to keep these or rely solely on blink's <C-l>/<C-h>
+      -- snippet_forward / snippet_backward bindings (they do the same thing).
+      -- vim.keymap.set({ 'i', 's' }, '<C-l>', function()
+      --   return ls.expand_or_jumpable() and ls.expand_or_jump()
+      -- end, { silent = true })
+      -- vim.keymap.set({ 'i', 's' }, '<C-h>', function()
+      --   return ls.jumpable(-1) and ls.jump(-1)
+      -- end, { silent = true })
 
-      vim.keymap.set({ 'i', 's' }, '<C-h>', function()
-        return vim.snippet.active { direction = -1 } and vim.snippet.jump(-1)
-      end, { silent = true })
-
-      ls.setup {
-        snip_env = {
-          s = function(...)
-            local snip = ls.s(...)
-            -- we can't just access the global `ls_file_snippets`, since it will be
-            -- resolved in the environment of the scope in which it was defined.
-            table.insert(getfenv(2).ls_file_snippets, snip)
-          end,
-          parse = function(...)
-            local snip = ls.parser.parse_snippet(...)
-            table.insert(getfenv(2).ls_file_snippets, snip)
-          end,
-          -- remaining definitions.
-        },
-      }
+      -- NOTE: ls.setup { snip_env = ... } block removed — it used getfenv(2)
+      -- which is a fragile Lua 5.1-ism. Our snippet files (cs.lua, lua.lua,
+      -- js.lua) all use ls.add_snippets() directly and don't rely on snip_env.
 
       require('luasnip.loaders.from_vscode').lazy_load()
     end,

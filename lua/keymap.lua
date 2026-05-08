@@ -177,7 +177,8 @@ map.set("n", "to", "<CMD>tabo<CR>", { desc = "Tab close All but this" }) -- clos
 map.set("n", "tl", "<CMD>tabn<CR>", { desc = "Tab Next" }) --  go to next tab
 map.set("n", "th", "<CMD>tabp<CR>", { desc = "Tab Previous" }) --  go to previous tab
 map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "Tab Duplicate current buffer in new tab" })
-map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "Tab open last used Tab" })
+-- TODO: implement a proper "go to previously visited tab" (needs a TabLeave autocmd to track history)
+-- map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "Tab open last used Tab" })
 map.set("n", "t", "<NOP>", { desc = "Tab" })
 
 -- buffers

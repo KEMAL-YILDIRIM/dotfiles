@@ -47,101 +47,52 @@ return {
     enabled = true,
   },
   {
-    -- none-ls: Community fork of null-ls for formatting and diagnostics
-    'nvimtools/none-ls.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' },
-    event = { 'BufReadPre', 'BufNewFile' },
+    -- conform.nvim: modern formatter plugin, replaces none-ls for 0.12 compat
+    'stevearc/conform.nvim',
+    event = { 'BufWritePre' },
     keys = {
       {
         '<leader>==',
         function()
-          vim.lsp.buf.format { async = false, timeout_ms = 3000 }
+          require('conform').format { async = false, timeout_ms = 3000 }
         end,
         mode = '',
         desc = 'Format buffer',
       },
     },
-    config = function()
-      local null_ls = require 'null-ls'
-      local formatting = null_ls.builtins.formatting
-
-      -- Helper to get Mason executable path on Windows
-      local function get_command(name)
-        if not F.is_win then
-          return name
-        end
-        local exe = F.get_executable(name)
-        if type(exe) == 'table' then
-          return exe.command
-        end
-        return exe
-      end
-
-      -- Helper to get extra args for node-based tools
-      local function get_extra_args(name)
-        if not F.is_win then
-          return nil
-        end
-        local exe = F.get_executable(name)
-        if type(exe) == 'table' then
-          return exe.args
-        end
-        return nil
-      end
-
-      local sources = {
-        -- Lua
-        formatting.stylua.with {
-          command = get_command 'stylua',
-          cwd = function()
-            return vim.fn.stdpath 'config'
-          end,
-        },
-        -- JavaScript/TypeScript/Web
-        formatting.prettier.with {
-          command = get_command 'prettier',
-          extra_args = get_extra_args 'prettier',
-          filetypes = {
-            'javascript',
-            'javascriptreact',
-            'typescript',
-            'typescriptreact',
-            'json',
-            'yaml',
-            'markdown',
-            'html',
-            'css',
-          },
-        },
-        -- C#
-        formatting.csharpier.with {
-          command = get_command 'csharpier',
-          condition = function(utils)
-            -- Only use csharpier if no .editorconfig (otherwise prefer LSP)
-            local root = vim.fs.root(0, { '.editorconfig', '.git', '*.sln', '*.csproj' })
+    opts = {
+      formatters_by_ft = {
+        lua             = { 'stylua' },
+        javascript      = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescript      = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        json            = { 'prettier' },
+        yaml            = { 'prettier' },
+        markdown        = { 'prettier' },
+        html            = { 'prettier' },
+        css             = { 'prettier' },
+        cs              = { 'csharpier' },
+      },
+      formatters = {
+        -- Lua: pin cwd to nvim config so .stylua.toml is always found
+        stylua = F.get_conform_formatter('stylua', {
+          cwd = function() return vim.fn.stdpath 'config' end,
+        }),
+        -- JS/TS/Web: handles node-based .cmd wrapper on Windows
+        prettier = F.get_conform_formatter('prettier'),
+        -- C#: skip csharpier when .editorconfig is present (defer to LSP)
+        csharpier = F.get_conform_formatter('csharpier', {
+          condition = function(self, ctx)
+            local root = vim.fs.root(ctx.buf, { '.editorconfig', '.git', '*.sln', '*.csproj' })
             if root and vim.fn.filereadable(root .. '/.editorconfig') == 1 then
               return false
             end
             return true
           end,
-        },
-      }
-
-      null_ls.setup {
-        sources = sources,
-        -- Uncomment to format on save
-        -- on_attach = function(client, bufnr)
-        --   if client.supports_method 'textDocument/formatting' then
-        --     vim.api.nvim_create_autocmd('BufWritePre', {
-        --       buffer = bufnr,
-        --       callback = function()
-        --         vim.lsp.buf.format { bufnr = bufnr, timeout_ms = 3000 }
-        --       end,
-        --     })
-        --   end
-        -- end,
-      }
-    end,
+        }),
+      },
+    },
   },
 }
 -- vim: ts=2 sts=2 sw=2 et

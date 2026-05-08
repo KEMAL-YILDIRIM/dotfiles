@@ -62,21 +62,27 @@ return {
 				highlight = false,
 			})
 
-			-- Universal treesitter highlighting: resolves Vim filetype → parser language
-			-- (e.g. 'cs' → 'c_sharp', 'ts' → 'typescript') via Neovim's built-in registry,
-			-- then starts highlighting only when a compiled parser is actually available.
-			-- This replaces tree-sitter-manager's pattern-based approach, which uses raw
-			-- language names and therefore silently misses filetypes with different names.
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "*",
-				callback = function()
-					local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
-					if lang then
+		-- Universal treesitter highlighting: resolves Vim filetype → parser language
+		-- (e.g. 'cs' → 'c_sharp', 'ts' → 'typescript') via Neovim's built-in registry,
+		-- then starts highlighting only when a compiled parser is actually available.
+		-- This replaces tree-sitter-manager's pattern-based approach, which uses raw
+		-- language names and therefore silently misses filetypes with different names.
+		--
+		-- Guard: Neovim 0.12 enables treesitter highlighting for Markdown by default,
+		-- so we check whether a highlighter is already active to avoid double-starting.
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = "*",
+			callback = function()
+				local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+				if lang then
+					local buf = vim.api.nvim_get_current_buf()
+					if not vim.treesitter.highlighter.active[buf] then
 						pcall(vim.treesitter.start)
 					end
-				end,
-				desc = "Auto-enable treesitter highlighting for all supported filetypes",
-			})
+				end
+			end,
+			desc = "Auto-enable treesitter highlighting for all supported filetypes",
+		})
 		end,
 	},
 }

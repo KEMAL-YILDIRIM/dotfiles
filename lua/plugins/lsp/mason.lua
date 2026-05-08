@@ -41,10 +41,11 @@ return {
       "css-lsp",
       "html-lsp",
       "tailwindcss-language-server",
-      "typescrip-language-server",
-      "lemminx",
+      "typescript-language-server",
+      -- "lemminx" already included via vim.tbl_keys(servers)
       "netcoredbg",
       "roslyn",
+      "eslint_d",
     })
     require("mason-tool-installer").setup { ensure_installed = ensure_installed }
 

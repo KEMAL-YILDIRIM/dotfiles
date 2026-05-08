@@ -142,7 +142,9 @@ end
 
 -- Adding additonal functionality to utils
 F.roslyn_cmd = function()
-	vim.opt.rtp:append("D:/Nvim/roslyn.nvim")
+	-- NOTE: removed vim.opt.rtp:append("D:/Nvim/roslyn.nvim") — dev artifact
+	-- that unconditionally corrupted rtp on every startup. roslyn.nvim is
+	-- loaded by lazy.nvim from the registry; no manual rtp manipulation needed.
 	local roslyn_mason_path =
 		vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages", "roslyn", "libexec"))
 	local roslyn_cmd = {

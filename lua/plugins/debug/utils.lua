@@ -172,10 +172,12 @@ F.find_test_method_under_cursor = function()
 	local tree = parser:parse()[1]
 	local root = tree:root()
 
-	local cursor_row, cursor_col = unpack(vim.api.nvim_win_get_cursor(0))
-	cursor_row = cursor_row - 1 -- Convert to 0-based indexing
+	local cursor_row = vim.api.nvim_win_get_cursor(0)[1] - 1 -- 0-based
 
-	-- Query to find test methods
+	-- Query to find test methods.
+	-- Uses iter_matches so all captures for a match are collected in one pass —
+	-- avoids the old pattern of re-running iter_captures on a sub-node, which
+	-- was redundant and could produce spurious results from ancestor nodes.
 	local query = ts.query.parse(
 		"c_sharp",
 		[[
@@ -187,25 +189,32 @@ F.find_test_method_under_cursor = function()
   ]]
 	)
 
-	for id, node, metadata in query:iter_captures(root, 0) do
-		local name = query.captures[id]
-		local start_row, start_col, end_row, end_col = node:range()
+	-- capture-name → index map for quick lookup
+	local cap_index = {}
+	for i, name in ipairs(query.captures) do
+		cap_index[name] = i
+	end
 
-		if name == "method" and start_row <= cursor_row and cursor_row <= end_row then
-			-- Found the method containing the cursor
-			local method_name_node = nil
-			for child_id, child_node in query:iter_captures(node, 0) do
-				if query.captures[child_id] == "method_name" then
-					method_name_node = child_node
-					break
-				end
-			end
+	-- Helper: iter_matches returns a table of nodes per capture in 0.12+;
+	-- normalise to a single node (first match when multiple).
+	local function first(v)
+		if type(v) == "table" then return v[1] end
+		return v
+	end
 
-			if method_name_node then
+	-- Single-pass: all captures for a match are in `match`, so no re-query needed.
+	for _, match, _ in query:iter_matches(root, 0) do
+		local method_node = first(match[cap_index["method"]])
+		local method_name_node = first(match[cap_index["method_name"]])
+
+		if method_node and method_name_node then
+			local start_row, _, end_row, _ = method_node:range()
+
+			if start_row <= cursor_row and cursor_row <= end_row then
 				local method_name = ts.get_node_text(method_name_node, 0)
 
-				-- Get the full qualified name by finding the class
-				local class_node = node:parent()
+				-- Walk up the AST to find the enclosing class_declaration
+				local class_node = method_node:parent()
 				while class_node and class_node:type() ~= "class_declaration" do
 					class_node = class_node:parent()
 				end
@@ -220,7 +229,7 @@ F.find_test_method_under_cursor = function()
 					end
 				end
 
-				-- Get namespace
+				-- Walk up to find the enclosing namespace_declaration
 				local namespace_node = class_node and class_node:parent()
 				while namespace_node and namespace_node:type() ~= "namespace_declaration" do
 					namespace_node = namespace_node:parent()

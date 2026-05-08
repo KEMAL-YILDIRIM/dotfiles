@@ -36,9 +36,6 @@ vim.o.autowriteall = true
 -- Save undo history
 vim.o.undofile = true
 
--- force all horizontal splits to go below current window
-vim.o.splitbelow = true
-vim.o.splitright = true
 vim.o.swapfile = false
 
 -- Case-insensitive searching UNLESS \C or capital in search

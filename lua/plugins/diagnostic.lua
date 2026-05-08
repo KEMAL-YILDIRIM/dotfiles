@@ -123,4 +123,40 @@ return {
 			})
 		end,
 	},
+	{
+		'mfussenegger/nvim-lint',
+		event = { 'BufReadPost', 'BufWritePost' },
+		config = function()
+			local lint = require 'lint'
+
+			lint.linters_by_ft = {
+				javascript      = { 'eslint_d' },
+				javascriptreact = { 'eslint_d' },
+				typescript      = { 'eslint_d' },
+				typescriptreact = { 'eslint_d' },
+			}
+
+			-- Windows: patch eslint_d to use the resolved Mason executable
+			if F.is_win then
+				local function patch_linter(name)
+					local exe = F.get_executable(name)
+					if type(exe) == 'table' then
+						-- node-based tool: set cmd to 'node' and prepend the script path into args
+						lint.linters[name].cmd = exe.command
+						table.insert(lint.linters[name].args, 1, exe.args[1])
+					elseif type(exe) == 'string' and exe ~= name then
+						lint.linters[name].cmd = exe
+					end
+				end
+				patch_linter 'eslint_d'
+			end
+
+			vim.api.nvim_create_autocmd({ 'BufReadPost', 'BufWritePost' }, {
+				group = vim.api.nvim_create_augroup('nvim-lint', { clear = true }),
+				callback = function()
+					lint.try_lint()
+				end,
+			})
+		end,
+	},
 }

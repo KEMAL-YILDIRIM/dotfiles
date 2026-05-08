@@ -15,9 +15,9 @@ return {
     config = function()
       -- utils must be loaded before since it defines dependent functions
       require "plugins.debug.utils"
-      require "plugins/debug/c#"
-      require "plugins/debug/lua"
-      require "plugins/debug/ui"
+      require "plugins.debug.c#"
+      require "plugins.debug.lua"
+      require "plugins.debug.ui"
       require "plugins.debug.keymap"
     end,
   },
