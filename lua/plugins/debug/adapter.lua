@@ -3,14 +3,12 @@ return {
     'mfussenegger/nvim-dap',
     lazy = true,
     dependencies = {
-      -- creates a beautiful debugger ui
-      'rcarriga/nvim-dap-ui',
+      -- modern, tabbed single-panel debugger UI (replaces nvim-dap-ui)
+      { 'igorlfs/nvim-dap-view', version = '1.*' },
       -- display text as you step throughout the code
       'theHamsta/nvim-dap-virtual-text',
       -- lua debug
       'jbyuki/one-small-step-for-vimkind',
-      -- async io operations
-      'nvim-neotest/nvim-nio',
     },
     config = function()
       -- utils must be loaded before since it defines dependent functions

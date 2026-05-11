@@ -7,23 +7,26 @@ vim.fn.sign_define("DapStopped", { text = "", texthl = "WarningMsg" })
 vim.api.nvim_set_hl(0, 'DapBreakpointPending', { fg = '#556B2F' })
 vim.fn.sign_define('DapBreakpointRejected', { text = '○', texthl = 'DapBreakpointPending' })
 
--- dap ui setup for more information, see |:help nvim-dap-ui|
+-- dap-view setup; see |:help dap-view.txt|
 local dap = require("dap")
 -- TRACE log written to: vim.fn.stdpath('cache') .. '/dap.log'
 -- On Windows: %LOCALAPPDATA%\nvim-data\dap.log
 -- Inspect it to see netcoredbg module-load events and attach handshake details.
 dap.set_log_level("TRACE")
-local dapui = require("dapui")
+local dap_view = require("dap-view")
 
 -- open the ui as soon as we are debugging
-dap.listeners.after.event_initialized["dapui_config"] = function()
-	dapui.open()
+-- (dap-view also supports `auto_toggle = true` in setup, but doing it here
+-- keeps the lifecycle next to the other listeners and lets us share the
+-- listener namespace.)
+dap.listeners.after.event_initialized["dap_view_config"] = function()
+	dap_view.open()
 end
-dap.listeners.before.event_terminated["dapui_config"] = function()
-	dapui.close()
+dap.listeners.before.event_terminated["dap_view_config"] = function()
+	dap_view.close()
 end
-dap.listeners.before.event_exited["dapui_config"] = function()
-	dapui.close()
+dap.listeners.before.event_exited["dap_view_config"] = function()
+	dap_view.close()
 end
 
 -- Re-send all pending breakpoints whenever a new module (DLL) is loaded.
@@ -184,32 +187,36 @@ dap_warn_on_err('launch')
 dap_warn_on_err('evaluate')
 dap_warn_on_err('exceptionInfo')
 
--- more minimal ui
+-- Single tabbed panel: switch between Scopes / Watches / REPL / Breakpoints /
+-- Threads / Exceptions via the winbar (uppercase letter shown next to each
+-- label, or `]v` / `[v` to cycle). `g?` inside the panel lists per-view keymaps.
 ---@diagnostic disable-next-line: missing-fields
-dapui.setup({
-	expand_lines = true,
-	controls = { enabled = false }, -- no extra play/step buttons
-	floating = { border = "rounded" },
-
-	-- Set dapui window
-	render = {
-		indent = 2,
-		max_type_length = 60,
-		max_value_lines = 200,
+dap_view.setup({
+	winbar = {
+		show = true,
+		-- Order mirrors the priority of the old dap-ui layout (scopes first),
+		-- plus breakpoints/threads/exceptions which dap-view exposes for free.
+		sections = { "scopes", "watches", "repl", "breakpoints", "threads", "exceptions" },
+		default_section = "scopes",
+		show_keymap_hints = true,
+		controls = { enabled = false }, -- no clickable play/step buttons
 	},
-
-	-- Only one layout: just the "scopes" (variables) list at the bottom
-	layouts = {
-		{
-			elements = {
-				{ id = "scopes", size = 0.7 }, -- 100% of this panel is scopes
-				{ id = "watches", size = 0.1 }, -- 100% of this panel is scopes
-				{ id = "repl", size = 0.2 }, -- 100% of this panel is scopes
-			},
-			size = 80, -- height in lines (adjust to taste)
-			position = "left", -- "left", "right", "top", "bottom"
+	windows = {
+		-- Left-anchored vertical split, ~30% width. The old dap-ui layout was
+		-- 80 columns on the left; 0.3 is a close fractional equivalent and
+		-- adapts to window size.
+		size = 0.3,
+		position = "left",
+		terminal = {
+			-- Hide the auto-spawned terminal for netcoredbg — it has no useful
+			-- stdio and just steals screen space. Remove this entry if you want
+			-- a console panel for other adapters.
+			hide = { "coreclr", "netcoredbg" },
 		},
 	},
+	-- Jump to existing windows/tabs when navigating from breakpoints/threads
+	-- instead of opening the source in a new split inside the dap-view panel.
+	switchbuf = "usetab,uselast",
 })
 
 return {}

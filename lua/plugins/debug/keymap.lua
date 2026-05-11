@@ -1,5 +1,5 @@
 local dap = require("dap")
-local dapui = require("dapui")
+local dap_view = require("dap-view")
 vim.keymap.set("n", "<s-f5>", function()
 	dap.terminate()
 end, { desc = "debug: terminate" })
@@ -25,13 +25,14 @@ vim.keymap.set("n", "<s-f9>", function()
 	dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
 end, { desc = "debug: conditional breakpoint" })
 vim.keymap.set("n", "<f12>", function()
-	dapui.toggle({ reset = true })
+	dap_view.toggle()
 end, { desc = "debug: toggle session result." })
 vim.keymap.set("n", "<s-f12>", dap.run_last, { desc = "debug: see last test." })
 
--- Eval var under cursor
-vim.keymap.set("n", "<f6>", function()
-	require("dapui").eval(nil, { enter = true })
-end)
+-- Eval var under cursor. `hover(nil, true)` evaluates <cexpr> and focuses the
+-- hover window so `q` closes it (matching the old dapui.eval { enter = true }).
+vim.keymap.set({ "n", "v" }, "<f6>", function()
+	dap_view.hover(nil, true)
+end, { desc = "debug: eval under cursor / selection" })
 vim.keymap.set("n", "<s-f6>", dap.repl.toggle, { desc = "debug: repl toggle" })
 return {}
