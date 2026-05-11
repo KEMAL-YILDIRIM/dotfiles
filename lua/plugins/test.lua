@@ -32,7 +32,7 @@ return {
       })
       vim.keymap.set("n", "<leader>tr", function() neotest.run.run() end, { desc = "Run Test" })
       vim.keymap.set("n", "<leader>tt", function() neotest.summary.toggle() end, { desc = "Toggle Summary" })
-      vim.keymap.set("n", "<leader>ta", function() neotest.run.run(vim.fn.exp("%")) end,
+      vim.keymap.set("n", "<leader>ta", function() neotest.run.run(vim.fn.expand("%")) end,
         { desc = "Run all tests on the File" })
       vim.keymap.set("n", "<leader>td", function() neotest.run.run({ strategy = "dap" }) end,
         { desc = "Debug Test" })

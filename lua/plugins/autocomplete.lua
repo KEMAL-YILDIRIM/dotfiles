@@ -43,7 +43,7 @@ return {
   { -- Autocompletion Blink
     'saghen/blink.cmp',
     dependencies = {
-      { 'saghen/blink.compat', lazy = true, verson = false },
+      { 'saghen/blink.compat', lazy = true, version = false },
     },
     version = '1.*',
     enabled = true,

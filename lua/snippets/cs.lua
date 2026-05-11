@@ -16,7 +16,7 @@ local function get_namespace()
 
 	-- If we're in the root, use the project name
 	if namespace == "" or namespace == "." then
-		namespace = project_without_ext
+		namespace = project_name
 	end
 
 	return namespace
@@ -200,7 +200,7 @@ public class {}
 						string.format(
 							'    /// <param name="%s">The %s.</param>',
 							parsed.name,
-							parsed.name:gsub("([A-Z])", " %1"):lower():trim()
+							vim.trim(parsed.name:gsub("([A-Z])", " %1"):lower())
 						)
 					)
 				end
