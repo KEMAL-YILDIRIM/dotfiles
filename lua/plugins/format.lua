@@ -1,5 +1,3 @@
-vim.keymap.set('n', '<leader>=-', 'gg=G', { desc = 'Format buffer with indentation' })
-
 -- tab settings
 vim.o.tabstop = 2
 vim.o.softtabstop = 0
@@ -54,7 +52,13 @@ return {
       {
         '<leader>==',
         function()
-          require('conform').format { async = false, timeout_ms = 3000 }
+          local conform = require('conform')
+          local has_formatter = #conform.list_formatters_for_buffer() > 0
+          if has_formatter then
+            conform.format { async = false, timeout_ms = 3000 }
+          else
+            vim.cmd 'normal! gg=G'
+          end
         end,
         mode = '',
         desc = 'Format buffer',

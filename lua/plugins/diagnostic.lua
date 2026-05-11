@@ -1,11 +1,12 @@
 vim.diagnostic.config({
 	virtual_text = true,
+	virtual_lines = false, -- 0.12 adds virtual_lines; keep explicit to prevent double-rendering
 	underline = true,
 	update_in_insert = false,
 	severity_sort = true,
 	float = {
 		border = "rounded",
-		source = true,
+		source = "if_many", -- only show source label when multiple LSP clients are attached
 		header = "",
 		prefix = "",
 	},

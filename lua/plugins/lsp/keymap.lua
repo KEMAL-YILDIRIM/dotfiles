@@ -4,15 +4,24 @@ local function lsp_attach(event)
 		vim.keymap.set("n", keys, func, { buffer = event.buf, desc = "LSP: " .. desc, noremap = true })
 	end
 
+	-- Clear Neovim's built-in LSP default keymaps (grn/gra/grd/grr from 0.11,
+	-- grt/grx added in 0.12) so they don't shadow or conflict with our <leader>l* bindings.
+	for _, lhs in ipairs({ "grn", "gra", "grd", "grr", "grt", "grx" }) do
+		pcall(vim.keymap.del, "n", lhs, { buffer = event.buf })
+	end
+
 	-- jump to lsp document window
-	vim.keymap.set("i", "<C-l>", function()
-		vim.cmd.stopinsert()
-		vim.lsp.buf.signature_help()
-		vim.defer_fn(function()
-			vim.cmd.wincmd("w")
-		end, 100)
-		vim.keymap.set("n", "q", ":close<CR>", { buffer = true })
-	end)
+	-- NOTE: Commented out — conflicts with blink.cmp's <C-l> = snippet_forward (set globally
+	-- without buffer scoping, so it re-registers on every LspAttach and silently overwrites
+	-- blink's insert-mode binding). Use blink's <C-l> for snippet navigation instead.
+	-- vim.keymap.set("i", "<C-l>", function()
+	-- 	vim.cmd.stopinsert()
+	-- 	vim.lsp.buf.signature_help()
+	-- 	vim.defer_fn(function()
+	-- 		vim.cmd.wincmd("w")
+	-- 	end, 100)
+	-- 	vim.keymap.set("n", "q", ":close<CR>", { buffer = true })
+	-- end)
 
 	--  To jump back, press <C-T>.
 	local builtin = require("telescope.builtin")
