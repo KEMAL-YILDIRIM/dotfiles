@@ -1,3 +1,45 @@
+-- Universal treesitter highlighting: resolves Vim filetype → parser language
+-- (e.g. 'cs' → 'c_sharp', 'ts' → 'typescript') via Neovim's built-in registry,
+-- then starts highlighting only when a compiled parser is actually available.
+-- Registered here at the top level so this file is executed by lazy.nvim during
+-- its startup spec-collection pass, before any FileType events fire for files
+-- opened via `nvim somefile.js` on the CLI.
+--
+-- Neovim 0.12 enables treesitter highlighting for Markdown natively, so we
+-- explicitly skip it here to avoid a double-start.
+-- The active[buf] guard is a safety net for any other filetypes that 0.12+
+-- may enable by default in the future.
+-- Prepend nvim-treesitter's bundled queries dir to rtp at startup (before any
+-- FileType events fire). The plugin path is stable under lazy.nvim's data dir.
+-- See the long comment on the nvim-treesitter spec below for the full rationale.
+local ts_runtime = vim.fn.stdpath('data') .. '/lazy/nvim-treesitter/runtime'
+if vim.uv.fs_stat(ts_runtime) then
+	vim.opt.runtimepath:prepend(ts_runtime)
+end
+
+local ts_native_filetypes = { markdown = true }
+vim.api.nvim_create_autocmd({ 'FileType', 'BufWinEnter' }, {
+	group = vim.api.nvim_create_augroup('ts_highlight', { clear = true }),
+	pattern = '*',
+	callback = function()
+		local ft = vim.bo.filetype
+		if ft == '' or vim.bo.buftype ~= '' then
+			return
+		end
+		if ts_native_filetypes[ft] then
+			return
+		end
+		local lang = vim.treesitter.language.get_lang(ft)
+		if lang then
+			local buf = vim.api.nvim_get_current_buf()
+			if not vim.treesitter.highlighter.active[buf] then
+				pcall(vim.treesitter.start)
+			end
+		end
+	end,
+	desc = 'Auto-enable treesitter highlighting for all supported filetypes',
+})
+
 return {
 	{
 		-- Pulled in as a dependency by codecompanion and neotest.
@@ -5,9 +47,16 @@ return {
 		-- incompatible with Neovim 0.12's updated TSNode query API).
 		"nvim-treesitter/nvim-treesitter",
 		branch = "main",
-		-- No setup needed: the `configs` module was removed in the main branch.
-		-- Parser management and highlighting are handled by tree-sitter-manager
-		-- and the FileType autocmd below.
+		build = ":TSUpdate", -- ensure parsers are rebuilt on plugin update
+		-- nvim-treesitter's main branch ships its bundled queries in <plugin>/runtime/queries,
+		-- but that path is NOT on Neovim's runtimepath by default. Without this, queries
+		-- like @property, @variable.member, and @function.method.call (defined in the
+		-- ecma highlights inherited by JS/TS) are never loaded — only Neovim's minimal
+		-- built-in queries are found, leaving property accesses and method calls
+		-- unhighlighted. tree-sitter-manager handles parser compilation but does not
+		-- copy queries, so the rtp prepend is done at the top of this file instead.
+		-- No setup needed: configs module was removed in main; we only need the rtp.
+
 	},
 	{
 		"romus204/tree-sitter-manager.nvim",
@@ -41,6 +90,7 @@ return {
 				ensure_installed = {
 					"bash",
 					"c",
+          "nu",
 					"rust",
 					"c_sharp",
 					"html",
@@ -62,27 +112,6 @@ return {
 				highlight = false,
 			})
 
-		-- Universal treesitter highlighting: resolves Vim filetype → parser language
-		-- (e.g. 'cs' → 'c_sharp', 'ts' → 'typescript') via Neovim's built-in registry,
-		-- then starts highlighting only when a compiled parser is actually available.
-		-- This replaces tree-sitter-manager's pattern-based approach, which uses raw
-		-- language names and therefore silently misses filetypes with different names.
-		--
-		-- Guard: Neovim 0.12 enables treesitter highlighting for Markdown by default,
-		-- so we check whether a highlighter is already active to avoid double-starting.
-		vim.api.nvim_create_autocmd("FileType", {
-			pattern = "*",
-			callback = function()
-				local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
-				if lang then
-					local buf = vim.api.nvim_get_current_buf()
-					if not vim.treesitter.highlighter.active[buf] then
-						pcall(vim.treesitter.start)
-					end
-				end
-			end,
-			desc = "Auto-enable treesitter highlighting for all supported filetypes",
-		})
 		end,
 	},
 }

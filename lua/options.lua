@@ -11,8 +11,9 @@ vim.o.relativenumber = true
 vim.o.cpo = "aABceFsn_"
 
 -- fold settings
-vim.o.foldmethod = "expr"
-vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+-- foldmethod/foldexpr are set per-filetype in commands.lua using window-local scope
+-- (vim.wo[0][0]) so that special buffers like quickfix, terminal, and oil.nvim
+-- floats don't attempt treesitter folding when no parser is available.
 vim.o.foldcolumn = "0"
 vim.o.foldtext = ""
 vim.o.foldlevel = 99

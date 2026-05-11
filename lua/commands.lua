@@ -55,20 +55,9 @@ end, {
 -- open help in vertical split
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "help",
-	command = "wincmd L",
+	-- command = "wincmd L", --vertical window
+	command = "wincmd T",
 })
-
-
---[[ vim.api.nvim_create_autocmd("BufEnter", {
-	pattern = "*.txt",
-	desc = 'Create a new tab and display help inside that',
-	group = vim.api.nvim_create_augroup('help-display', { clear = true }),
-	callback = function()
-		if vim.bo.buftype == "help" then
-			vim.cmd("wincmd T")
-		end
-	end,
-}) ]]
 
 -- restore cursor to file position in previous editing session
 vim.api.nvim_create_autocmd("BufReadPost", {
@@ -96,4 +85,30 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.opt_local.formatoptions:remove({ "c", "r", "o" })
 	end,
+})
+
+-- Treesitter folding: set window-local foldmethod/foldexpr only when a parser
+-- is available for this filetype. Using vim.wo[0][0] scopes the option to the
+-- current window+buffer combination, preventing special buffers (quickfix,
+-- terminal, oil.nvim floats) from inheriting treesitter folding.
+-- Falls back to indent folding for files without a treesitter parser.
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("treesitter_folds", { clear = true }),
+	callback = function()
+		local ft = vim.bo.filetype
+		-- Skip special/non-file buffers that should never use expr folding
+		if ft == "" or vim.bo.buftype ~= "" then
+			return
+		end
+		local lang = vim.treesitter.language.get_lang(ft)
+		local has_parser = lang and (pcall(vim.treesitter.get_parser, 0, lang))
+		if has_parser then
+			vim.wo[0][0].foldmethod = "expr"
+			vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+		else
+			vim.wo[0][0].foldmethod = "indent"
+			vim.wo[0][0].foldexpr = ""
+		end
+	end,
+	desc = "Set treesitter folding when parser available, indent folding otherwise",
 })
