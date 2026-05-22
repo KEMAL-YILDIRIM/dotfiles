@@ -47,7 +47,10 @@ return {
 		-- incompatible with Neovim 0.12's updated TSNode query API).
 		"nvim-treesitter/nvim-treesitter",
 		branch = "main",
-		build = ":TSUpdate", -- ensure parsers are rebuilt on plugin update
+		-- No `build = ':TSUpdate'`: on the `main` branch, nvim-treesitter no longer
+		-- manages parser installation itself — that's delegated to tree-sitter-manager.nvim
+		-- below. The :TSUpdate command still exists but is a no-op for us because we
+		-- never register parsers with nvim-treesitter's own installer.
 		-- nvim-treesitter's main branch ships its bundled queries in <plugin>/runtime/queries,
 		-- but that path is NOT on Neovim's runtimepath by default. Without this, queries
 		-- like @property, @variable.member, and @function.method.call (defined in the
@@ -90,7 +93,7 @@ return {
 				ensure_installed = {
 					"bash",
 					"c",
-          "nu",
+					"nu",
 					"rust",
 					"c_sharp",
 					"html",
@@ -105,7 +108,20 @@ return {
 					"json",
 					"regex",
 					"javascript",
-          "python",
+					"python",
+					-- Recovered from stale nvim-treesitter parser dir on 2026-05-22; installed via tree-sitter-manager.
+					-- Note: `jsonc` and `cshtml` are not standalone parsers in tree-sitter-manager's catalog.
+					-- `jsonc` is aliased to the `json` parser via filetypes.lua; `cshtml` would need a custom
+					-- `languages` entry (similar pattern to nvim-treesitter master). Skipped for now.
+					"typescript",
+					"tsx",
+					"xml",
+					"yaml",
+					"toml",
+					"dockerfile",
+					"razor",
+					"diff",
+					"query",
 				},
 				-- Highlighting is handled by the universal FileType autocmd on the
 				-- nvim-treesitter entry above, which correctly resolves filetype →
