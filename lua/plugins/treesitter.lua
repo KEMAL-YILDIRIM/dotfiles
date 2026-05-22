@@ -105,6 +105,7 @@ return {
 					"json",
 					"regex",
 					"javascript",
+          "python",
 				},
 				-- Highlighting is handled by the universal FileType autocmd on the
 				-- nvim-treesitter entry above, which correctly resolves filetype →

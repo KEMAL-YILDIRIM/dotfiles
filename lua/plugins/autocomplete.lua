@@ -82,6 +82,12 @@ return {
       },
 
       completion = {
+        -- Workaround for blink.cmp v1.10.2 crash in write_to_dot_repeat:
+        -- undo_preview() skips range clamping, so a negative cursor delta can
+        -- invert the text-edit range and nvim_buf_get_text throws
+        -- "'start' is higher than 'end'". Disabling dot-repeat avoids the
+        -- offending code path; we lose `.`-repeat of completion acceptance only.
+        accept = { dot_repeat = false },
         menu = {
           border = 'rounded',
           draw = {

@@ -205,7 +205,7 @@ dap_view.setup({
 		-- Left-anchored vertical split, ~30% width. The old dap-ui layout was
 		-- 80 columns on the left; 0.3 is a close fractional equivalent and
 		-- adapts to window size.
-		size = 0.3,
+		size = 0.4,
 		position = "left",
 		terminal = {
 			-- Hide the auto-spawned terminal for netcoredbg — it has no useful

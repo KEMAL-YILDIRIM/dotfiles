@@ -218,6 +218,14 @@ return {
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Search Files' })
       vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = 'Search grep Word' })
       vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Search live Grep' })
+      vim.keymap.set('n', '<leader>fG', function()
+        builtin.live_grep {
+          additional_args = function()
+            return { '--fixed-strings' }
+          end,
+          prompt_title = 'Live Grep (literal)',
+        }
+      end, { desc = 'Search live Grep (literal/fixed-string)' })
       vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = 'Search Diagnostics' })
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = 'Search Resume' })
       vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = 'Search Recent Files.' })
