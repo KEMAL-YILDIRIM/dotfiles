@@ -28,6 +28,9 @@ vim.keymap.set("n", "<f12>", function()
 	dap_view.toggle()
 end, { desc = "debug: toggle session result." })
 vim.keymap.set("n", "<leader><f12>", dap.run_last, { desc = "debug: see last test." })
+vim.keymap.set("n", "<leader><f8>", function()
+	F.pick_dap_cs_configuration()
+end, { desc = "debug: pick C# build configuration (Debug/Release)" })
 
 -- Eval var under cursor. `hover(nil, true)` evaluates <cexpr> and focuses the
 -- hover window so `q` closes it (matching the old dapui.eval { enter = true }).

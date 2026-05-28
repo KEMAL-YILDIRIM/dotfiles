@@ -622,8 +622,9 @@ F.dap_continue_with_build = function()
 		return
 	end
 
+	local active_cfg = (F.get_dap_cs_configuration and F.get_dap_cs_configuration()) or "Debug"
 	vim.ui.select(configs, {
-		prompt = "Select debug configuration:",
+		prompt = "Select debug configuration (Configuration: " .. active_cfg .. "):",
 		format_item = function(config)
 			return config.name
 		end,
@@ -689,11 +690,22 @@ F.refresh_dap_cs_configs = function()
     table.insert(configs, cfg)
   end
 
-  -- Build symbol search paths from all known project bin/Debug dirs so
-  -- netcoredbg can locate PDBs for referenced shared projects even when
-  -- they are not in the same folder as the entry DLL.
+  -- Build symbol search paths from all known project bin/Debug AND bin/Release
+  -- dirs so netcoredbg can locate PDBs for referenced shared projects even
+  -- when they are not in the same folder as the entry DLL. Including both
+  -- configurations is cheap (netcoredbg only loads what it needs) and means
+  -- switching the active C# configuration doesn't require a DAP refresh.
   local search_paths = {}
   local seen = {}
+  local function add_bin_dirs(proj_dir)
+    for _, cfg in ipairs({ 'Debug', 'Release' }) do
+      local bin_dir = vim.fs.normalize(proj_dir .. '/bin/' .. cfg)
+      if not seen[bin_dir] then
+        seen[bin_dir] = true
+        table.insert(search_paths, bin_dir)
+      end
+    end
+  end
   if vim.g.roslyn_nvim_selected_solution then
     local solution_dir = vim.fs.dirname(vim.g.roslyn_nvim_selected_solution)
     local res = vim.system({ 'dotnet', 'sln', vim.g.roslyn_nvim_selected_solution, 'list' }):wait()
@@ -701,25 +713,16 @@ F.refresh_dap_cs_configs = function()
       for _, line in ipairs(vim.split(res.stdout, '\n')) do
         local fullpath = vim.fs.normalize(vim.fs.joinpath(solution_dir, line))
         if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
-          local proj_dir = vim.fn.fnamemodify(fullpath, ':h')
-          local bin_debug = vim.fs.normalize(proj_dir .. '/bin/Debug')
-          if not seen[bin_debug] then
-            seen[bin_debug] = true
-            table.insert(search_paths, bin_debug)
-          end
+          add_bin_dirs(vim.fn.fnamemodify(fullpath, ':h'))
         end
       end
     end
   end
-  -- Fallback: scan all csproj bin/Debug dirs under cwd
+  -- Fallback: scan all csproj bin dirs under cwd
   if #search_paths == 0 then
     local csprojs = vim.fn.globpath(vim.fn.getcwd(), '**/*.csproj', false, true)
     for _, f in ipairs(csprojs) do
-      local bin_debug = vim.fs.normalize(vim.fn.fnamemodify(f, ':h') .. '/bin/Debug')
-      if not seen[bin_debug] then
-        seen[bin_debug] = true
-        table.insert(search_paths, bin_debug)
-      end
+      add_bin_dirs(vim.fn.fnamemodify(f, ':h'))
     end
   end
 

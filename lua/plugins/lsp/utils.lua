@@ -26,6 +26,113 @@ F.find_csproj_file = function(path)
 	end, { upward = true, path = path })[1]
 end
 
+-- ---------------------------------------------------------------------------
+-- Active C# build configuration (Debug / Release), VS-dropdown-style.
+--
+-- Persisted on `vim.g.dap_cs_configuration` so it survives across builds
+-- in the same session. Default: "Debug".
+-- ---------------------------------------------------------------------------
+
+--- Returns the current C# build configuration ("Debug" or "Release").
+F.get_dap_cs_configuration = function()
+	local cfg = vim.g.dap_cs_configuration
+	if cfg == "Debug" or cfg == "Release" then
+		return cfg
+	end
+	return "Debug"
+end
+
+--- Sets the C# build configuration. Validates input; no-op on bad value.
+F.set_dap_cs_configuration = function(cfg)
+	if cfg ~= "Debug" and cfg ~= "Release" then
+		vim.notify("DAP cs configuration: invalid value '" .. tostring(cfg) .. "'", vim.log.levels.WARN)
+		return
+	end
+	vim.g.dap_cs_configuration = cfg
+	vim.notify("DAP cs configuration: " .. cfg, vim.log.levels.INFO)
+end
+
+--- Interactive picker for Debug/Release. Bound to <leader><F8>.
+F.pick_dap_cs_configuration = function()
+	local current = F.get_dap_cs_configuration()
+	vim.ui.select({ "Debug", "Release" }, {
+		prompt = "C# build configuration (current: " .. current .. "):",
+	}, function(choice)
+		if choice then
+			F.set_dap_cs_configuration(choice)
+		end
+	end)
+end
+
+--- Parses <TargetFramework> (single) or the first entry of <TargetFrameworks>
+--- (multi) from a csproj. Returns the TFM string (e.g. "net8.0") or nil.
+---
+--- We can't rely on a lexical glob of bin/<cfg>/*/ because subdirs like
+--- "net10.0" and "net8.0" sort '1' < '8', which makes the launcher pick a
+--- stale leftover TFM directory. Parsing the csproj is the only reliable
+--- way to know which TFM `dotnet build` will actually produce.
+F.get_csproj_tfm = function(csproj_path)
+	local ok, lines = pcall(vim.fn.readfile, csproj_path)
+	if not ok or not lines then
+		return nil
+	end
+	local blob = table.concat(lines, "\n")
+	local single = blob:match("<TargetFramework>%s*([^<%s]+)%s*</TargetFramework>")
+	if single then
+		return single
+	end
+	local multi = blob:match("<TargetFrameworks>%s*([^<]+)%s*</TargetFrameworks>")
+	if multi then
+		local first = multi:match("([^;%s]+)")
+		if first and first ~= "" then
+			return first
+		end
+	end
+	return nil
+end
+
+--- Resolves the freshly-built DLL inside bin/<configuration>/.
+--- Strategy:
+---   1. If csproj declares a TFM, look at bin/<cfg>/<tfm>/<name>.dll directly.
+---   2. Fallback A: glob bin/<cfg>/*/<name>.dll and pick the newest by mtime
+---      (avoids the lexical-sort footgun where net10.0 < net8.0).
+---   3. Fallback B: recursive vim.fs.find under bin/<cfg>.
+local function resolve_built_dll(project_dir, project_name, configuration, csproj_path)
+	local norm_dir = vim.fs.normalize(project_dir)
+	local filename = project_name .. ".dll"
+	local bin_cfg = norm_dir .. "/bin/" .. configuration
+
+	local tfm = F.get_csproj_tfm(csproj_path)
+	if tfm then
+		local candidate = bin_cfg .. "/" .. tfm .. "/" .. filename
+		if vim.uv.fs_stat(candidate) then
+			return vim.fs.normalize(candidate)
+		end
+	end
+
+	local matches = vim.fn.glob(bin_cfg .. "/*/" .. filename, false, true)
+	if #matches > 0 then
+		local best, best_mtime = nil, -1
+		for _, m in ipairs(matches) do
+			local st = vim.uv.fs_stat(m)
+			local mtime = (st and st.mtime and st.mtime.sec) or 0
+			if mtime > best_mtime then
+				best, best_mtime = m, mtime
+			end
+		end
+		if best then
+			return vim.fs.normalize(best)
+		end
+	end
+
+	local found = vim.fs.find(filename, { path = bin_cfg, type = "file" })
+	if #found > 0 then
+		return vim.fs.normalize(found[1])
+	end
+
+	return nil
+end
+
 -- Async build with callback (non-blocking, calls on_complete when done)
 ---@param csproj_path string
 ---@param on_complete fun(success: boolean, dll_path: string|nil)
@@ -40,9 +147,10 @@ F.build_project_async = function(csproj_path, on_complete)
 
 	local project_name = vim.fn.fnamemodify(csproj_path, ":t:r")
 	local project_dir = vim.fn.fnamemodify(csproj_path, ":h")
-	vim.notify("Building " .. project_name .. "...", vim.log.levels.INFO)
+	local configuration = F.get_dap_cs_configuration()
+	vim.notify("Building " .. project_name .. " (" .. configuration .. ")...", vim.log.levels.INFO)
 
-	local cmd = { "dotnet", "build", csproj_path, "-clp:ErrorsOnly", "--nologo", "-c", "Debug" }
+	local cmd = { "dotnet", "build", csproj_path, "-clp:ErrorsOnly", "--nologo", "-c", configuration }
 	local output_lines = {}
 
 	F.safe_jobstart(cmd, {
@@ -94,25 +202,8 @@ F.build_project_async = function(csproj_path, on_complete)
 						on_complete(false, nil)
 					end
 				else
-					vim.notify("Build: ✔️ " .. project_name, vim.log.levels.INFO)
-					local filename = project_name .. ".dll"
-					-- Normalize project_dir first, then build pattern
-					local norm_dir = vim.fs.normalize(project_dir)
-					local pattern = norm_dir .. "/bin/Debug/*/" .. filename
-					local matches = vim.fn.glob(pattern, false, true)
-					local dll = nil
-					if #matches > 0 then
-						dll = vim.fs.normalize(matches[1])
-					else
-						-- Fallback: use vim.fs.find for recursive search
-						local found = vim.fs.find(filename, {
-							path = norm_dir .. "/bin/Debug",
-							type = "file",
-						})
-						if #found > 0 then
-							dll = vim.fs.normalize(found[1])
-						end
-					end
+					vim.notify("Build: ✔️ " .. project_name .. " (" .. configuration .. ")", vim.log.levels.INFO)
+					local dll = resolve_built_dll(project_dir, project_name, configuration, csproj_path)
 					if on_complete then
 						on_complete(true, dll)
 					end
@@ -136,7 +227,7 @@ F.build_cmd = function()
 		return vim.o.makeprg
 	end
 
-	local cmd = "dotnet build " .. project_path .. " -clp:ErrorsOnly --nologo -c debug"
+	local cmd = "dotnet build " .. project_path .. " -clp:ErrorsOnly --nologo -c " .. F.get_dap_cs_configuration()
 	return cmd
 end
 
