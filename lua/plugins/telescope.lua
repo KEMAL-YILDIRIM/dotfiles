@@ -213,7 +213,33 @@ return {
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>f', '<NOP>', { desc = 'Search Telescope' })
-      vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Search Help' })
+      vim.keymap.set('n', '<leader>fh', function()
+        builtin.help_tags {
+          attach_mappings = function(prompt_bufnr, map)
+            local actions_mod = require 'telescope.actions'
+            local action_state = require 'telescope.actions.state'
+            -- Strip the @lang suffix that Telescope appends internally (e.g. "kulala.api.txt@en" → "kulala.api.txt")
+            -- Without this, vim.cmd("help " .. value) passes the @lang suffix which causes E661.
+            actions_mod.select_default:replace(function()
+              local selection = action_state.get_selected_entry()
+              if selection == nil then
+                return
+              end
+              actions_mod.close(prompt_bufnr)
+              local tag = selection.value:gsub('@%a%a$', '')
+              -- Telescope can read tags from lazily-loaded plugins that aren't yet on
+              -- &runtimepath. :help only searches &rtp, so ensure the plugin root is
+              -- added before calling it (no-op if already present).
+              if selection.filename then
+                local plugin_root = vim.fn.fnamemodify(selection.filename, ':h:h')
+                vim.opt.rtp:append(plugin_root)
+              end
+              vim.cmd('help ' .. tag)
+            end)
+            return true
+          end,
+        }
+      end, { desc = 'Search Help' })
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = 'Search Keymaps' })
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Search Files' })
       vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = 'Search grep Word' })

@@ -52,39 +52,39 @@ return {
       {
         '<leader>==',
         function()
-          local conform = require('conform')
-          local has_formatter = #conform.list_formatters_for_buffer() > 0
-          if has_formatter then
-            conform.format { async = false, timeout_ms = 3000 }
-          else
-            vim.cmd 'normal! gg=G'
-          end
+          require('conform').format { async = false, timeout_ms = 3000, lsp_format = 'fallback' }
         end,
         mode = '',
         desc = 'Format buffer',
       },
     },
     opts = {
+      -- format_on_save = {
+      --   timeout_ms = 3000,
+      --   lsp_format = 'fallback',
+      -- },
       formatters_by_ft = {
-        lua             = { 'stylua' },
-        javascript      = { 'prettier' },
+        lua = { 'stylua' },
+        javascript = { 'prettier' },
         javascriptreact = { 'prettier' },
-        typescript      = { 'prettier' },
+        typescript = { 'prettier' },
         typescriptreact = { 'prettier' },
-        json            = { 'prettier' },
-        yaml            = { 'prettier' },
-        markdown        = { 'prettier' },
-        html            = { 'prettier' },
-        css             = { 'prettier' },
-        cs              = { 'csharpier' },
+        json = { 'prettier' },
+        yaml = { 'prettier' },
+        markdown = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        cs = { 'csharpier' },
       },
       formatters = {
         -- Lua: pin cwd to nvim config so .stylua.toml is always found
         stylua = F.get_conform_formatter('stylua', {
-          cwd = function() return vim.fn.stdpath 'config' end,
+          cwd = function()
+            return vim.fn.stdpath 'config'
+          end,
         }),
         -- JS/TS/Web: handles node-based .cmd wrapper on Windows
-        prettier = F.get_conform_formatter('prettier'),
+        prettier = F.get_conform_formatter 'prettier',
         -- C#: skip csharpier when .editorconfig is present (defer to LSP)
         csharpier = F.get_conform_formatter('csharpier', {
           condition = function(self, ctx)
