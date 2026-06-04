@@ -19,9 +19,6 @@ end, { desc = "Clear search highlight if active" })
 -- return to normal mode
 map.set({ "i", "x" }, "<C-c>", "<ESC><ESC>", { desc = "Press ESC" })
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
 --  See `:help wincmd` for a list of all window commands
 map.set("n", "<C-h>", "<C-w><C-h>", { desc = "Move focus to the left window" })
 map.set("n", "<C-l>", "<C-w><C-l>", { desc = "Move focus to the right window" })

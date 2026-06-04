@@ -87,11 +87,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Treesitter folding: set window-local foldmethod/foldexpr only when a parser
--- is available for this filetype. Using vim.wo[0][0] scopes the option to the
--- current window+buffer combination, preventing special buffers (quickfix,
--- terminal, oil.nvim floats) from inheriting treesitter folding.
--- Falls back to indent folding for files without a treesitter parser.
 vim.api.nvim_create_autocmd("FileType", {
 	group = vim.api.nvim_create_augroup("treesitter_folds", { clear = true }),
 	callback = function()

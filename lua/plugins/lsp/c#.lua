@@ -8,27 +8,9 @@ return {
       broad_search = true,
       lock_target = false,
       debug = true,
-      extensions = {
-        razor = {
-          enabled = true,
-          config = function()
-            local razor_extension_path = require('roslyn.utils').find_razor_extension_path()
-            if razor_extension_path == nil then
-              return {
-                path = nil,
-              }
-            end
-
-            return {
-              path = vim.fs.joinpath(razor_extension_path, 'Microsoft.VisualStudioCode.RazorExtension.dll'),
-              args = {
-                '--razorSourceGenerator=' .. vim.fs.joinpath(razor_extension_path, 'Microsoft.CodeAnalysis.Razor.Compiler.dll'),
-                '--razorDesignTimePath=' .. vim.fs.joinpath(razor_extension_path, 'Targets', 'Microsoft.NET.Sdk.Razor.DesignTime.targets'),
-              },
-            }
-          end,
-        },
-      },
+      -- NOTE: razor extension is wired up via `cmd` (F.roslyn_cmd) in `init`
+      -- below. The old `extensions` config option was deprecated in
+      -- roslyn.nvim (commit 33dd549) in favour of overriding `cmd` directly.
     },
     init = function()
       vim.lsp.config('roslyn', {
