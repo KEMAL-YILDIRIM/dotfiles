@@ -90,6 +90,19 @@ return {
 			end
 
 			require("tree-sitter-manager").setup({
+				-- The razor grammar dropped its short-lived `at_await` node (tree-sitter-razor
+				-- PR #16, commit 63bd4ea), but the queries bundled with both nvim-treesitter and
+				-- tree-sitter-manager still reference `"at_await"`. Against the newer parser
+				-- revision we install (a3399c2), that yields a fatal `Invalid node type "at_await"`
+				-- query error. The razor repo's OWN queries/ dir matches its parser, so override
+				-- just this flag to copy queries from the cloned repo instead of the stale bundle.
+				languages = {
+					razor = {
+						install_info = {
+							use_repo_queries = true,
+						},
+					},
+				},
 				ensure_installed = {
 					"bash",
 					"c",
