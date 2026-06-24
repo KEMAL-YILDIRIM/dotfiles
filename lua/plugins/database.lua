@@ -13,6 +13,11 @@ return {
     'DBUIFindBuffer',
   },
   init = function()
+    -- Use a custom SQL Server adapter (autoload/db/adapter/mssqlfmt.vim) that
+    -- appends `-W -s '  '` so query results trim columns to content and separate
+    -- them with two spaces instead of sqlcmd's wide fixed-width padding.
+    vim.g.db_adapter_sqlserver = 'db#adapter#mssqlfmt#'
+
     vim.g.db_ui_use_nerd_fonts = 1
     vim.g.db_ui_disable_mappings = 1
     vim.g.db_ui_execute_on_save = 0
@@ -32,6 +37,69 @@ return {
     }
 
     local group = vim.api.nvim_create_augroup('DadbodMappings', { clear = true })
+
+    -- Seed stored-procedure helper queries into each DBUI connection's save folder.
+    -- vim-dadbod-ui's drawer only lists tables/views, never procedures, so we expose
+    -- catalog queries as saved queries instead. Runs on every DBUIOpened, keyed off
+    -- connections.json, so any newly added connection gets the helpers automatically.
+    -- NOTE: only covers file-based connections (connections.json), not g:dbs.
+    local function seed_dbui_helpers()
+      local save_loc = vim.fn.fnamemodify(vim.g.db_ui_save_location or '~/.local/share/db_ui', ':p')
+      save_loc = save_loc:gsub('[\\/]$', '')
+      local conn_file = save_loc .. '/connections.json'
+      if vim.fn.filereadable(conn_file) == 0 then
+        return
+      end
+      local ok, conns = pcall(vim.fn.json_decode, table.concat(vim.fn.readfile(conn_file), '\n'))
+      if not ok or type(conns) ~= 'table' then
+        return
+      end
+
+      local helpers = {
+        ['list-procedures'] = table.concat({
+          'SELECT ROUTINE_SCHEMA, ROUTINE_NAME',
+          'FROM INFORMATION_SCHEMA.ROUTINES',
+          "WHERE ROUTINE_TYPE = 'PROCEDURE'",
+          'ORDER BY ROUTINE_SCHEMA, ROUTINE_NAME;',
+        }, '\n'),
+        ['proc-definition'] = table.concat({
+          '-- Replace with your procedure name, then execute (<leader>dbe)',
+          "EXEC sp_helptext N'dbo.YourProcName';",
+        }, '\n'),
+        ['search-procedures'] = table.concat({
+          "-- Replace 'SearchText', then execute (<leader>dbe)",
+          'SELECT ROUTINE_SCHEMA, ROUTINE_NAME',
+          'FROM INFORMATION_SCHEMA.ROUTINES',
+          "WHERE ROUTINE_TYPE = 'PROCEDURE'",
+          "  AND ROUTINE_DEFINITION LIKE '%SearchText%'",
+          'ORDER BY ROUTINE_SCHEMA, ROUTINE_NAME;',
+        }, '\n'),
+      }
+
+      for _, conn in ipairs(conns) do
+        local name = conn.name
+        if type(name) == 'string' and name ~= '' then
+          local dir = save_loc .. '/' .. name
+          if vim.fn.isdirectory(dir) == 0 then
+            vim.fn.mkdir(dir, 'p')
+          end
+          for fname, content in pairs(helpers) do
+            local path = dir .. '/' .. fname
+            if vim.fn.filereadable(path) == 0 then
+              vim.fn.writefile(vim.split(content, '\n'), path)
+            end
+          end
+        end
+      end
+    end
+
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'DBUIOpened',
+      group = group,
+      callback = seed_dbui_helpers,
+      desc = 'Seed stored-procedure helper queries into each DBUI connection',
+    })
+
     vim.api.nvim_create_autocmd('FileType', {
       pattern = '*sql',
       group = group,
@@ -52,19 +120,21 @@ return {
         local original_max_var_type_width = vim.env.SQLCMDMAXVARTYPEWIDTH
         local original_max_fixed_type_width = vim.env.SQLCMDMAXFIXEDTYPEWIDTH
 
-        -- Toggle between original and custom width for column
+        -- Toggle the per-cell width cap between original and unlimited (0).
+        -- Columns are already trimmed to content + 2-space separated by the
+        -- mssqlfmt adapter (-W -s '  '); this only lifts the length cap so long
+        -- text columns (e.g. stored-procedure bodies) print in full.
         vim.keymap.set('n', '<leader>dbw', function()
-          local width = vim.g.db_ui_winwidth
-          if vim.env.SQLCMDMAXFIXEDTYPEWIDTH == original_max_fixed_type_width then
-            vim.env.SQLCMDMAXFIXEDTYPEWIDTH = width
-            vim.env.SQLCMDMAXVARTYPEWIDTH = width
-            vim.notify('Variable width set to: ' .. width)
+          if vim.env.SQLCMDMAXVARTYPEWIDTH == original_max_var_type_width then
+            vim.env.SQLCMDMAXFIXEDTYPEWIDTH = '0'
+            vim.env.SQLCMDMAXVARTYPEWIDTH = '0'
+            vim.notify 'Column width: unlimited'
           else
             vim.env.SQLCMDMAXFIXEDTYPEWIDTH = original_max_fixed_type_width
             vim.env.SQLCMDMAXVARTYPEWIDTH = original_max_var_type_width
-            vim.notify 'Variable width set back to original'
+            vim.notify 'Column width: original'
           end
-        end, { desc = 'Toggle variable width' })
+        end, { desc = 'Toggle unlimited column width' })
 
         vim.keymap.set('n', 'yh', '<Plug>(DBUI_YankHeader)', { buffer = true })
         vim.keymap.set('n', 'yc', '<Plug>(DBUI_YankCellValue)', { buffer = true })

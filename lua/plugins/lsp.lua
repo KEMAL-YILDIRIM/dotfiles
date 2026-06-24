@@ -1,4 +1,5 @@
 local M = {}
+require("plugins.lsp.diagnostic-guard")
 require("plugins.lsp.utils")
 require("plugins.lsp.commands")
 

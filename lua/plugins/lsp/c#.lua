@@ -6,7 +6,7 @@ return {
     opts = {
       filewatching = 'roslyn',
       broad_search = true,
-      lock_target = false,
+      lock_target = true,
       debug = true,
       -- NOTE: razor extension is wired up via `cmd` (F.roslyn_cmd) in `init`
       -- below. The old `extensions` config option was deprecated in
@@ -24,7 +24,7 @@ return {
           end,
           -- },
         },
-        cmd = F.roslyn_cmd(),
+        -- cmd = F.roslyn_cmd(),
         lazy = false,
         settings = {
           ['csharp|background_analysis'] = {
@@ -62,12 +62,12 @@ return {
           },
         },
       })
-      vim.filetype.add {
-        extension = {
-          razor = 'razor',
-          cshtml = 'razor',
-        },
-      }
+      -- vim.filetype.add {
+      --   extension = {
+      --     razor = 'razor',
+      --     cshtml = 'razor',
+      --   },
+      -- }
       vim.lsp.enable 'roslyn'
     end,
   },
