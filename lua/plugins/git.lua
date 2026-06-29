@@ -133,9 +133,93 @@ local FileHistory = function()
 		})
 		:find()
 end
+-- Inline diff colors: NEW = blue, OLD = red (catppuccin-macchiato palette)
+local function SetInlineDiffColors()
+	local blue, red = "#8aadf4", "#ed8796"
+	local new_ln_bg, new_inline_bg = "#2b3c5f", "#3b5285"
+	local old_ln_bg, old_inline_bg = "#5a2b39", "#7a3b49"
+	-- Added / changed (treated as "new") -> blue
+	vim.api.nvim_set_hl(0, "GitSignsAddLn", { bg = new_ln_bg })
+	vim.api.nvim_set_hl(0, "GitSignsAddInline", { bg = new_inline_bg })
+	vim.api.nvim_set_hl(0, "GitSignsChangeLn", { bg = new_ln_bg })
+	vim.api.nvim_set_hl(0, "GitSignsChangeInline", { bg = new_inline_bg })
+	vim.api.nvim_set_hl(0, "GitSignsAdd", { fg = blue })
+	vim.api.nvim_set_hl(0, "GitSignsChange", { fg = blue })
+	-- Deleted / old -> red (virtual lines + inline)
+	vim.api.nvim_set_hl(0, "GitSignsDeleteLn", { bg = old_ln_bg })
+	vim.api.nvim_set_hl(0, "GitSignsDeleteVirtLn", { bg = old_ln_bg })
+	vim.api.nvim_set_hl(0, "GitSignsDeleteInline", { bg = old_inline_bg })
+	vim.api.nvim_set_hl(0, "GitSignsDelete", { fg = red })
+end
+
+-- Retarget the live inline diff to a commit picked via Telescope, then
+-- force line highlight + show deleted (old) lines so NEW=blue / OLD=red show in-buffer.
+local function PickInlineDiffBase()
+	local cwd = vim.fn.expand("%:p:h")
+	require("telescope.builtin").git_commits({
+		cwd = cwd,
+		attach_mappings = function(prompt_bufnr)
+			local actions = require("telescope.actions")
+			local action_state = require("telescope.actions.state")
+			actions.select_default:replace(function()
+				local selection = action_state.get_selected_entry()
+				actions.close(prompt_bufnr)
+				local gs = require("gitsigns")
+				gs.change_base(selection.value, true)
+				gs.toggle_linehl(true)
+				gs.toggle_deleted(true)
+				gs.toggle_word_diff(true)
+				vim.notify("Inline diff base -> " .. selection.value:sub(1, 7), vim.log.levels.INFO)
+			end)
+			return true
+		end,
+	})
+end
+
+-- Apply inline diff colors now and re-apply whenever the colorscheme changes
+-- (gitsigns highlights would otherwise be reset by a colorscheme reload).
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = SetInlineDiffColors,
+	desc = "Reapply gitsigns inline diff colors (new=blue / old=red)",
+})
+SetInlineDiffColors()
+
 return {
 	{ "tpope/vim-fugitive" },
 	{ "sindrets/diffview.nvim" },
+	{ -- Git Extensions-style commit/branch graph (pure viewer)
+		"isakbm/gitgraph.nvim",
+		dependencies = { "sindrets/diffview.nvim" },
+		opts = {
+			symbols = {
+				merge_commit = "M",
+				commit = "*",
+			},
+			format = {
+				timestamp = "%Y-%m-%d %H:%M",
+				fields = { "hash", "timestamp", "author", "branch_name", "tag" },
+			},
+			hooks = {
+				-- Open the selected commit in diffview, keeping the graph a pure navigator
+				on_select_commit = function(commit)
+					vim.cmd("DiffviewOpen " .. commit.hash .. "^!")
+				end,
+				-- Diff the range between two selected commits
+				on_select_range_commit = function(from, to)
+					vim.cmd("DiffviewOpen " .. from.hash .. "~1.." .. to.hash)
+				end,
+			},
+		},
+		keys = {
+			{
+				"<leader>gv",
+				function()
+					require("gitgraph").draw({}, { all = true, max_count = 5000 })
+				end,
+				desc = "Git Graph (branches)",
+			},
+		},
+	},
 	{
 		dir = "D:/Nvim/repos.nvim",
 		name = "repos",
@@ -156,6 +240,7 @@ return {
 				topdelete = { text = "‾" },
 				changedelete = { text = "~" },
 			},
+			word_diff = false,
 			current_line_blame = false,
 			on_attach = function(bufnr)
 				local gs = package.loaded.gitsigns
@@ -202,6 +287,23 @@ return {
 				vim.keymap.set("n", "<leader>gd", function()
 					vim.cmd("DiffviewOpen")
 				end, { desc = "DiffviewOpen -- %" })
+
+				-- Inline live-buffer diff (NEW=blue / OLD=red) against a chosen commit
+				vim.keymap.set("n", "<leader>gB", PickInlineDiffBase, { desc = "Git: inline diff vs picked commit" })
+				vim.keymap.set("n", "<leader>g0", function()
+					gs.change_base(nil, true)
+					gs.toggle_deleted(false)
+					vim.notify("Inline diff base reset to index/HEAD", vim.log.levels.INFO)
+				end, { desc = "Git: reset inline diff base" })
+				vim.keymap.set("n", "<leader>gx", function()
+					gs.toggle_deleted()
+				end, { desc = "Git: toggle deleted (old) lines inline" })
+				vim.keymap.set("n", "<leader>gX", function()
+					gs.toggle_linehl()
+				end, { desc = "Git: toggle inline line highlight" })
+				vim.keymap.set("n", "<leader>gw", function()
+					gs.toggle_word_diff()
+				end, { desc = "Git: toggle word diff" })
 				vim.keymap.set("v", "<leader>gr", function()
 					gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
 				end, { desc = "Git Signs: Reset hunk" })
