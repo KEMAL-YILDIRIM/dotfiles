@@ -3,32 +3,6 @@ vim.o.termguicolors = true
 vim.o.background = 'dark'
 vim.o.signcolumn = 'yes'
 
--- tailwind colors can be found at https://tailscan.com/_nuxt/colors.*.js
----Read the colors.json and gets the color palette
----@param theme string
----@return table
-local function get_colors(theme)
-  local cur_path = '~/AppData/Local/nvim/lua/colors.json'
-  local content = F.read_file(cur_path)
-  if content == nil then
-    return {}
-  end
-  local colors = vim.json.decode(content)
-  local formattedColors = {}
-  for key, color in pairs(colors[theme]) do
-    local item = {}
-    for _, subColor in pairs(color) do
-      if subColor ~= nil and subColor.value ~= nil and subColor.hex ~= nil then
-        table.insert(item, subColor.value, subColor.hex)
-      end
-    end
-    if key ~= nil then
-      formattedColors[key] = item
-    end
-  end
-  return formattedColors
-end
-
 return {
   { -- zen mode
     'folke/zen-mode.nvim',
@@ -108,7 +82,7 @@ return {
     lazy = false,
     priority = 1000,
     config = function()
-      local colors = get_colors 'custom'
+      local colors = F.get_colors 'custom'
       require('catppuccin').setup {
         color_overrides = {
           macchiato = {
