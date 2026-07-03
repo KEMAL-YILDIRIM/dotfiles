@@ -178,14 +178,40 @@ local G = {
     vim.api.nvim_set_hl(0, 'diffChanged', { fg = modified })
     vim.api.nvim_set_hl(0, 'diffLine', { fg = modified_bg })
   end,
+
+  -- Flog branch-lane colors: tint flogBranch1..8 (the lanes cycled through by
+  -- g:flog_num_branch_colors, default 8) with the tailwind palette. Dynamic
+  -- branch highlighting colors each lane's vertical line by position, so with
+  -- the bullet concealed into a line the whole lane reads as one continuous
+  -- colored stroke.
+  SetFlogBranchColors = function()
+    local colors = F.get_colors 'tailwind'
+    local lanes = {
+      colors.emerald[500],
+      colors.sky[500],
+      colors.amber[500],
+      colors.rose[500],
+      colors.violet[500],
+      colors.orange[500],
+      colors.cyan[500],
+      colors.lime[500],
+    }
+    for index, hex in ipairs(lanes) do
+      vim.api.nvim_set_hl(0, 'flogBranch' .. index, { fg = hex })
+    end
+  end,
 }
 
 -- Apply inline diff colors now and re-apply whenever the colorscheme changes
 -- (gitsigns highlights would otherwise be reset by a colorscheme reload).
 G.SetInlineDiffColors()
+G.SetFlogBranchColors()
 vim.api.nvim_create_autocmd('ColorScheme', {
-  callback = G.SetInlineDiffColors,
-  desc = 'Reapply gitsigns inline diff colors (new=blue / old=red)',
+  callback = function()
+    G.SetInlineDiffColors()
+    G.SetFlogBranchColors()
+  end,
+  desc = 'Reapply gitsigns inline diff + flog branch colors on colorscheme reload',
 })
 
 return {
@@ -200,9 +226,11 @@ return {
       'sindrets/diffview.nvim',
     },
     init = function()
-      -- Static, per-column branch colors. Dynamic highlighting tints the bullet
-      -- and its branch line the same hue, making lines/dots visually 'mix'.
-      vim.g.flog_enable_dynamic_branch_hl = false
+      -- Dynamic branch highlighting colors each branch lane by column position
+      -- (via extmarks) rather than by matching the bullet glyph. This is what
+      -- lets us conceal the commit bullet into a continuous vertical line below
+      -- without losing hash/author/date/ref highlighting.
+      vim.g.flog_enable_dynamic_branch_hl = true
 
       vim.g.flog_default_opts = {
         -- Match the old gitgraph cap of 5000 commits.
@@ -224,6 +252,26 @@ return {
           -- The global 'trail:·' listchar renders flog's trailing-space line
           -- padding as dots, which mangles the graph. Disable 'list' here.
           vim.wo.list = false
+
+          -- Render the commit bullet (•, U+2022) as a continuous branch line (│)
+          -- instead of a dot. 'n' in concealcursor keeps it concealed on the
+          -- cursor line in normal mode too.
+          vim.wo.conceallevel = 2
+          vim.wo.concealcursor = 'n'
+          -- Deferred: the syntax match must run AFTER flog's own syntax has
+          -- defined 'flogBranches' (flog loads its syntax file synchronously as
+          -- part of :Flog, after this FileType callback). vim.schedule pushes it
+          -- past that load. Scoping the match 'contained containedin=flogBranches'
+          -- confines it to the graph-prefix region, so commit-info groups
+          -- (hash/author/date/ref) keep their highlighting.
+          vim.schedule(function()
+            if not vim.api.nvim_buf_is_valid(args.buf) then
+              return
+            end
+            vim.api.nvim_buf_call(args.buf, function()
+              vim.cmd [[syntax match flogBulletConceal /\%u2022/ conceal cchar=│ contained containedin=flogBranches]]
+            end)
+          end)
 
           -- Single commit under cursor -> diff that commit against its parent.
           vim.keymap.set('n', '<CR>', function()
