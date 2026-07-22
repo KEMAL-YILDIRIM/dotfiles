@@ -122,6 +122,13 @@ return {
       preview = {
         filetypes = { 'markdown', 'codecompanion' },
         ignore_buftypes = { 'nofile', 'acwrite' },
+        condition = function(bufnr)
+          -- Render conductor.nvim chat logs despite their nofile buftype.
+          if vim.api.nvim_buf_get_name(bufnr):match '^conductor://chat/' then
+            return true
+          end
+          return nil -- fall back to filetypes/ignore_buftypes checks
+        end,
       },
     },
     config = function()

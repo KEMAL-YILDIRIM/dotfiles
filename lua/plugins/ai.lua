@@ -31,7 +31,7 @@ return {
       'nvim-treesitter/nvim-treesitter',
     },
     init = function()
-      vim.keymap.set('n', '<leader>aa', '<CMD>CodeCompanionChat Toggle<CR>', { desc = 'AI Code Companion Chat Toggle' })
+      vim.keymap.set('n', '<leader>ai', '<CMD>CodeCompanionChat Toggle<CR>', { desc = 'AI Code Companion Chat Toggle' })
     end,
   },
   {

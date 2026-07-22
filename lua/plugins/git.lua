@@ -1,24 +1,24 @@
-local G = {
-
-  ShowGitInSplit = function(git_args, buf_name, filetype)
-    local existing = vim.fn.bufnr(buf_name)
-    if existing ~= -1 then
-      vim.cmd 'vsplit'
-      vim.api.nvim_set_current_buf(existing)
-      return
-    end
-    local content = F.safe_system(git_args)
-    local buf = vim.api.nvim_create_buf(true, true)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, '\n'))
-    vim.api.nvim_buf_set_name(buf, buf_name)
-    vim.bo[buf].buftype = 'nofile'
-    vim.bo[buf].modifiable = false
+local ShowGitInSplit = function(git_args, buf_name, filetype)
+  local existing = vim.fn.bufnr(buf_name)
+  if existing ~= -1 then
     vim.cmd 'vsplit'
-    vim.api.nvim_set_current_buf(buf)
-    if filetype then
-      vim.bo[buf].filetype = filetype
-    end
-  end,
+    vim.api.nvim_set_current_buf(existing)
+    return
+  end
+  local content = F.safe_system(git_args)
+  local buf = vim.api.nvim_create_buf(true, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(content, '\n'))
+  vim.api.nvim_buf_set_name(buf, buf_name)
+  vim.bo[buf].buftype = 'nofile'
+  vim.bo[buf].modifiable = false
+  vim.cmd 'vsplit'
+  vim.api.nvim_set_current_buf(buf)
+  if filetype then
+    vim.bo[buf].filetype = filetype
+  end
+end
+
+local G = {
 
   FileHistory = function()
     -- Custom file history that handles renames properly
@@ -107,7 +107,7 @@ local G = {
           end)
           return true
         end,
-        
+
         previewer = require('telescope.previewers').new_buffer_previewer {
           title = 'File at commit',
           get_buffer_by_name = function(_, entry)
@@ -160,7 +160,8 @@ local G = {
   -- Inline diff colors: NEW = blue, OLD = red (catppuccin-macchiato palette)
   SetInlineDiffColors = function()
     local colors = F.get_colors 'tailwind'
-    local deleted, deleted_bg, modified, modified_bg, new, new_bg = colors.red[900], colors.red[200], colors.emerald[700], colors.emerald[200], colors.sky[500], colors.sky[200];
+    local deleted, deleted_bg, modified, modified_bg, new, new_bg =
+      colors.red[900], colors.red[200], colors.violet[800], colors.violet[200], colors.sky[800], colors.sky[200]
     vim.api.nvim_set_hl(0, 'GitSignsAddLn', { bg = new })
     vim.api.nvim_set_hl(0, 'GitSignsAddInline', { bg = new_bg })
     vim.api.nvim_set_hl(0, 'GitSignsChangeLn', { bg = modified })
@@ -398,7 +399,7 @@ return {
                 actions.close(prompt_bufnr)
                 local hash = selection.value
                 local file = vim.fn.expand '%:t'
-                G.ShowGitInSplit({ 'git', '-C', cwd, '--no-pager', 'show', hash, '--', file }, hash, 'diff')
+                ShowGitInSplit({ 'git', '-C', cwd, '--no-pager', 'show', hash, '--', file }, hash, 'diff')
               end)
               return true
             end,

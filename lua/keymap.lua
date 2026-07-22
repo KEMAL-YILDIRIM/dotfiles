@@ -156,14 +156,25 @@ local function tab_actions()
 
 	-- Set up one-time autocmd to clean up on any other key or mode change
 	local group = vim.api.nvim_create_augroup("TabModeCleanup", { clear = true })
-	vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "VisualEnter" }, {
+
+	local function cleanup()
+		tab_mode_active = false
+		vim.notify("Tab mode exited", vim.log.levels.INFO)
+		vim.api.nvim_del_augroup_by_id(group)
+	end
+
+	vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
 		group = group,
 		once = true,
-		callback = function()
-			tab_mode_active = false
-			vim.notify("Tab mode exited", vim.log.levels.INFO)
-			vim.api.nvim_del_augroup_by_id(group)
-		end,
+		callback = cleanup,
+	})
+
+	-- Visual mode has no "VisualEnter" event; use ModeChanged into v/V/<C-v>
+	vim.api.nvim_create_autocmd("ModeChanged", {
+		group = group,
+		pattern = "*:[vV\x16]*",
+		once = true,
+		callback = cleanup,
 	})
 end
 
