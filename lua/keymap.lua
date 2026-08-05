@@ -88,14 +88,6 @@ end, { noremap = true, desc = "Quickfix Toggle" })
 
 -- tabs
 local function tab_actions()
-	vim.notify("Tab mode: n=new x=close a=only l=next h=prev d=dup (any other key exits)", vim.log.levels.INFO)
-	vim.cmd("redraw")
-
-	local ok, key = pcall(vim.fn.getcharstr)
-	if not ok then
-		return -- interrupted (e.g. <C-c>)
-	end
-
 	local actions = {
 		n = "tabnew",
 		x = "tabclose",
@@ -105,12 +97,24 @@ local function tab_actions()
 		d = "tabnew %",
 	}
 
-	local cmd = actions[key]
-	if cmd then
-		vim.cmd(cmd)
-	else
-		vim.notify("Tab mode exited", vim.log.levels.INFO)
+	while true do
+		vim.api.nvim_echo({ { "Tab mode: n=new x=close a=only l=next h=prev d=dup (any other key exits)", "ModeMsg" } }, false, {})
+		vim.cmd("redraw")
+
+		local ok, key = pcall(vim.fn.getcharstr)
+		if not ok then
+			break -- interrupted (e.g. <C-c>)
+		end
+
+		local cmd = actions[key]
+		if cmd then
+			vim.cmd(cmd)
+		else
+			break -- any other key exits
+		end
 	end
+
+	vim.api.nvim_echo({ { "Tab mode exited", "ModeMsg" } }, false, {})
 end
 
 map.set("n", "tm", tab_actions, { desc = "Tab Mode" })
