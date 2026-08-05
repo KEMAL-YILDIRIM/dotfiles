@@ -16,7 +16,21 @@ return {
       terminal = {
         backend = 'external',
         open = function(o)
-          return vim.system(vim.list_extend({ 'wezterm', 'cli', 'spawn', '--cwd', o.cwd, '--' }, o.argv)):wait().code == 0
+          -- On Windows, `wezterm cli spawn -- pi ...` runs pi.cmd, a batch shim
+          -- that re-expands %* and mangles arguments containing spaces (e.g.
+          -- session paths under "C:\Users\Kemal Yildirim\"). Hand the command to
+          -- PowerShell so argv is parsed once, cleanly.
+          local function pwsh_quote(s)
+            return "'" .. tostring(s):gsub("'", "''") .. "'"
+          end
+          local parts = {}
+          for _, a in ipairs(o.argv) do
+            parts[#parts + 1] = pwsh_quote(a)
+          end
+          local cmd = '& ' .. table.concat(parts, ' ')
+          return vim
+            .system({ 'wezterm', 'cli', 'spawn', '--cwd', o.cwd, '--', 'pwsh', '-NoLogo', '-NoExit', '-Command', cmd })
+            :wait().code == 0
         end,
       },
       keymaps = {

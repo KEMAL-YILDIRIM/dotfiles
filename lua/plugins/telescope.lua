@@ -144,6 +144,9 @@ return {
           -- lsp_document_symbols = {
           --   theme = "ivy"
           -- },
+          colorscheme = {
+            enable_preview = true,
+          },
           keymaps = {
             show_plug = false,
             entry_maker = function(entry)

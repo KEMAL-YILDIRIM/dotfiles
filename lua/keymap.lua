@@ -87,95 +87,30 @@ map.set("n", "<leader>qq", function()
 end, { noremap = true, desc = "Quickfix Toggle" })
 
 -- tabs
-local tab_mode_active = false
-
 local function tab_actions()
-	if tab_mode_active then
-		return -- Prevent multiple activations
+	vim.notify("Tab mode: n=new x=close a=only l=next h=prev d=dup (any other key exits)", vim.log.levels.INFO)
+	vim.cmd("redraw")
+
+	local ok, key = pcall(vim.fn.getcharstr)
+	if not ok then
+		return -- interrupted (e.g. <C-c>)
 	end
 
-	tab_mode_active = true
-	vim.notify("Tab mode active - press n/x/a/l/h/d or any other key to exit", vim.log.levels.INFO)
-
-	-- Create temporary keymaps only for tab mode
-	local temp_maps = {
-		{
-			"n",
-			"n",
-			function()
-				vim.cmd("tabnew")
-				tab_mode_active = false
-			end,
-		},
-		{
-			"n",
-			"x",
-			function()
-				vim.cmd("tabc")
-				tab_mode_active = false
-			end,
-		},
-		{
-			"n",
-			"a",
-			function()
-				vim.cmd("tabo")
-				tab_mode_active = false
-			end,
-		},
-		{
-			"n",
-			"l",
-			function()
-				vim.cmd("tabn")
-				tab_mode_active = false
-			end,
-		},
-		{
-			"n",
-			"h",
-			function()
-				vim.cmd("tabp")
-				tab_mode_active = false
-			end,
-		},
-		{
-			"n",
-			"d",
-			function()
-				vim.cmd("tabnew %")
-				tab_mode_active = false
-			end,
-		},
+	local actions = {
+		n = "tabnew",
+		x = "tabclose",
+		a = "tabonly",
+		l = "tabnext",
+		h = "tabprevious",
+		d = "tabnew %",
 	}
 
-	-- Set temporary maps
-	for _, map_def in ipairs(temp_maps) do
-		map.set(map_def[1], map_def[2], map_def[3], { buffer = true })
-	end
-
-	-- Set up one-time autocmd to clean up on any other key or mode change
-	local group = vim.api.nvim_create_augroup("TabModeCleanup", { clear = true })
-
-	local function cleanup()
-		tab_mode_active = false
+	local cmd = actions[key]
+	if cmd then
+		vim.cmd(cmd)
+	else
 		vim.notify("Tab mode exited", vim.log.levels.INFO)
-		vim.api.nvim_del_augroup_by_id(group)
 	end
-
-	vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
-		group = group,
-		once = true,
-		callback = cleanup,
-	})
-
-	-- Visual mode has no "VisualEnter" event; use ModeChanged into v/V/<C-v>
-	vim.api.nvim_create_autocmd("ModeChanged", {
-		group = group,
-		pattern = "*:[vV\x16]*",
-		once = true,
-		callback = cleanup,
-	})
 end
 
 map.set("n", "tm", tab_actions, { desc = "Tab Mode" })

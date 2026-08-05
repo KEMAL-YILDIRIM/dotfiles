@@ -24,7 +24,7 @@ vim.api.nvim_create_autocmd('BufEnter', {
   group = vim.api.nvim_create_augroup('conceal-setting', { clear = true }),
   callback = function()
     if vim.bo.filetype == 'markdown' or package.loaded['nvim-dap'] ~= nil then
-      vim.o.conceallevel = 1
+      vim.wo.conceallevel = 1
     end
   end,
 })
