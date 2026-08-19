@@ -1,3 +1,8 @@
+-- [[ Enable Lua module bytecode cache — speeds up require() heavy startup ]]
+if vim.loader then
+  vim.loader.enable()
+end
+
 -- [[ Setting options ]]
 require 'options'
 
