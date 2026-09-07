@@ -1,5 +1,29 @@
 local dap = require('dap')
 
+-- ---------------------------------------------------------------------------
+-- Config cache — avoids re-running `dotnet sln list` on every F5 press.
+-- Keyed on the solution file path + its mtime so it auto-invalidates when
+-- the solution changes on disk (projects added/removed).
+-- ---------------------------------------------------------------------------
+local _cache = {
+  configs = nil,
+  solution_path = nil,
+  solution_mtime = nil,
+}
+
+local function cache_solution_mtime()
+  local path = vim.g.roslyn_nvim_selected_solution
+  if not path then return nil end
+  local stat = vim.uv.fs_stat(path)
+  return stat and stat.mtime.sec
+end
+
+local function is_cache_valid()
+  if not _cache.configs then return false end
+  if vim.g.roslyn_nvim_selected_solution ~= _cache.solution_path then return false end
+  return cache_solution_mtime() == _cache.solution_mtime
+end
+
 local netcoredbg_path = vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath('data'),
   'mason/packages/netcoredbg/netcoredbg/netcoredbg.exe'))
 local netcoredbg_adapter = {
@@ -607,32 +631,36 @@ local dap_run_with_build = function(config)
 	end
 end
 
--- Show picker and run with build
+-- Show picker and run with build.
+-- Delegates config refresh to F.refresh_dap_cs_configs so the picker appears
+-- immediately on a cache hit, or after the async dotnet command on a miss.
 F.dap_continue_with_build = function()
-	local configs = dap.configurations.cs or {}
+  -- If a debug session is already active, just resume it.
+  if dap.session() then
+    dap.continue()
+    return
+  end
 
-	if #configs == 0 then
-		vim.notify("No debug configurations found", vim.log.levels.WARN)
-		return
-	end
+  local active_cfg = (F.get_dap_cs_configuration and F.get_dap_cs_configuration()) or 'Debug'
 
-	-- If already debugging, just continue
-	if dap.session() then
-		dap.continue()
-		return
-	end
+  local function show_picker(configs)
+    if #configs == 0 then
+      vim.notify('No debug configurations found', vim.log.levels.WARN)
+      return
+    end
+    vim.ui.select(configs, {
+      prompt = 'Select debug configuration (Configuration: ' .. active_cfg .. '):',
+      format_item = function(config)
+        return config.name
+      end,
+    }, function(config)
+      if config then
+        dap_run_with_build(config)
+      end
+    end)
+  end
 
-	local active_cfg = (F.get_dap_cs_configuration and F.get_dap_cs_configuration()) or "Debug"
-	vim.ui.select(configs, {
-		prompt = "Select debug configuration (Configuration: " .. active_cfg .. "):",
-		format_item = function(config)
-			return config.name
-		end,
-	}, function(config)
-		if config then
-			dap_run_with_build(config)
-		end
-	end)
+  F.refresh_dap_cs_configs(show_picker)
 end
 
 -- Helper: Parse .vscode/launch.json
@@ -664,28 +692,38 @@ local get_vscode_configs = function()
 
 	return configs
 end
--- Refresh function to rebuild configurations dynamically
-F.refresh_dap_cs_configs = function()
+-- Refresh function to rebuild configurations dynamically.
+-- Accepts an optional `callback(configs)` that is called once the configs are
+-- ready.  When the cache is valid the callback fires synchronously; when a
+-- full rebuild is needed it fires after the async `dotnet sln list` finishes.
+--
+-- Returns the cached table immediately (or nil when an async rebuild was
+-- started), so callers that need the result synchronously can still read it
+-- after a warm-cache hit.
+F.refresh_dap_cs_configs = function(callback)
+  -- Fast path: return cached result without any I/O.
+  if is_cache_valid() then
+    if callback then callback(_cache.configs) end
+    return _cache.configs
+  end
+
+  -- Collect every config that doesn't require dotnet (all fast, sync).
   local configs = {}
 
-  -- Add launch profiles from launchSettings.json
   local profile_configs = get_launch_profile_configs()
   for _, cfg in ipairs(profile_configs) do
     table.insert(configs, cfg)
   end
 
-  -- Add VSCode configurations
   local vscode_configs = get_vscode_configs()
   for _, cfg in ipairs(vscode_configs) do
     table.insert(configs, cfg)
   end
 
-  -- Add static launch configs
   for _, cfg in ipairs(launch_configs) do
     table.insert(configs, cfg)
   end
 
-  -- Add attach configs
   for _, cfg in ipairs(attach_configs) do
     table.insert(configs, cfg)
   end
@@ -698,52 +736,78 @@ F.refresh_dap_cs_configs = function()
   local search_paths = {}
   local seen = {}
   local function add_bin_dirs(proj_dir)
-    for _, cfg in ipairs({ 'Debug', 'Release' }) do
-      local bin_dir = vim.fs.normalize(proj_dir .. '/bin/' .. cfg)
+    for _, configuration in ipairs({ 'Debug', 'Release' }) do
+      local bin_dir = vim.fs.normalize(proj_dir .. '/bin/' .. configuration)
       if not seen[bin_dir] then
         seen[bin_dir] = true
         table.insert(search_paths, bin_dir)
       end
     end
   end
-  if vim.g.roslyn_nvim_selected_solution then
-    local solution_dir = vim.fs.dirname(vim.g.roslyn_nvim_selected_solution)
-    local res = vim.system({ 'dotnet', 'sln', vim.g.roslyn_nvim_selected_solution, 'list' }):wait()
-    if res.code == 0 and res.stdout then
-      for _, line in ipairs(vim.split(res.stdout, '\n')) do
-        local fullpath = vim.fs.normalize(vim.fs.joinpath(solution_dir, line))
-        if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
-          add_bin_dirs(vim.fn.fnamemodify(fullpath, ':h'))
-        end
-      end
+
+  -- Helper: merge opts + search paths, commit to dap, update cache, fire callback.
+  local function finalise()
+    local opts_with_paths = vim.tbl_deep_extend('force', common_debug_opts, {
+      symbolOptions = { searchPaths = search_paths },
+    })
+    local final_configs = {}
+    for _, cfg in ipairs(configs) do
+      -- tbl_deep_extend: opts_with_paths wins for symbol/source keys,
+      -- but per-config keys (name, type, request, processId, program …) are
+      -- preserved because cfg comes last and wins on conflict.
+      local merged = vim.tbl_deep_extend('force', opts_with_paths, cfg)
+      table.insert(final_configs, merged)
     end
+    dap.configurations.cs = final_configs
+    -- Update cache so the next F5 press is instant.
+    _cache.configs = final_configs
+    _cache.solution_path = vim.g.roslyn_nvim_selected_solution
+    _cache.solution_mtime = cache_solution_mtime()
+    if callback then callback(final_configs) end
+    return final_configs
   end
-  -- Fallback: scan all csproj bin dirs under cwd
-  if #search_paths == 0 then
+
+  if vim.g.roslyn_nvim_selected_solution then
+    vim.notify('[DAP] Refreshing debug configurations…', vim.log.levels.INFO)
+    -- Async: spawn dotnet without blocking the main thread.
+    -- The on_exit callback is always delivered via the event loop (equivalent
+    -- to vim.schedule), so it is safe to call Neovim API functions inside it.
+    vim.system(
+      { 'dotnet', 'sln', vim.g.roslyn_nvim_selected_solution, 'list' },
+      nil,
+      function(res)
+        vim.schedule(function()
+          if res.code == 0 and res.stdout then
+            local solution_dir = vim.fs.dirname(vim.g.roslyn_nvim_selected_solution)
+            for _, line in ipairs(vim.split(res.stdout, '\n')) do
+              local fullpath = vim.fs.normalize(vim.fs.joinpath(solution_dir, line))
+              if fullpath ~= solution_dir and vim.uv.fs_stat(fullpath) then
+                add_bin_dirs(vim.fn.fnamemodify(fullpath, ':h'))
+              end
+            end
+          end
+          finalise()
+        end)
+      end
+    )
+    -- Return nil: caller must use the callback for the async result.
+    return nil
+  else
+    -- No solution file: globpath fallback is fast enough to keep synchronous.
     local csprojs = vim.fn.globpath(vim.fn.getcwd(), '**/*.csproj', false, true)
     for _, f in ipairs(csprojs) do
       add_bin_dirs(vim.fn.fnamemodify(f, ':h'))
     end
+    return finalise()
   end
+end
 
-  -- Merge common_debug_opts into every config (deep extend so nested tables
-  -- like symbolOptions/sourceFileMap are merged, not replaced).
-  -- Build a concrete opts table with the resolved search paths.
-  local opts_with_paths = vim.tbl_deep_extend('force', common_debug_opts, {
-    symbolOptions = { searchPaths = search_paths },
-  })
-
-  local final_configs = {}
-  for _, cfg in ipairs(configs) do
-    -- tbl_deep_extend: opts_with_paths wins for symbol/source keys,
-    -- but per-config keys (name, type, request, processId, program …) are
-    -- preserved because cfg comes last and wins on conflict.
-    local merged = vim.tbl_deep_extend('force', opts_with_paths, cfg)
-    table.insert(final_configs, merged)
-  end
-
-  dap.configurations.cs = final_configs
-  return final_configs
+-- Manually bust the config cache (e.g. after adding a project to the solution).
+F.invalidate_dap_cs_config_cache = function()
+  _cache.configs = nil
+  _cache.solution_path = nil
+  _cache.solution_mtime = nil
+  vim.notify('[DAP] Debug config cache invalidated', vim.log.levels.INFO)
 end
 
 return {}

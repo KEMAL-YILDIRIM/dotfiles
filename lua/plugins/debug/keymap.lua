@@ -9,8 +9,6 @@ vim.keymap.set('n', '<f5>', function()
     require('osv').launch { port = 8086 }
     dap.continue()
   elseif ft == 'cs' then
-    -- Use async build for C# to avoid blocking and file locking issues
-    F.refresh_dap_cs_configs()
     F.dap_continue_with_build()
   else
     dap.continue()
