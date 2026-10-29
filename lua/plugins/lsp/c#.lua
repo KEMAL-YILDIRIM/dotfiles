@@ -24,7 +24,18 @@ return {
           end,
           -- },
         },
-        -- cmd = F.roslyn_cmd(),
+        -- Override the launch command to drop `--daemon-mode`, which
+        -- roslyn.nvim's default cmd (lsp/roslyn.lua) hardcodes but the
+        -- Mason-installed Roslyn server does not yet support. With the flag
+        -- present the server prints a `System.CommandLine` usage error to
+        -- stdout instead of speaking LSP, corrupting the stream so the client
+        -- crashes on first message and never attaches to .cs buffers.
+        cmd = {
+          require('roslyn.utils').get_roslyn_lsp_path(),
+          '--stdio',
+          '--clientProcessId',
+          tostring(vim.uv.os_getpid()),
+        },
         lazy = false,
         settings = {
           ['csharp|background_analysis'] = {
