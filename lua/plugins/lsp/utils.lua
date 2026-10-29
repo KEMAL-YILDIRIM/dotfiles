@@ -231,29 +231,6 @@ F.build_cmd = function()
 	return cmd
 end
 
--- Adding additonal functionality to utils
-F.roslyn_cmd = function()
-	-- NOTE: removed vim.opt.rtp:append("D:/Nvim/roslyn.nvim") — dev artifact
-	-- that unconditionally corrupted rtp on every startup. roslyn.nvim is
-	-- loaded by lazy.nvim from the registry; no manual rtp manipulation needed.
-	local roslyn_mason_path =
-		vim.fs.normalize(vim.fs.joinpath(vim.fn.stdpath("data"), "mason", "packages", "roslyn", "libexec"))
-	local roslyn_cmd = {
-		"dotnet",
-		vim.fs.normalize(vim.fs.joinpath(roslyn_mason_path, "Microsoft.CodeAnalysis.LanguageServer.dll")),
-		"--stdio",
-		"--logLevel=Information",
-		"--extensionLogDirectory=" .. vim.fs.dirname(vim.lsp.log.get_filename()),
-		"--razorSourceGenerator=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.CodeAnalysis.Razor.Compiler.dll",
-		"--razorDesignTimePath="
-			.. roslyn_mason_path
-			.. "/.razorExtension/Targets/Microsoft.NET.Sdk.Razor.DesignTime.targets",
-		"--extension=" .. roslyn_mason_path .. "/.razorExtension/Microsoft.VisualStudioCode.RazorExtension.dll",
-	}
-
-	return roslyn_cmd
-end
-
 F.get_user_secrets = function(current_dir)
 	local proj_path = F.find_csproj_file(current_dir)
 	if not proj_path then

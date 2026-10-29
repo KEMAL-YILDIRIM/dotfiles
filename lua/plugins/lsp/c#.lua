@@ -8,9 +8,6 @@ return {
       broad_search = true,
       lock_target = true,
       debug = true,
-      -- NOTE: razor extension is wired up via `cmd` (F.roslyn_cmd) in `init`
-      -- below. The old `extensions` config option was deprecated in
-      -- roslyn.nvim (commit 33dd549) in favour of overriding `cmd` directly.
     },
     init = function()
       vim.lsp.config('roslyn', {
@@ -23,18 +20,6 @@ return {
             vim.lsp.handlers['textDocument/hover'](err, result, ctx, config)
           end,
           -- },
-        },
-        -- Override the launch command to drop `--daemon-mode`, which
-        -- roslyn.nvim's default cmd (lsp/roslyn.lua) hardcodes but the
-        -- Mason-installed Roslyn server does not yet support. With the flag
-        -- present the server prints a `System.CommandLine` usage error to
-        -- stdout instead of speaking LSP, corrupting the stream so the client
-        -- crashes on first message and never attaches to .cs buffers.
-        cmd = {
-          require('roslyn.utils').get_roslyn_lsp_path(),
-          '--stdio',
-          '--clientProcessId',
-          tostring(vim.uv.os_getpid()),
         },
         lazy = false,
         settings = {
