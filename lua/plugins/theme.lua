@@ -61,7 +61,7 @@ return {
   },
   { -- nvim-colorizer show colors in badges
     'catgoose/nvim-colorizer.lua',
-    event = { 'BufReadPre', 'BufEnter' },
+    ft = { 'css', 'scss', 'sass', 'less', 'html', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'lua', 'conf', 'toml', 'yaml' },
     config = function()
       require('colorizer').setup {
         options = {

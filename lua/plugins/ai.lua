@@ -16,13 +16,12 @@ return {
       },
       interactions = {
         chat = {
-          adapter = { name = 'copilot', model = 'gpt-4.1' },
+          -- Use your Claude subscription via the ACP adapter (needs CLAUDE_CODE_OAUTH_TOKEN
+          -- and the `claude-agent-acp` bridge on PATH). ACP is chat-only.
+          adapter = 'claude_code',
           keymaps = {
             close = { modes = { n = '<C-x>', i = '<C-x>' }, opts = {} },
           },
-        },
-        inline = {
-          adapter = { name = 'copilot', model = 'gpt-4.1' },
         },
       },
     },
@@ -37,7 +36,7 @@ return {
   {
     'zbirenbaum/copilot.lua',
     cmd = 'Copilot',
-    enabled = true,
+    enabled = false,
     event = 'InsertEnter',
     config = function()
       require('copilot').setup {

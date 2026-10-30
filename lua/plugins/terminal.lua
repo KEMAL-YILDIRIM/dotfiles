@@ -39,6 +39,14 @@ return {
               mode = 't',
               desc = 'Terminal: exit to normal mode',
             },
+            -- Legacy-terminal alternative for <C-;> (delivered as <M-;> when the
+            -- kitty keyboard protocol is disabled; WezTerm bridges Ctrl+; -> ESC ;).
+            term_normal_alt = {
+              '<M-;>',
+              function() vim.cmd 'stopinsert' end,
+              mode = 't',
+              desc = 'Terminal: exit to normal mode',
+            },
             --[[ term_normal = {
 						"<esc>",
 						function(self)
@@ -61,6 +69,11 @@ return {
     },
     init = function()
       vim.keymap.set({ 'n', 't' }, '<C-/>', function()
+        Snacks.terminal()
+      end, { desc = 'Terminal' })
+      -- Legacy-terminal alias: Ctrl+/ is transmitted as 0x1F (<C-_>) when the
+      -- kitty keyboard protocol is disabled.
+      vim.keymap.set({ 'n', 't' }, '<C-_>', function()
         Snacks.terminal()
       end, { desc = 'Terminal' })
     end,

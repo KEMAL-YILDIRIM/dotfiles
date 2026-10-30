@@ -11,6 +11,18 @@ return {
     },
     init = function()
       vim.lsp.config('roslyn', {
+        -- Launch the .exe directly instead of Mason's .cmd shim: cmd.exe strips the
+        -- outer quotes when the command line has more than two, which breaks paths
+        -- containing a space ("C:\Users\Kemal Yildirim"). Arguments mirror roslyn.nvim's lsp/roslyn.lua.
+        cmd = {
+          vim.fs.joinpath(vim.fn.stdpath 'data', 'mason', 'packages', 'roslyn', 'libexec', 'roslyn-language-server.exe'),
+          '--stdio',
+          '--daemon-mode',
+          '--clientProcessId',
+          tostring(vim.uv.os_getpid()),
+          '--extensionLogDirectory',
+          vim.fs.joinpath(vim.fn.stdpath 'log', 'roslyn'),
+        },
         -- handlers = vim.tbl_extend("error", require("rzls.roslyn_handlers"), {
         handlers = {
           ['textDocument/hover'] = function(err, result, ctx, config)

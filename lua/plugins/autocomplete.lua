@@ -55,6 +55,9 @@ return {
 
         ['K'] = { 'show_signature', 'hide_signature', 'fallback' },
         ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        -- Legacy-terminal alias: Ctrl+Space is transmitted as 0x00 (<C-@>/<Nul>)
+        -- when the kitty keyboard protocol is disabled.
+        ['<C-@>'] = { 'show', 'show_documentation', 'hide_documentation' },
         ['<C-c>'] = {
           function(cmp)
             if cmp.is_visible() then
