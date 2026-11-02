@@ -27,7 +27,10 @@ end
 ---@param theme string
 ---@return table
 F.get_colors = function(theme)
-  local cur_path = '~/AppData/Local/nvim/lua/colors.json'
+  -- Resolve colors.json relative to this file so alternate checkouts (worktrees,
+  -- `nvim -u <path>/init.lua`) load their own palette instead of the main tree's.
+  local this_dir = vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':h')
+  local cur_path = vim.fs.joinpath(this_dir, 'colors.json')
   local content = F.read_file(cur_path)
   if content == nil then
     return {}
