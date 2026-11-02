@@ -95,10 +95,12 @@ local function tab_actions()
 		l = "tabnext",
 		h = "tabprevious",
 		d = "tabnew %",
+		[","] = "-tabmove", -- move tab left
+		["."] = "+tabmove", -- move tab right
 	}
 
 	while true do
-		vim.api.nvim_echo({ { "Tab mode: n=new x=close a=only l=next h=prev d=dup (any other key exits)", "ModeMsg" } }, false, {})
+		vim.api.nvim_echo({ { "Tab mode: n=new x=close a=only l=next h=prev d=dup ,=move left .=move right (any other key exits)", "ModeMsg" } }, false, {})
 		vim.cmd("redraw")
 
 		local ok, key = pcall(vim.fn.getcharstr)
@@ -108,7 +110,11 @@ local function tab_actions()
 
 		local cmd = actions[key]
 		if cmd then
-			vim.cmd(cmd)
+			-- keep the mode active on errors (e.g. moving past first/last tab), but show them
+			local success, error_message = pcall(vim.cmd, cmd)
+			if not success then
+				vim.notify("Tab mode: " .. tostring(error_message), vim.log.levels.WARN)
+			end
 		else
 			break -- any other key exits
 		end
