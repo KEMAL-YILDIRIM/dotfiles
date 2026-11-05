@@ -113,81 +113,183 @@ return {
       desc = 'Set keymaps for sql',
     })
 
-    -- Realign the tab-separated sqlcmd output produced by the mssqlfmt adapter
-    -- (-W -s "\t") into a fixed-width table made of real spaces. vim-dadbod-ui's
-    -- yank-header (yh) and yank-cell (yc) read column boundaries from character
-    -- positions in the `-----` underline, so the alignment must live in the
-    -- buffer text, not only on screen. Every column except the last is padded
-    -- one extra character (its dash run included) so columns look two spaces
-    -- apart while the underline keeps a single-space separator, as yh expects.
+    -- SQL Server result tables (mssqlfmt adapter: sqlcmd -W -s "\t").
+    -- sqlcmd ends every row with CRLF, but values may contain bare line breaks,
+    -- so one database row can span several buffer lines. align_result_tables
+    -- rebuilds each row, shortens every cell to its column width (ending in '…',
+    -- line breaks shown as '↵') and pads it with spaces into a fixed-width table.
+    -- The full values are kept in cells_by_buffer for the hover window and yc.
+    -- Every column except the last is padded one extra character (dash run
+    -- included) so columns look two spaces apart while the underline keeps the
+    -- single-space separator vim-dadbod-ui's yank-header (yh) expects.
+    local cell_width_cap = 12
+
+    -- cells_by_buffer[buffer][line] = list of { first, last, value, truncated },
+    -- where first/last are the screen columns the cell occupies.
+    local cells_by_buffer = {}
+
+    local function flatten(value)
+      return (value:gsub('\r?\n', '↵'):gsub('[\r\t]', ' '))
+    end
+
+    -- Returns the value shortened to `width` screen cells, and whether the
+    -- displayed text differs from the full value.
+    local function fit_cell(value, width)
+      local flat = flatten(value)
+      if vim.api.nvim_strwidth(flat) <= width then
+        return flat, flat ~= value
+      end
+      local kept, used = {}, 0
+      for _, character in ipairs(vim.fn.split(flat, [[\zs]])) do
+        local character_width = vim.api.nvim_strwidth(character)
+        if used + character_width > width - 1 then
+          break
+        end
+        kept[#kept + 1] = character
+        used = used + character_width
+      end
+      return table.concat(kept) .. '…', true
+    end
+
+    local function pad(text, width)
+      return text .. string.rep(' ', width - vim.api.nvim_strwidth(text))
+    end
+
     local function align_result_tables(buffer)
+      -- Skip if this exact buffer content was already aligned (FileType can fire
+      -- again without a reload, and the original values would then be lost).
+      if vim.b[buffer].dbout_aligned_tick == vim.api.nvim_buf_get_changedtick(buffer) then
+        return
+      end
+
       local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
-      local changed = false
+      local output, cells = {}, {}
       local line_index = 1
-      while line_index < #lines do
-        local header = lines[line_index]
-        local underline = lines[line_index + 1]
+      while line_index <= #lines do
+        local header_raw = lines[line_index]
+        local header = (header_raw:gsub('\r$', ''))
+        local underline = ((lines[line_index + 1] or ''):gsub('\r$', ''))
         if header ~= '' and underline:match '^%-[%-\t]*$' then
-          -- A result block is header, underline, then rows up to a blank line.
-          local block_last = line_index + 1
-          while block_last < #lines and lines[block_last + 1] ~= '' do
-            block_last = block_last + 1
-          end
+          local uses_carriage_return = header_raw:sub(-1) == '\r'
+          local column_count = select(2, underline:gsub('\t', '')) + 1
+          local headers = vim.split(header, '\t', { plain = true })
 
+          -- Rebuild database rows: a row is complete once it holds every column
+          -- separator and (when sqlcmd wrote CRLF) its line ends in '\r'.
           local rows = {}
+          local current, current_tabs = nil, 0
+          local next_index = line_index + 2
+          while next_index <= #lines do
+            local raw = lines[next_index]
+            local ends_row = raw:sub(-1) == '\r'
+            local text = ends_row and raw:sub(1, -2) or raw
+            if current == nil and text == '' then
+              break
+            end
+            current = current and (current .. '\n' .. text) or text
+            current_tabs = current_tabs + select(2, text:gsub('\t', ''))
+            next_index = next_index + 1
+            if current_tabs >= column_count - 1 and (ends_row or not uses_carriage_return) then
+              rows[#rows + 1] = vim.split(current, '\t', { plain = true })
+              current, current_tabs = nil, 0
+            end
+          end
+          if current then
+            rows[#rows + 1] = vim.split(current, '\t', { plain = true })
+          end
+
+          -- Column width: the header, or the widest value capped at cell_width_cap.
           local widths = {}
-          for row_index = line_index, block_last do
-            local cells = vim.split(lines[row_index], '\t', { plain = true })
-            rows[#rows + 1] = cells
-            if row_index ~= line_index + 1 then
-              for column, cell in ipairs(cells) do
-                widths[column] = math.max(widths[column] or 1, vim.fn.strdisplaywidth(cell))
-              end
-            end
-          end
-
-          local column_count = math.max(#widths, #rows[2])
           for column = 1, column_count do
-            widths[column] = (widths[column] or 1) + (column < column_count and 1 or 0)
+            local widest = 1
+            for _, row in ipairs(rows) do
+              widest = math.max(widest, vim.api.nvim_strwidth(flatten(row[column] or '')))
+            end
+            widths[column] = math.max(vim.api.nvim_strwidth(headers[column] or ''), math.min(widest, cell_width_cap), 1)
+          end
+          local function padded_width(column)
+            return widths[column] + (column < column_count and 1 or 0)
           end
 
-          for offset, cells in ipairs(rows) do
-            local parts = {}
+          local header_parts, underline_parts = {}, {}
+          for column = 1, column_count do
+            header_parts[column] = pad(headers[column] or '', padded_width(column))
+            underline_parts[column] = string.rep('-', padded_width(column))
+          end
+          output[#output + 1] = (table.concat(header_parts, ' '):gsub('%s+$', ''))
+          output[#output + 1] = table.concat(underline_parts, ' ')
+
+          for _, row in ipairs(rows) do
+            local parts, row_cells, first = {}, {}, 1
             for column = 1, column_count do
-              if offset == 2 then
-                parts[column] = string.rep('-', widths[column])
-              else
-                local cell = cells[column] or ''
-                parts[column] = cell .. string.rep(' ', widths[column] - vim.fn.strdisplaywidth(cell))
-              end
+              local value = row[column] or ''
+              local shown, truncated = fit_cell(value, widths[column])
+              parts[column] = pad(shown, padded_width(column))
+              local last = first + padded_width(column)
+              row_cells[column] = { first = first, last = last, value = value, truncated = truncated }
+              first = last + 1
             end
-            local aligned = (table.concat(parts, ' '):gsub('%s+$', ''))
-            local target = line_index + offset - 1
-            if aligned ~= lines[target] then
-              lines[target] = aligned
-              changed = true
-            end
+            output[#output + 1] = (table.concat(parts, ' '):gsub('%s+$', ''))
+            cells[#output] = row_cells
           end
 
-          line_index = block_last + 1
+          line_index = next_index
         else
+          output[#output + 1] = header
           line_index = line_index + 1
         end
       end
 
-      if not changed then
+      cells_by_buffer[buffer] = cells
+      if table.concat(output, '\n') ~= table.concat(lines, '\n') then
+        -- Rewrite without an undo step and keep the buffer unmodified, so the
+        -- result window never prompts to save.
+        local buffer_options = vim.bo[buffer]
+        local modifiable, undolevels = buffer_options.modifiable, buffer_options.undolevels
+        buffer_options.modifiable = true
+        buffer_options.undolevels = -1
+        vim.api.nvim_buf_set_lines(buffer, 0, -1, false, output)
+        buffer_options.undolevels = undolevels
+        buffer_options.modifiable = modifiable
+        buffer_options.modified = false
+      end
+      vim.b[buffer].dbout_aligned_tick = vim.api.nvim_buf_get_changedtick(buffer)
+    end
+
+    local function cell_under_cursor()
+      local buffer_cells = cells_by_buffer[vim.api.nvim_get_current_buf()]
+      local row = buffer_cells and buffer_cells[vim.fn.line '.']
+      if not row then
+        return nil
+      end
+      local screen_column = vim.fn.virtcol '.'
+      for _, cell in ipairs(row) do
+        if screen_column >= cell.first and screen_column <= cell.last then
+          return cell
+        end
+      end
+    end
+
+    -- Show the full value of the cell under the cursor in a floating window.
+    -- Automatic (focus = false): only for shortened cells. K (focus = true):
+    -- always, and moves into the window so long values can be scrolled.
+    local function show_cell(focus)
+      local cell = cell_under_cursor()
+      if not cell or (not focus and not cell.truncated) then
         return
       end
-      -- Rewrite without an undo step and keep the buffer unmodified, so the
-      -- result window never prompts to save.
-      local buffer_options = vim.bo[buffer]
-      local modifiable, undolevels = buffer_options.modifiable, buffer_options.undolevels
-      buffer_options.modifiable = true
-      buffer_options.undolevels = -1
-      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
-      buffer_options.undolevels = undolevels
-      buffer_options.modifiable = modifiable
-      buffer_options.modified = false
+      local syntax = cell.value:match '^%s*<' and 'html' or 'text'
+      local _, float_window = vim.lsp.util.open_floating_preview(vim.split(cell.value, '\r?\n'), syntax, {
+        border = 'rounded',
+        focus_id = 'dbout_cell_value',
+        focus = focus,
+        max_width = math.floor(vim.o.columns * 0.8),
+        max_height = math.floor(vim.o.lines * 0.6),
+        close_events = { 'CursorMoved', 'BufLeave', 'InsertEnter' },
+      })
+      if focus and float_window and vim.api.nvim_win_is_valid(float_window) then
+        vim.api.nvim_set_current_win(float_window)
+      end
     end
 
     vim.api.nvim_create_autocmd('FileType', {
@@ -219,7 +321,35 @@ return {
         end, { desc = 'Toggle unlimited column width' })
 
         vim.keymap.set('n', 'yh', '<Plug>(DBUI_YankHeader)', { buffer = true })
-        vim.keymap.set('n', 'yc', '<Plug>(DBUI_YankCellValue)', { buffer = true })
+        -- Yank the full (not shortened) value of the cell under the cursor.
+        vim.keymap.set('n', 'yc', function()
+          local cell = cell_under_cursor()
+          if not cell then
+            vim.notify('No result cell under cursor', vim.log.levels.WARN)
+            return
+          end
+          vim.fn.setreg(vim.v.register, cell.value)
+        end, { buffer = true, desc = 'Yank full cell value' })
+        vim.keymap.set('n', 'K', function()
+          show_cell(true)
+        end, { buffer = true, desc = 'Show full cell value' })
+
+        -- Hover: show the full value of a shortened cell when the cursor rests.
+        local hover_group = vim.api.nvim_create_augroup('DadbodCellHover' .. args.buf, { clear = true })
+        vim.api.nvim_create_autocmd('CursorHold', {
+          group = hover_group,
+          buffer = args.buf,
+          callback = function()
+            show_cell(false)
+          end,
+        })
+        vim.api.nvim_create_autocmd('BufWipeout', {
+          group = hover_group,
+          buffer = args.buf,
+          callback = function()
+            cells_by_buffer[args.buf] = nil
+          end,
+        })
       end,
       desc = 'Set keymaps for dbout',
     })
