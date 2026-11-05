@@ -1,7 +1,9 @@
 " Custom SQL Server adapter for vim-dadbod.
 " Delegates to the bundled sqlserver adapter and only appends formatting flags:
 "   -W           strip trailing whitespace / trim columns to content width
-"   -s '  '      use a two-space column separator
+"   -s "\t"      use a tab column separator (sqlcmd only accepts one character)
+" The tab-separated output is realigned into a fixed-width table by the
+" `FileType dbout` autocommand in lua/plugins/database.lua.
 " Activated via `let g:db_adapter_sqlserver = 'db#adapter#mssqlfmt#'`.
 " Lives in the config repo (not the plugin dir) so it survives plugin updates.
 
@@ -10,7 +12,7 @@ function! db#adapter#mssqlfmt#canonicalize(url) abort
 endfunction
 
 function! db#adapter#mssqlfmt#interactive(url) abort
-  return db#adapter#sqlserver#interactive(a:url) + ['-W', '-s', '  ']
+  return db#adapter#sqlserver#interactive(a:url) + ['-W', '-s', "\t"]
 endfunction
 
 function! db#adapter#mssqlfmt#input(url, in) abort

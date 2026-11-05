@@ -113,16 +113,98 @@ return {
       desc = 'Set keymaps for sql',
     })
 
+    -- Realign the tab-separated sqlcmd output produced by the mssqlfmt adapter
+    -- (-W -s "\t") into a fixed-width table made of real spaces. vim-dadbod-ui's
+    -- yank-header (yh) and yank-cell (yc) read column boundaries from character
+    -- positions in the `-----` underline, so the alignment must live in the
+    -- buffer text, not only on screen. Every column except the last is padded
+    -- one extra character (its dash run included) so columns look two spaces
+    -- apart while the underline keeps a single-space separator, as yh expects.
+    local function align_result_tables(buffer)
+      local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+      local changed = false
+      local line_index = 1
+      while line_index < #lines do
+        local header = lines[line_index]
+        local underline = lines[line_index + 1]
+        if header ~= '' and underline:match '^%-[%-\t]*$' then
+          -- A result block is header, underline, then rows up to a blank line.
+          local block_last = line_index + 1
+          while block_last < #lines and lines[block_last + 1] ~= '' do
+            block_last = block_last + 1
+          end
+
+          local rows = {}
+          local widths = {}
+          for row_index = line_index, block_last do
+            local cells = vim.split(lines[row_index], '\t', { plain = true })
+            rows[#rows + 1] = cells
+            if row_index ~= line_index + 1 then
+              for column, cell in ipairs(cells) do
+                widths[column] = math.max(widths[column] or 1, vim.fn.strdisplaywidth(cell))
+              end
+            end
+          end
+
+          local column_count = math.max(#widths, #rows[2])
+          for column = 1, column_count do
+            widths[column] = (widths[column] or 1) + (column < column_count and 1 or 0)
+          end
+
+          for offset, cells in ipairs(rows) do
+            local parts = {}
+            for column = 1, column_count do
+              if offset == 2 then
+                parts[column] = string.rep('-', widths[column])
+              else
+                local cell = cells[column] or ''
+                parts[column] = cell .. string.rep(' ', widths[column] - vim.fn.strdisplaywidth(cell))
+              end
+            end
+            local aligned = (table.concat(parts, ' '):gsub('%s+$', ''))
+            local target = line_index + offset - 1
+            if aligned ~= lines[target] then
+              lines[target] = aligned
+              changed = true
+            end
+          end
+
+          line_index = block_last + 1
+        else
+          line_index = line_index + 1
+        end
+      end
+
+      if not changed then
+        return
+      end
+      -- Rewrite without an undo step and keep the buffer unmodified, so the
+      -- result window never prompts to save.
+      local buffer_options = vim.bo[buffer]
+      local modifiable, undolevels = buffer_options.modifiable, buffer_options.undolevels
+      buffer_options.modifiable = true
+      buffer_options.undolevels = -1
+      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
+      buffer_options.undolevels = undolevels
+      buffer_options.modifiable = modifiable
+      buffer_options.modified = false
+    end
+
     vim.api.nvim_create_autocmd('FileType', {
       pattern = 'dbout',
       group = group,
-      callback = function()
+      callback = function(args)
+        -- Runs after every query: vim-dadbod reloads the result buffer with
+        -- `edit!`, which fires FileType again on the final output.
+        vim.opt_local.wrap = false
+        align_result_tables(args.buf)
+
         local original_max_var_type_width = vim.env.SQLCMDMAXVARTYPEWIDTH
         local original_max_fixed_type_width = vim.env.SQLCMDMAXFIXEDTYPEWIDTH
 
         -- Toggle the per-cell width cap between original and unlimited (0).
-        -- Columns are already trimmed to content + 2-space separated by the
-        -- mssqlfmt adapter (-W -s '  '); this only lifts the length cap so long
+        -- Columns are trimmed to content by the mssqlfmt adapter (-W) and
+        -- realigned above; this only lifts the length cap so long
         -- text columns (e.g. stored-procedure bodies) print in full.
         vim.keymap.set('n', '<leader>dbw', function()
           if vim.env.SQLCMDMAXVARTYPEWIDTH == original_max_var_type_width then
