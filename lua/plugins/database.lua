@@ -14,8 +14,8 @@ return {
   },
   init = function()
     -- Use a custom SQL Server adapter (autoload/db/adapter/mssqlfmt.vim) that
-    -- appends `-W -s '  '` so query results trim columns to content and separate
-    -- them with two spaces instead of sqlcmd's wide fixed-width padding.
+    -- appends `-W` and a unit-separator column separator, so query results trim
+    -- columns to content; align_result_tables below realigns them into a table.
     vim.g.db_adapter_sqlserver = 'db#adapter#mssqlfmt#'
 
     vim.g.db_ui_use_nerd_fonts = 1
@@ -113,7 +113,7 @@ return {
       desc = 'Set keymaps for sql',
     })
 
-    -- SQL Server result tables (mssqlfmt adapter: sqlcmd -W -s "\t").
+    -- SQL Server result tables (mssqlfmt adapter: sqlcmd -W, unit separator).
     -- sqlcmd ends every row with CRLF, but values may contain bare line breaks,
     -- so one database row can span several buffer lines. align_result_tables
     -- rebuilds each row, shortens every cell to its column width (ending in '…',
@@ -123,6 +123,29 @@ return {
     -- included) so columns look two spaces apart while the underline keeps the
     -- single-space separator vim-dadbod-ui's yank-header (yh) expects.
     local cell_width_cap = 12
+
+    -- ASCII unit separator (U+001F): the column separator the mssqlfmt adapter
+    -- passes to sqlcmd. Real text never contains it, unlike tabs.
+    local separator = string.char(31)
+
+    local function count_separators(text)
+      return #vim.split(text, separator, { plain = true }) - 1
+    end
+
+    -- Split a database row into exactly column_count cells. Should a value ever
+    -- contain the separator, the surplus pieces are joined back into the last
+    -- column instead of shifting every later cell one column to the right.
+    local function split_row(text, column_count)
+      local cells = vim.split(text, separator, { plain = true })
+      if #cells > column_count then
+        local tail = table.concat(cells, ' ', column_count)
+        for index = #cells, column_count + 1, -1 do
+          cells[index] = nil
+        end
+        cells[column_count] = tail
+      end
+      return cells
+    end
 
     -- cells_by_buffer[buffer][line] = list of { first, last, value, truncated },
     -- where first/last are the screen columns the cell occupies.
@@ -169,15 +192,15 @@ return {
         local header_raw = lines[line_index]
         local header = (header_raw:gsub('\r$', ''))
         local underline = ((lines[line_index + 1] or ''):gsub('\r$', ''))
-        if header ~= '' and underline:match '^%-[%-\t]*$' then
+        if header ~= '' and underline:match('^%-[%-' .. separator .. ']*$') then
           local uses_carriage_return = header_raw:sub(-1) == '\r'
-          local column_count = select(2, underline:gsub('\t', '')) + 1
-          local headers = vim.split(header, '\t', { plain = true })
+          local column_count = count_separators(underline) + 1
+          local headers = vim.split(header, separator, { plain = true })
 
           -- Rebuild database rows: a row is complete once it holds every column
           -- separator and (when sqlcmd wrote CRLF) its line ends in '\r'.
           local rows = {}
-          local current, current_tabs = nil, 0
+          local current, current_separators = nil, 0
           local next_index = line_index + 2
           while next_index <= #lines do
             local raw = lines[next_index]
@@ -187,15 +210,15 @@ return {
               break
             end
             current = current and (current .. '\n' .. text) or text
-            current_tabs = current_tabs + select(2, text:gsub('\t', ''))
+            current_separators = current_separators + count_separators(text)
             next_index = next_index + 1
-            if current_tabs >= column_count - 1 and (ends_row or not uses_carriage_return) then
-              rows[#rows + 1] = vim.split(current, '\t', { plain = true })
-              current, current_tabs = nil, 0
+            if current_separators >= column_count - 1 and (ends_row or not uses_carriage_return) then
+              rows[#rows + 1] = split_row(current, column_count)
+              current, current_separators = nil, 0
             end
           end
           if current then
-            rows[#rows + 1] = vim.split(current, '\t', { plain = true })
+            rows[#rows + 1] = split_row(current, column_count)
           end
 
           -- Column width: the header, or the widest value capped at cell_width_cap.
