@@ -116,13 +116,17 @@ return {
     -- SQL Server result tables (mssqlfmt adapter: sqlcmd -W, unit separator).
     -- sqlcmd ends every row with CRLF, but values may contain bare line breaks,
     -- so one database row can span several buffer lines. align_result_tables
-    -- rebuilds each row, shortens every cell to its column width (ending in '…',
-    -- line breaks shown as '↵') and pads it with spaces into a fixed-width table.
-    -- The full values are kept in cells_by_buffer for the hover window and yc.
+    -- rebuilds each row (kept in documents_by_buffer) and render_document lays
+    -- it out as a fixed-width table: every column gets its longest value, and
+    -- only when the table is wider than the window are the widest columns
+    -- shortened to one shared limit (never below minimum_shrunk_width), ending
+    -- in '…' with line breaks shown as '↵'. The layout is redone when the result
+    -- window is resized. Full values are kept in cells_by_buffer for the hover
+    -- window and yc.
     -- Every column except the last is padded one extra character (dash run
     -- included) so columns look two spaces apart while the underline keeps the
     -- single-space separator vim-dadbod-ui's yank-header (yh) expects.
-    local cell_width_cap = 12
+    local minimum_shrunk_width = 12
 
     -- ASCII unit separator (U+001F): the column separator the mssqlfmt adapter
     -- passes to sqlcmd. Real text never contains it, unlike tabs.
@@ -151,6 +155,10 @@ return {
     -- where first/last are the screen columns the cell occupies.
     local cells_by_buffer = {}
 
+    -- documents_by_buffer[buffer] = list of segments: { text = line } for plain
+    -- lines, or { headers, rows, column_count } for a parsed result table.
+    local documents_by_buffer = {}
+
     local function flatten(value)
       return (value:gsub('\r?\n', '↵'):gsub('[\r\t]', ' '))
     end
@@ -178,6 +186,152 @@ return {
       return text .. string.rep(' ', width - vim.api.nvim_strwidth(text))
     end
 
+    -- Screen columns available for text in the window showing the buffer.
+    local function available_width(buffer)
+      local window = vim.fn.win_findbuf(buffer)[1]
+      if window then
+        local info = vim.fn.getwininfo(window)[1]
+        return info.width - info.textoff
+      end
+      return vim.o.columns
+    end
+
+    -- Column widths: each column's longest value (or its header). If the row is
+    -- wider than the window, find the highest shared limit at which it fits and
+    -- shorten only the columns above it; never below minimum_shrunk_width.
+    local function column_widths(segment, width_available)
+      local count = segment.column_count
+      if not segment.natural then
+        segment.header_widths, segment.natural = {}, {}
+        for column = 1, count do
+          local header_width = math.max(vim.api.nvim_strwidth(segment.headers[column] or ''), 1)
+          local widest = header_width
+          for _, row in ipairs(segment.rows) do
+            widest = math.max(widest, vim.api.nvim_strwidth(flatten(row[column] or '')))
+          end
+          segment.header_widths[column], segment.natural[column] = header_width, widest
+        end
+      end
+
+      local function widths_for(limit)
+        local widths, total = {}, count - 1
+        for column = 1, count do
+          widths[column] = math.max(segment.header_widths[column], math.min(segment.natural[column], limit))
+          total = total + widths[column] + (column < count and 1 or 0)
+        end
+        return widths, total
+      end
+
+      local widest_natural = 1
+      for column = 1, count do
+        widest_natural = math.max(widest_natural, segment.natural[column])
+      end
+      local widths, total = widths_for(widest_natural)
+      if total <= width_available then
+        return widths
+      end
+      local low, high = math.min(minimum_shrunk_width, widest_natural), widest_natural
+      local best = low
+      while low <= high do
+        local middle = math.floor((low + high) / 2)
+        local _, middle_total = widths_for(middle)
+        if middle_total <= width_available then
+          best, low = middle, middle + 1
+        else
+          high = middle - 1
+        end
+      end
+      return (widths_for(best))
+    end
+
+    -- Lay the parsed document out for the current window width and write it
+    -- into the buffer (no undo step, buffer stays unmodified, cursors kept).
+    local function render_document(buffer)
+      local segments = documents_by_buffer[buffer]
+      if not segments or not vim.api.nvim_buf_is_valid(buffer) then
+        return
+      end
+      local width_available = available_width(buffer)
+      local output, cells = {}, {}
+      for _, segment in ipairs(segments) do
+        if segment.text then
+          output[#output + 1] = segment.text
+        else
+          local column_count = segment.column_count
+          local widths = column_widths(segment, width_available)
+          local function padded_width(column)
+            return widths[column] + (column < column_count and 1 or 0)
+          end
+
+          local header_parts, underline_parts = {}, {}
+          for column = 1, column_count do
+            header_parts[column] = pad(segment.headers[column] or '', padded_width(column))
+            underline_parts[column] = string.rep('-', padded_width(column))
+          end
+          output[#output + 1] = (table.concat(header_parts, ' '):gsub('%s+$', ''))
+          output[#output + 1] = table.concat(underline_parts, ' ')
+
+          for _, row in ipairs(segment.rows) do
+            local parts, row_cells, first = {}, {}, 1
+            for column = 1, column_count do
+              local value = row[column] or ''
+              local shown, truncated = fit_cell(value, widths[column])
+              parts[column] = pad(shown, padded_width(column))
+              local last = first + padded_width(column)
+              row_cells[column] = { first = first, last = last, value = value, truncated = truncated }
+              first = last + 1
+            end
+            output[#output + 1] = (table.concat(parts, ' '):gsub('%s+$', ''))
+            cells[#output] = row_cells
+          end
+        end
+      end
+
+      cells_by_buffer[buffer] = cells
+      vim.b[buffer].dbout_rendered_width = width_available
+      local current = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
+      if table.concat(output, '\n') ~= table.concat(current, '\n') then
+        local cursors = {}
+        for _, window in ipairs(vim.fn.win_findbuf(buffer)) do
+          cursors[window] = vim.api.nvim_win_get_cursor(window)
+        end
+        local buffer_options = vim.bo[buffer]
+        local modifiable, undolevels = buffer_options.modifiable, buffer_options.undolevels
+        buffer_options.modifiable = true
+        buffer_options.undolevels = -1
+        vim.api.nvim_buf_set_lines(buffer, 0, -1, false, output)
+        buffer_options.undolevels = undolevels
+        buffer_options.modifiable = modifiable
+        buffer_options.modified = false
+        for window, cursor in pairs(cursors) do
+          pcall(vim.api.nvim_win_set_cursor, window, { math.min(cursor[1], #output), cursor[2] })
+        end
+      end
+      vim.b[buffer].dbout_aligned_tick = vim.api.nvim_buf_get_changedtick(buffer)
+    end
+
+    -- Redo the layout when a window showing a result buffer changes width.
+    vim.api.nvim_create_autocmd('WinResized', {
+      group = group,
+      callback = function()
+        local windows = vim.v.event.windows
+        if not windows or #windows == 0 then
+          windows = vim.api.nvim_tabpage_list_wins(0)
+        end
+        for _, window in ipairs(windows) do
+          if vim.api.nvim_win_is_valid(window) then
+            local buffer = vim.api.nvim_win_get_buf(window)
+            if documents_by_buffer[buffer] and vim.b[buffer].dbout_rendered_width ~= available_width(buffer) then
+              vim.schedule(function()
+                render_document(buffer)
+              end)
+            end
+          end
+        end
+      end,
+      desc = 'Re-layout dbout result tables on window resize',
+    })
+
     local function align_result_tables(buffer)
       -- Skip if this exact buffer content was already aligned (FileType can fire
       -- again without a reload, and the original values would then be lost).
@@ -186,7 +340,7 @@ return {
       end
 
       local lines = vim.api.nvim_buf_get_lines(buffer, 0, -1, false)
-      local output, cells = {}, {}
+      local segments = {}
       local line_index = 1
       while line_index <= #lines do
         local header_raw = lines[line_index]
@@ -221,62 +375,17 @@ return {
             rows[#rows + 1] = split_row(current, column_count)
           end
 
-          -- Column width: the header, or the widest value capped at cell_width_cap.
-          local widths = {}
-          for column = 1, column_count do
-            local widest = 1
-            for _, row in ipairs(rows) do
-              widest = math.max(widest, vim.api.nvim_strwidth(flatten(row[column] or '')))
-            end
-            widths[column] = math.max(vim.api.nvim_strwidth(headers[column] or ''), math.min(widest, cell_width_cap), 1)
-          end
-          local function padded_width(column)
-            return widths[column] + (column < column_count and 1 or 0)
-          end
-
-          local header_parts, underline_parts = {}, {}
-          for column = 1, column_count do
-            header_parts[column] = pad(headers[column] or '', padded_width(column))
-            underline_parts[column] = string.rep('-', padded_width(column))
-          end
-          output[#output + 1] = (table.concat(header_parts, ' '):gsub('%s+$', ''))
-          output[#output + 1] = table.concat(underline_parts, ' ')
-
-          for _, row in ipairs(rows) do
-            local parts, row_cells, first = {}, {}, 1
-            for column = 1, column_count do
-              local value = row[column] or ''
-              local shown, truncated = fit_cell(value, widths[column])
-              parts[column] = pad(shown, padded_width(column))
-              local last = first + padded_width(column)
-              row_cells[column] = { first = first, last = last, value = value, truncated = truncated }
-              first = last + 1
-            end
-            output[#output + 1] = (table.concat(parts, ' '):gsub('%s+$', ''))
-            cells[#output] = row_cells
-          end
+          segments[#segments + 1] = { headers = headers, rows = rows, column_count = column_count }
 
           line_index = next_index
         else
-          output[#output + 1] = header
+          segments[#segments + 1] = { text = header }
           line_index = line_index + 1
         end
       end
 
-      cells_by_buffer[buffer] = cells
-      if table.concat(output, '\n') ~= table.concat(lines, '\n') then
-        -- Rewrite without an undo step and keep the buffer unmodified, so the
-        -- result window never prompts to save.
-        local buffer_options = vim.bo[buffer]
-        local modifiable, undolevels = buffer_options.modifiable, buffer_options.undolevels
-        buffer_options.modifiable = true
-        buffer_options.undolevels = -1
-        vim.api.nvim_buf_set_lines(buffer, 0, -1, false, output)
-        buffer_options.undolevels = undolevels
-        buffer_options.modifiable = modifiable
-        buffer_options.modified = false
-      end
-      vim.b[buffer].dbout_aligned_tick = vim.api.nvim_buf_get_changedtick(buffer)
+      documents_by_buffer[buffer] = segments
+      render_document(buffer)
     end
 
     local function cell_under_cursor()
@@ -371,6 +480,7 @@ return {
           buffer = args.buf,
           callback = function()
             cells_by_buffer[args.buf] = nil
+            documents_by_buffer[args.buf] = nil
           end,
         })
       end,
