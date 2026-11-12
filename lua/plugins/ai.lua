@@ -2,6 +2,7 @@ return {
   {
     'olimorris/codecompanion.nvim',
     event = 'InsertEnter',
+    cmd = { 'CodeCompanion', 'CodeCompanionChat', 'CodeCompanionActions' },
     opts = {
       adapters = {
         acp = {
