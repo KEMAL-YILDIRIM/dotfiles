@@ -12,6 +12,7 @@ return {
 				options = {
 					theme = 'nightfly',
 				},
+				extensions = { 'conductor_input' },
 				sections = {
 					lualine_c = { { 'filename', path = 2 } },
 				},

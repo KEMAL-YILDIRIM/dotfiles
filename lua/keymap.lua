@@ -129,6 +129,8 @@ map.set("n", "tc", "<CMD>tabc<CR>", { desc = "Tab close Current" }) -- close cur
 map.set("n", "to", "<CMD>tabo<CR>", { desc = "Tab close All but this" }) -- close current tab
 map.set("n", "tl", "<CMD>tabn<CR>", { desc = "Tab Next" }) --  go to next tab
 map.set("n", "th", "<CMD>tabp<CR>", { desc = "Tab Previous" }) --  go to previous tab
+map.set("n", "t,", "<CMD>-tabmove<CR>", { desc = "Tab Previous" }) --  go to previous tab
+map.set("n", "t.", "<CMD>+tabmove<CR>", { desc = "Tab Previous" }) --  go to previous tab
 map.set("n", "td", "<CMD>tabnew %<CR>", { desc = "Tab Duplicate current buffer in new tab" })
 -- TODO: implement a proper "go to previously visited tab" (needs a TabLeave autocmd to track history)
 -- map.set("n", "tt", "<CMD>g:lasttat <CR>", { desc = "Tab open last used Tab" })
@@ -146,8 +148,8 @@ map.set("n", "<leader>s", "<NOP>", { desc = "Save" })
 map.set("n", "<leader>sf", "<CMD>:w<CR>", { noremap = true, desc = "Save File" })
 map.set("n", "<leader>sa", "<CMD>:wa<CR>", { noremap = true, desc = "Save All buffers" })
 map.set("n", "<leader>so", "<CMD>:w<CR><cmd>:so<cr>", { noremap = true, desc = "Save and Source out" })
-map.set("n", "<leader>sw", "<CMD>:wq!<CR>", { noremap = true, desc = "Save and Quit" })
-map.set("n", "<leader>sq", "<CMD>:q!<CR>", { noremap = true, desc = "Quit without saving" })
+map.set("n", "<leader>sw", "<CMD>:wqa<CR>", { noremap = true, desc = "Save all and Quit" })
+map.set("n", "<leader>sq", "<CMD>:qa!<CR>", { noremap = true, desc = "Quit all without saving" })
 map.set("n", "Q", "<NOP>", { desc = "No map for Q" })
 
 -- session
