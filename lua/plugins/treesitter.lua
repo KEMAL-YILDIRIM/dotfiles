@@ -63,6 +63,12 @@ return {
 	},
 	{
 		"romus204/tree-sitter-manager.nvim",
+		-- Parsers/queries live in stdpath('data')/site (on rtp by default) and the
+		-- filetype → language mappings come from plugin/filetypes.lua of nvim-treesitter,
+		-- so highlighting does not need this plugin. Defer setup (ensure_installed check,
+		-- user commands) until after the UI is drawn, or until a command is used.
+		event = "VeryLazy",
+		cmd = { "TSManager", "TSInstall", "TSInstallSync", "TSUninstall", "TSUpdate", "TSUpdateSync" },
 		config = function()
 			-- Set up the full MSVC + Windows SDK environment so that cl.exe and link.exe
 			-- (used by tree-sitter CLI to compile parsers) can find standard headers and libs.

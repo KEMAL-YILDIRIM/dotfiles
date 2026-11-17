@@ -2,8 +2,8 @@ local _ft = { 'dbout', 'dbui', '*sql' }
 return {
   'kristijanhusak/vim-dadbod-ui',
   dependencies = {
-    { 'tpope/vim-dadbod', ft = _ft, event = 'BufEnter' },
-    { 'kristijanhusak/vim-dadbod-completion', ft = _ft, event = 'BufEnter' },
+    { 'tpope/vim-dadbod', ft = _ft },
+    { 'kristijanhusak/vim-dadbod-completion', ft = _ft },
   },
   lazy = true,
   cmd = {

@@ -46,6 +46,9 @@ return {
       { 'saghen/blink.compat', lazy = true, version = false },
     },
     version = '1.*',
+    -- Load on file open (before roslyn's FileType hook, so blink's completion
+    -- capabilities reach the first language server) or on first insert/cmdline.
+    event = { 'BufReadPre', 'BufNewFile', 'InsertEnter', 'CmdlineEnter' },
     enabled = true,
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
