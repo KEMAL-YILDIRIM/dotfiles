@@ -18,6 +18,34 @@ local ShowGitInSplit = function(git_args, buf_name, filetype)
   end
 end
 
+-- Parse `git worktree list --porcelain` output into a list of
+-- { path, head, branch, detached, bare } records, one per worktree.
+local ParseWorktreeList = function(lines)
+  local worktrees = {}
+  local current = nil
+  for _, raw_line in ipairs(lines) do
+    local line = raw_line:gsub('%c+$', '') -- drop a trailing carriage return
+    local path = line:match '^worktree (.+)$'
+    if path then
+      current = { path = path }
+      table.insert(worktrees, current)
+    elseif current then
+      local head = line:match '^HEAD (%x+)$'
+      local branch = line:match '^branch (.+)$'
+      if head then
+        current.head = head
+      elseif branch then
+        current.branch = branch:gsub('^refs/heads/', '')
+      elseif line == 'detached' then
+        current.detached = true
+      elseif line == 'bare' then
+        current.bare = true
+      end
+    end
+  end
+  return worktrees
+end
+
 local G = {
 
   FileHistory = function()
@@ -155,6 +183,62 @@ local G = {
         return true
       end,
     }
+  end,
+
+  -- Pick one of the repository's worktrees and make it the working directory
+  -- of the current tab.
+  PickWorktree = function()
+    local directory = vim.fn.expand '%:p:h'
+    if vim.fn.isdirectory(directory) == 0 then
+      directory = vim.fn.getcwd()
+    end
+
+    local lines = F.safe_systemlist { 'git', '-C', directory, 'worktree', 'list', '--porcelain' }
+    if vim.v.shell_error ~= 0 then
+      vim.notify('Not in a git repository: ' .. directory, vim.log.levels.WARN)
+      return
+    end
+
+    local worktrees = vim.tbl_filter(function(worktree)
+      return not worktree.bare
+    end, ParseWorktreeList(lines))
+    if #worktrees == 0 then
+      vim.notify('No git worktrees found for ' .. directory, vim.log.levels.WARN)
+      return
+    end
+
+    require('telescope.pickers')
+      .new({}, {
+        prompt_title = 'Git Worktrees',
+        finder = require('telescope.finders').new_table {
+          results = worktrees,
+          entry_maker = function(entry)
+            local label = entry.branch or ('detached ' .. (entry.head or ''):sub(1, 7))
+            return {
+              value = entry.path,
+              display = label .. '  ' .. entry.path,
+              ordinal = label .. ' ' .. entry.path,
+            }
+          end,
+        },
+        sorter = require('telescope.config').values.generic_sorter {},
+        attach_mappings = function(prompt_bufnr)
+          local actions = require 'telescope.actions'
+          local action_state = require 'telescope.actions.state'
+          actions.select_default:replace(function()
+            local selection = action_state.get_selected_entry()
+            actions.close(prompt_bufnr)
+            if not selection then
+              return
+            end
+            -- magic off: the path is passed through as-is, even with spaces, % or #
+            vim.cmd.tcd { args = { selection.value }, magic = { file = false, bar = false } }
+            vim.notify('Working directory -> ' .. selection.value, vim.log.levels.INFO)
+          end)
+          return true
+        end,
+      })
+      :find()
   end,
 
   -- Inline diff colors: NEW = blue, OLD = red (catppuccin-macchiato palette)
@@ -406,18 +490,7 @@ return {
           }
         end, { noremap = true, desc = 'Git Commits' })
         vim.keymap.set('n', '<leader>gtb', ':Telescope git_branches<CR>', { noremap = true })
-        vim.keymap.set(
-          'n',
-          '<leader>gtw',
-          "<CMD>lua require('telescope').extensions.git_worktree.git_worktrees()<CR>",
-          { desc = 'Telescope Git Worktrees', silent = true }
-        )
-        vim.keymap.set(
-          'n',
-          '<leader>gtW',
-          "<CMD>lua require('telescope').extensions.git_worktree.create_git_worktree()<CR>",
-          { desc = 'Telescope git create worktrees', silent = true }
-        )
+        vim.keymap.set('n', '<leader>gtw', G.PickWorktree, { noremap = true, desc = 'Git Worktrees (switch tab directory)' })
       end,
     },
   },
