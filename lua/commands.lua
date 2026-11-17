@@ -79,6 +79,50 @@ vim.api.nvim_create_autocmd("VimResized", {
 	command = "wincmd =",
 })
 
+-- reload buffers that were changed on disk, for example by a coding agent in another pane.
+-- 'autoread' only acts when something triggers a timestamp check; Neovim does that itself
+-- when it regains focus, so without this a buffer stays stale while focus stays in Neovim.
+local reload_group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true })
+
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "TermClose", "TermLeave" }, {
+	group = reload_group,
+	callback = function()
+		-- :checktime is not allowed in the command-line window and must not
+		-- interrupt command-line input, a prompt or a running shell command
+		if vim.fn.getcmdwintype() ~= "" or vim.fn.mode():match("^[cr!]") then
+			return
+		end
+		vim.cmd("checktime")
+	end,
+	desc = "Reload buffers changed outside of Neovim",
+})
+
+local reloaded_files = {}
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	group = reload_group,
+	callback = function(args)
+		local file = vim.api.nvim_buf_get_name(args.buf)
+		-- Neovim reports a deleted file or a conflict with unsaved changes itself
+		if vim.bo[args.buf].modified or not vim.uv.fs_stat(file) then
+			return
+		end
+		table.insert(reloaded_files, vim.fn.fnamemodify(file, ":t"))
+		if #reloaded_files > 1 then
+			return
+		end
+		-- one message per batch: separate messages would raise the hit-enter prompt
+		vim.schedule(function()
+			local shown = table.concat(reloaded_files, ", ", 1, math.min(#reloaded_files, 3))
+			if #reloaded_files > 3 then
+				shown = shown .. " (+" .. (#reloaded_files - 3) .. " more)"
+			end
+			reloaded_files = {}
+			vim.notify("Reloaded from disk: " .. shown, vim.log.levels.INFO)
+		end)
+	end,
+	desc = "Report buffers that were reloaded from disk",
+})
+
 -- no auto continue comments on new line
 vim.api.nvim_create_autocmd("FileType", {
 	group = vim.api.nvim_create_augroup("no_auto_comment", {}),
