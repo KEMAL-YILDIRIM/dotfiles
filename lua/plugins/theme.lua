@@ -90,7 +90,7 @@ return {
             blue = colors.yellow[500],
             yellow = colors.green[500],
             overlay0 = colors.green[650],
-            text = colors.blue[150],
+            text = colors.blue[100], -- brighter main text (contrast 11.0 vs 7.8)
 
             rosewater = colors.red[300],
             flamingo = colors.pink[700],
