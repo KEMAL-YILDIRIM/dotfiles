@@ -3,6 +3,11 @@ vim.o.termguicolors = true
 vim.o.background = 'dark'
 vim.o.signcolumn = 'yes'
 
+-- How much foreground colors are blended toward the background in dimmed mode
+-- (0 = unchanged, 1 = invisible). Default only: :ThemeDim [0-100] overrides it
+-- and the last choice is remembered in stdpath('state')/theme-dim.json
+local dim_amount = 0.10
+
 return {
   { -- zen mode
     'folke/zen-mode.nvim',
@@ -83,9 +88,7 @@ return {
     priority = 1000,
     config = function()
       local colors = F.get_colors 'custom'
-      require('catppuccin').setup {
-        color_overrides = {
-          macchiato = {
+      local palette = {
             mauve = colors.green[600],
             blue = colors.yellow[500],
             yellow = colors.green[500],
@@ -113,13 +116,97 @@ return {
             base = colors.black[350],
             mantle = colors.black[400],
             crust = colors.black[500],
-          },
-        },
       }
 
-      vim.cmd.colorscheme 'catppuccin-macchiato'
+      -- Blend a '#rrggbb' color toward the background by `amount`
+      local function blend(hex, background, amount)
+        local pattern = '^#%x%x%x%x%x%x$'
+        if type(hex) ~= 'string' or type(background) ~= 'string' or not hex:match(pattern) or not background:match(pattern) then
+          return hex
+        end
+        local result = '#'
+        for i = 2, 6, 2 do
+          local foreground_channel = tonumber(hex:sub(i, i + 1), 16)
+          local background_channel = tonumber(background:sub(i, i + 1), 16)
+          result = result .. string.format('%02x', math.floor(foreground_channel * (1 - amount) + background_channel * amount + 0.5))
+        end
+        return result
+      end
 
-      vim.cmd.hi 'Comment gui=none'
+      -- Background colors keep their value; only foreground colors are dimmed
+      local background_keys = { base = true, mantle = true, crust = true, surface0 = true, surface1 = true, surface2 = true }
+
+      -- Last used dim amount and on/off state, remembered across restarts
+      local state_file = vim.fs.joinpath(vim.fn.stdpath 'state', 'theme-dim.json')
+      local state = { amount = dim_amount, dimmed = true }
+
+      local function load_state()
+        if vim.fn.filereadable(state_file) == 0 then
+          return
+        end
+        local ok, decoded = pcall(vim.json.decode, table.concat(vim.fn.readfile(state_file), '\n'))
+        if not ok or type(decoded) ~= 'table' then
+          return
+        end
+        if type(decoded.amount) == 'number' and decoded.amount > 0 and decoded.amount <= 1 then
+          state.amount = decoded.amount
+        end
+        if type(decoded.dimmed) == 'boolean' then
+          state.dimmed = decoded.dimmed
+        end
+      end
+
+      local function save_state()
+        pcall(vim.fn.writefile, { vim.json.encode(state) }, state_file)
+      end
+
+      local function build_palette()
+        if not state.dimmed then
+          return palette
+        end
+        local result = {}
+        for key, value in pairs(palette) do
+          result[key] = background_keys[key] and value or blend(value, palette.base, state.amount)
+        end
+        return result
+      end
+
+      local function apply()
+        vim.g.theme_dimmed = state.dimmed
+        require('catppuccin').setup {
+          color_overrides = {
+            macchiato = build_palette(),
+          },
+        }
+        vim.cmd.colorscheme 'catppuccin-macchiato'
+        vim.cmd.hi 'Comment gui=none'
+      end
+
+      load_state()
+      apply()
+
+      -- :ThemeDim        toggle dimmed / normal
+      -- :ThemeDim <0-100> dim by that percentage (0 = normal)
+      vim.api.nvim_create_user_command('ThemeDim', function(command)
+        if command.args == '' then
+          state.dimmed = not state.dimmed
+        else
+          local percentage = tonumber(command.args)
+          if not percentage or percentage < 0 or percentage > 100 then
+            vim.notify('ThemeDim: expected a number from 0 to 100', vim.log.levels.ERROR)
+            return
+          end
+          if percentage == 0 then
+            state.dimmed = false
+          else
+            state.amount = percentage / 100
+            state.dimmed = true
+          end
+        end
+        save_state()
+        apply()
+        vim.notify(string.format('Theme colors: %s', state.dimmed and string.format('dimmed %g%%', state.amount * 100) or 'normal'))
+      end, { nargs = '?', desc = 'Toggle dimmed theme colors, or set dim percentage (0-100)' })
     end,
   },
 }
